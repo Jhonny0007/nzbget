@@ -47,10 +47,29 @@ if(ENABLE_STATIC)
 	include(${CMAKE_SOURCE_DIR}/lib/sources.cmake)
 else()
 	find_package(Threads REQUIRED)
-	find_package(LibXml2 REQUIRED)
+	find_package(LibXml2)
 
-	set(LIBS ${LIBS} Threads::Threads LibXml2::LibXml2)
-	set(INCLUDES ${INCLUDES} ${LIBXML2_INCLUDE_DIR})
+	if(NOT LibXml2_FOUND)
+		message(STATUS "The LibXml2 library will be installed from gitlab")
+		include(ExternalProject)
+
+		include(${CMAKE_SOURCE_DIR}/cmake/xml2.cmake)
+
+		include(${CMAKE_SOURCE_DIR}/lib/sources.cmake)
+
+		add_dependencies(${PACKAGE} xml2)
+		add_dependencies(yencode xml2)
+		add_dependencies(par2 xml2)
+		add_dependencies(regex xml2)
+	else()
+		set(LIBS ${LIBS} LibXml2::LibXml2)
+		set(INCLUDES ${INCLUDES} ${LIBXML2_INCLUDE_DIR})
+
+		include(${CMAKE_SOURCE_DIR}/lib/sources.cmake)
+	endif()
+
+	set(LIBS ${LIBS} Threads::Threads )
+	set(INCLUDES ${INCLUDES})
 
 	if(NOT DISABLE_TLS)
 		if(USE_OPENSSL AND NOT USE_GNUTLS)
