@@ -23,11 +23,11 @@
 
 HardwareInfo::HardwareInfo()
 {
-	InitCpuInfo();
+	InitCpuModel();
 }
 
 #ifdef WIN32
-void HardwareInfo::InitCpuInfo()
+void HardwareInfo::InitCpuModel()
 {
 	HKEY hKey;
 	if (RegOpenKeyEx(
@@ -57,7 +57,7 @@ void HardwareInfo::InitCpuInfo()
 #endif
 
 #if defined(unix) || defined(__APPLE__) && !defined(__linux__)
-void HardwareInfo::InitCpuInfo()
+void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
 	size_t len = sizeof(cpuModel);
@@ -73,7 +73,7 @@ void HardwareInfo::InitCpuInfo()
 
 #ifdef __linux__
 #include <fstream> 
-void HardwareInfo::InitCpuInfo()
+void HardwareInfo::InitCpuModel()
 {
 	std::ifstream cpuinfo("/proc/cpuinfo");
 	std::string line;

@@ -28,7 +28,7 @@ public:
 	HardwareInfo();
 	const std::string& GetCpuModel();
 private:
-	void InitCpuInfo();
+	void InitCpuModel();
 	std::string m_cpuModel;
 };
 
