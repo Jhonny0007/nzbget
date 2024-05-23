@@ -99,7 +99,7 @@ int g_ArgumentCount;
 char* (*g_EnvironmentVariables)[] = nullptr;
 char* (*g_Arguments)[] = nullptr;
 
-
+#include "HardwareInfo.h"
 /*
  * Main entry point
  */
@@ -116,7 +116,7 @@ int main(int argc, char *argv[], char *argp[])
 		);
 #endif
 #endif
-
+	HardwareInfo gw;
 	Util::Init();
 	YEncode::init();
 

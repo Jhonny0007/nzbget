@@ -1,7 +1,7 @@
 /*
  *  This file is part of nzbget. See <https://nzbget.com>.
  *
- *  Copyright (C) 2023 Denis <denis@nzbget.com>
+ *  Copyright (C) 2024 Denis <denis@nzbget.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,10 +20,76 @@
 #include "nzbget.h"
 
 #include "HardwareInfo.h"
-#include "windows.h"
 
 HardwareInfo::HardwareInfo()
 {
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
+	InitCpuInfo();
+}
+
+#ifdef WIN32
+void HardwareInfo::InitCpuInfo()
+{
+	HKEY hKey;
+	if (RegOpenKeyEx(
+		HKEY_LOCAL_MACHINE,
+		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+		0,
+		KEY_READ,
+		&hKey) == ERROR_SUCCESS)
+	{
+		char cpuModel[256];
+		DWORD size = sizeof(cpuModel);
+		if (RegQueryValueEx(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)cpuModel, &size) == ERROR_SUCCESS)
+		{
+			m_cpuModel = cpuModel;
+		}
+		else
+		{
+			// std::cout << "Failed to get CPU name" << std::endl;
+		}
+		RegCloseKey(hKey);
+
+		return;
+	}
+
+	//std::cout << "Failed to open Registry key" << std::endl;
+}
+#endif
+
+#if defined(unix) || defined(__APPLE__) && !defined(__linux__)
+void HardwareInfo::InitCpuInfo()
+{
+	char cpuModel[256];
+	size_t len = sizeof(cpuModel);
+	if (sysctlbyname("hw.model", &cpuModel, &len, NULL, 0) == 0)
+	{
+		m_cpuModel = cpuModel;
+		return;
+	}
+
+	//std::cout << "Failed" << std::endl;
+}
+#endif
+
+#ifdef __linux__
+#include <fstream> 
+void HardwareInfo::InitCpuInfo()
+{
+	std::ifstream cpuinfo("/proc/cpuinfo");
+	std::string line;
+
+	while (std::getline(cpuinfo, line)) {
+		if (line.find("model name") != std::string::npos) {
+			m_cpuModel = line.substr(line.find(":") + 2);
+			return;
+		}
+	}
+
+	//std::cout << "Failed" << std::endl;
+}
+#endif
+
+const std::string& HardwareInfo::GetCpuModel()
+{
+	return m_cpuModel;
 }

@@ -20,13 +20,16 @@
 #ifndef HARDWARE_INFO_H
 #define HARDWARE_INFO_H
 
-#include <iostream>
+#include <string>
 
 class HardwareInfo final
 {
 public:
 	HardwareInfo();
-	~HardwareInfo() = default;
+	const std::string& GetCpuModel();
+private:
+	void InitCpuInfo();
+	std::string m_cpuModel;
 };
 
 #endif

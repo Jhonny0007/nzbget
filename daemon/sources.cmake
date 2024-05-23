@@ -92,6 +92,7 @@ set(SRC
 	${CMAKE_SOURCE_DIR}/daemon/util/Util.cpp
 	${CMAKE_SOURCE_DIR}/daemon/util/Json.cpp
 	${CMAKE_SOURCE_DIR}/daemon/util/Xml.cpp
+	${CMAKE_SOURCE_DIR}/daemon/util/HardwareInfo.cpp
 )
 
 set(WIN32_SRC
