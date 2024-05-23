@@ -56,7 +56,8 @@ void HardwareInfo::InitCpuModel()
 }
 #endif
 
-#if defined(unix) || defined(__APPLE__) && !defined(__linux__)
+#if !defined(__linux__) && defined(__unix__) || defined(__APPLE__)
+#include <sys/sysctl.h> 
 void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
