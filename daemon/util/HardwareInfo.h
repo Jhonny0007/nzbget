@@ -31,6 +31,7 @@ public:
 private:
 	void InitCpuModel();
 	std::string m_cpuModel;
+	std::string m_osInfo;
 };
 
 #endif

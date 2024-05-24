@@ -172,6 +172,8 @@ nzbget_SOURCES = \
 	daemon/util/Xml.h \
 	daemon/util/Util.cpp \
 	daemon/util/Util.h \
+	daemon/util/HardwareInfo.cpp \
+	daemon/util/HardwareInfo.h \
 	daemon/nserv/NServMain.h \
 	daemon/nserv/NServMain.cpp \
 	daemon/nserv/NServFrontend.h \
