@@ -108,7 +108,7 @@ void HardwareInfo::InitCpuModel()
 	{
 		m_cpuModel = cpuModel;
 		std::cout << "CPU Model: " << m_cpuModel << std::endl;
-		return
+		return;
 	}
 
 	std::cout << "Failed to get CPU Model" << std::endl;
