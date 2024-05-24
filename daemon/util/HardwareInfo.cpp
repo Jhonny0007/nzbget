@@ -100,12 +100,11 @@ void HardwareInfo::InitCpuModel()
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
-#include <sys/sysctl.h>
 void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
-
-	if (sysctlbyname("hw.model", &cpuModel, sizeof(cpuModel), NULL, 0) == 0)
+	size_t len = sizeof(cpuModel);
+	if (sysctlbyname("hw.model", &cpuModel, len, NULL, 0) == 0)
 	{
 		m_cpuModel = cpuModel;
 		std::cout << "CPU Model: " << m_cpuModel << std::endl;
@@ -118,7 +117,8 @@ void HardwareInfo::InitCpuModel()
 void HardwareInfo::InitOS()
 {
 	char os[256];
-	if (sysctlbyname("kern.ostype", &os, sizeof(os), NULL, 0) == 0)
+	size_t len = sizeof(os);
+	if (sysctlbyname("kern.ostype", &os, len, NULL, 0) == 0)
 	{
 		m_os = os;
 		std::cout << "OS: " << m_os << std::endl;
@@ -129,11 +129,12 @@ void HardwareInfo::InitOS()
 
 void HardwareInfo::InitOSVersion()
 {
-	char osVersion[256];
-	if (sysctlbyname("kern.osrelease", &osVersion, sizeof(osVersion), NULL, 0) == 0)
+	char version[256];
+	size_t len = sizeof(version);
+	if (sysctlbyname("kern.osrelease", &version, len, NULL, 0) == 0)
 	{
-		m_os = osVersion;
-		std::cout << "OS Version: " << osVersion << std::endl;
+		m_os = version;
+		std::cout << "OS Version: " << m_os << std::endl;
 		return;
 	}
 	std::cout << "Failed to get OS Version" << std::endl;
@@ -141,7 +142,6 @@ void HardwareInfo::InitOSVersion()
 #endif
 
 #ifdef __APPLE__
-#include <sys/sysctl.h>
 void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
