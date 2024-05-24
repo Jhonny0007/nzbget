@@ -76,7 +76,7 @@ void HardwareInfo::InitCpuModel()
 }
 #endif
 
-#if defined(__unix__)
+#ifdef __unix__
 void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
@@ -92,7 +92,7 @@ void HardwareInfo::InitCpuModel()
 }
 #endif
 
-#if defined(__APPLE__)
+#ifdef __APPLE__
 void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];

@@ -21,6 +21,7 @@
 #define HARDWARE_INFO_H
 
 #include <string>
+#include <iostream>
 
 class HardwareInfo final
 {
