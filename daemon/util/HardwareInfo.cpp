@@ -24,6 +24,8 @@
 HardwareInfo::HardwareInfo()
 {
 	InitCpuModel();
+	InitOS();
+	InitOSVersion();
 }
 
 #ifdef WIN32
@@ -55,6 +57,24 @@ void HardwareInfo::InitCpuModel()
 
 	std::cout << "Failed to open Registry key" << std::endl;
 }
+
+void HardwareInfo::InitOS()
+{
+	m_os = "Windows";
+}
+
+void HardwareInfo::InitOSVersion()
+{
+	OSVERSIONINFO info;
+	info.dwOSVersionInfoSize = sizeof(info);
+	if (GetVersionEx(&info))
+	{
+		m_osVersion = std::to_string(info.dwBuildNumber);
+		return;
+	}
+
+	std::cout << "Failed to get OS Version" << std::endl;
+}
 #endif
 
 #ifdef __linux__
@@ -68,7 +88,10 @@ void HardwareInfo::InitCpuModel()
 		if (line.find("model name") != std::string::npos) {
 			m_cpuModel = line.substr(line.find(":") + 2);
 			std::cout << "CPU Model: " << m_cpuModel << std::endl;
-			return;
+		}
+		if (line.find("model name") != std::string::npos) {
+			m_cpuModel = line.substr(line.find(":") + 2);
+			std::cout << "CPU Model: " << m_cpuModel << std::endl;
 		}
 	}
 
@@ -80,15 +103,39 @@ void HardwareInfo::InitCpuModel()
 void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
-	size_t len = sizeof(cpuModel);
-	if (sysctlbyname("hw.model", &cpuModel, &len, NULL, 0) == 0)
+
+	if (sysctlbyname("hw.model", &cpuModel, sizeof(cpuModel), NULL, 0) == 0)
 	{
 		m_cpuModel = cpuModel;
 		std::cout << "CPU Model: " << m_cpuModel << std::endl;
-		return;
+		return
 	}
 
 	std::cout << "Failed to get CPU Model" << std::endl;
+}
+
+void HardwareInfo::InitOS()
+{
+	char os[256];
+	if (sysctlbyname("kern.ostype", &os, sizeof(os), NULL, 0) == 0)
+	{
+		m_os = os;
+		std::cout << "OS: " << m_os << std::endl;
+		return;
+	}
+	std::cout << "Failed to get OS" << std::endl;
+}
+
+void HardwareInfo::InitOSVersion()
+{
+	char osVersion[256];
+	if (sysctlbyname("kern.osrelease", &osVersion, sizeof(osVersion), NULL, 0) == 0)
+	{
+		m_os = osVersion;
+		std::cout << "OS Version: " << osVersion << std::endl;
+		return;
+	}
+	std::cout << "Failed to get OS Version" << std::endl;
 }
 #endif
 
@@ -106,9 +153,15 @@ void HardwareInfo::InitCpuModel()
 
 	std::cout << "Failed to get CPU Model" << std::endl;
 }
+
 #endif
 
 const std::string& HardwareInfo::GetCpuModel()
 {
 	return m_cpuModel;
+}
+
+const std::string& HardwareInfo::GetOS()
+{
+	return m_os;
 }
