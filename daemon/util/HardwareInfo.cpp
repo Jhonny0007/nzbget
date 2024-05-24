@@ -41,7 +41,7 @@ void HardwareInfo::InitCpuModel()
 	{
 		char cpuModel[256];
 		DWORD size = sizeof(cpuModel);
-		if (RegQueryValueEx(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)cpuModel, &size) == ERROR_SUCCESS)
+		if (RegQueryValueEx(hKey, "ProcessorNameString", nullptrullptrLPBYTE)cpuModel, &size) == ERROR_SUCCESS)
 		{
 			m_cpuModel = cpuModel;
 			std::cout << "CPU Model: " << m_cpuModel << std::endl;
@@ -104,7 +104,7 @@ void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
 	size_t len = sizeof(cpuModel);
-	if (sysctlbyname("hw.model", &cpuModel, &len, NULL, 0) == 0)
+	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr) == 0)
 	{
 		m_cpuModel = cpuModel;
 		std::cout << "CPU Model: " << m_cpuModel << std::endl;
@@ -118,7 +118,7 @@ void HardwareInfo::InitOS()
 {
 	char os[256];
 	size_t len = sizeof(os);
-	if (sysctlbyname("kern.ostype", &os, &len, NULL, 0) == 0)
+	if (sysctlbyname("kern.ostype", &os, &len, nullptr) == 0)
 	{
 		m_os = os;
 		std::cout << "OS: " << m_os << std::endl;
@@ -131,7 +131,7 @@ void HardwareInfo::InitOSVersion()
 {
 	char version[256];
 	size_t len = sizeof(version);
-	if (sysctlbyname("kern.osrelease", &version, &len, NULL, 0) == 0)
+	if (sysctlbyname("kern.osrelease", &version, &len, nullptr) == 0)
 	{
 		m_osVersion = version;
 		std::cout << "OS Version: " << m_osVersion << std::endl;
@@ -146,7 +146,7 @@ void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[256];
 	size_t len = sizeof(cpuModel);
-	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, NULL, 0) == 0)
+	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, nullptr, 0) == 0)
 	{
 		m_cpuModel = cpuModel;
 		std::cout << "CPU Model: " << m_cpuModel << std::endl;
@@ -158,27 +158,50 @@ void HardwareInfo::InitCpuModel()
 
 void HardwareInfo::InitOS()
 {
-	struct utsname systemInfo;
-		
-	if(uname(&systemInfo) == 0) 
+	std::string cmd = "sw_vers -productVersion";
+	FILE* pipe = popen(cmd.c_str(), "r");
+	if (!pipe) 
 	{
-		m_os = systemInfo.sysname;
-		std::cout << "OS: " << systemInfo.sysname << std::endl;
 		return;
 	}
-	std::cout << "Failed to get OS" << std::endl;
+
+	char buffer[128];
+	m_osVersion = "";
+	while (!feof(pipe)) 
+	{
+		if (fgets(buffer, 128, pipe) != nullptr) 
+		{
+			m_osVersion += buffer;
+		}
+	}
+
+	pclose(pipe);
+
+	std::cout << "Failed to get OS Version" << std::endl;
 }
 
 void HardwareInfo::InitOSVersion()
 {
-	struct utsname systemInfo;
-		
-	if(uname(&systemInfo) == 0) 
+	std::string cmd = "sw_vers -productName";
+	FILE* pipe = popen(cmd.c_str(), "r");
+	if (!pipe) 
 	{
-		m_osVersion = systemInfo.release;
-		std::cout << "OS Version: " << m_osVersion << std::endl;
 		return;
 	}
+
+	char buffer[128];
+	m_os = "";
+	while (!feof(pipe)) 
+	{
+		if (fgets(buffer, 128, pipe) != nullptr) 
+		{
+			m_os += buffer;
+		}
+	}
+
+	pclose(pipe);
+
+	std::cout << "Failed to get OS" << std::endl;
 
 	std::cout << "Failed to get OS Version" << std::endl;
 }
