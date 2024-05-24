@@ -133,8 +133,8 @@ void HardwareInfo::InitOSVersion()
 	size_t len = sizeof(version);
 	if (sysctlbyname("kern.osrelease", &version, &len, NULL, 0) == 0)
 	{
-		m_os = version;
-		std::cout << "OS Version: " << m_os << std::endl;
+		m_osVersion = version;
+		std::cout << "OS Version: " << m_osVersion << std::endl;
 		return;
 	}
 	std::cout << "Failed to get OS Version" << std::endl;
@@ -156,6 +156,32 @@ void HardwareInfo::InitCpuModel()
 	std::cout << "Failed to get CPU Model" << std::endl;
 }
 
+void HardwareInfo::InitOS()
+{
+	struct utsname systemInfo;
+		
+	if(uname(&systemInfo) == 0) 
+	{
+		m_os = systemInfo.sysname;
+		std::cout << "OS: " << systemInfo.sysname << std::endl;
+		return;
+	}
+	std::cout << "Failed to get OS" << std::endl;
+}
+
+void HardwareInfo::InitOSVersion()
+{
+	struct utsname systemInfo;
+		
+	if(uname(&systemInfo) == 0) 
+	{
+		m_osVersion = systemInfo.release;
+		std::cout << "OS Version: " << m_osVersion << std::endl;
+		return;
+	}
+
+	std::cout << "Failed to get OS Version" << std::endl;
+}
 #endif
 
 const std::string& HardwareInfo::GetCpuModel()
