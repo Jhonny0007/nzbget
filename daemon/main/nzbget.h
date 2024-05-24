@@ -160,6 +160,7 @@ compiled */
 #include <sys/wait.h>
 #include <sys/un.h>
 #include <sys/file.h>
+#include <sys/sysctl.h> 
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <dirent.h>

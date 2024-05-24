@@ -42,33 +42,18 @@ void HardwareInfo::InitCpuModel()
 		if (RegQueryValueEx(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)cpuModel, &size) == ERROR_SUCCESS)
 		{
 			m_cpuModel = cpuModel;
+			std::cout << "CPU Model: " << m_cpuModel << std::endl;
 		}
 		else
 		{
-			// std::cout << "Failed to get CPU name" << std::endl;
+			std::cout << "Failed to get CPU model" << std::endl;
 		}
 		RegCloseKey(hKey);
 
 		return;
 	}
 
-	//std::cout << "Failed to open Registry key" << std::endl;
-}
-#endif
-
-#if !defined(__linux__) && defined(__unix__) || defined(__APPLE__)
-#include <sys/sysctl.h> 
-void HardwareInfo::InitCpuModel()
-{
-	char cpuModel[256];
-	size_t len = sizeof(cpuModel);
-	if (sysctlbyname("hw.model", &cpuModel, &len, NULL, 0) == 0)
-	{
-		m_cpuModel = cpuModel;
-		return;
-	}
-
-	//std::cout << "Failed" << std::endl;
+	std::cout << "Failed to open Registry key" << std::endl;
 }
 #endif
 
@@ -82,11 +67,44 @@ void HardwareInfo::InitCpuModel()
 	while (std::getline(cpuinfo, line)) {
 		if (line.find("model name") != std::string::npos) {
 			m_cpuModel = line.substr(line.find(":") + 2);
+			std::cout << "CPU Model: " << m_cpuModel << std::endl;
 			return;
 		}
 	}
 
-	//std::cout << "Failed" << std::endl;
+	std::cout << "Failed to get CPU Model" << std::endl;
+}
+#endif
+
+#if defined(__unix__)
+void HardwareInfo::InitCpuModel()
+{
+	char cpuModel[256];
+	size_t len = sizeof(cpuModel);
+	if (sysctlbyname("hw.model", &cpuModel, &len, NULL, 0) == 0)
+	{
+		m_cpuModel = cpuModel;
+		std::cout << "CPU Model: " << m_cpuModel << std::endl;
+		return;
+	}
+
+	std::cout << "Failed to get CPU Model" << std::endl;
+}
+#endif
+
+#if defined(__APPLE__)
+void HardwareInfo::InitCpuModel()
+{
+	char cpuModel[256];
+	size_t len = sizeof(cpuModel);
+	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, NULL, 0) == 0)
+	{
+		m_cpuModel = cpuModel;
+		std::cout << "CPU Model: " << m_cpuModel << std::endl;
+		return;
+	}
+
+	std::cout << "Failed to get CPU Model" << std::endl;
 }
 #endif
 
