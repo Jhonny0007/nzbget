@@ -164,7 +164,7 @@ compiled */
 #include <netinet/in.h>
 #include <dirent.h>
 
-#ifndef __linux__
+#if defined(__unix__) && !defined(__linux__)
 #include <sys/sysctl.h>
 #endif
 
