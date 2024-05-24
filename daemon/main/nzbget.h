@@ -164,8 +164,8 @@ compiled */
 #include <netinet/in.h>
 #include <dirent.h>
 
-#ifdef __unix__
-#include <sys/sysctl.h> 
+#ifndef __linux__
+#include <sys/sysctl.h>
 #endif
 
 #ifdef HAVE_SYS_PRCTL_H
