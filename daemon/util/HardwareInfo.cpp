@@ -119,7 +119,6 @@ void HardwareInfo::InitOSVersion()
 		}
 		RegCloseKey(hKey);
 	}
-
 }
 #endif
 
@@ -130,15 +129,13 @@ void HardwareInfo::InitCpuModel()
 	std::ifstream cpuinfo("/proc/cpuinfo");
 	std::string line;
 
-	while (std::getline(cpuinfo, line)) {
-		if (line.find("model name") != std::string::npos) {
+	while (std::getline(cpuinfo, line)) 
+	{
+		if (line.find("model name") != std::string::npos) 
+		{
 			m_cpuModel = line.substr(line.find(":") + 2);
 			std::cout << "CPU Model: " << m_cpuModel << std::endl;
 		}
-		if (line.find("model name") != std::string::npos) {
-			m_cpuModel = line.substr(line.find(":") + 2);
-			std::cout << "CPU Model: " << m_cpuModel << std::endl;
-}
 	}
 
 	std::cout << "Failed to get CPU Model" << std::endl;
@@ -146,28 +143,24 @@ void HardwareInfo::InitCpuModel()
 
 void HardwareInfo::InitOS()
 {
-	char os[256];
-	size_t len = sizeof(os);
-	if (sysctlbyname("kern.ostype", &os, &len, nullptr) == 0)
+	std::ifstream cpuinfo("/proc/cpuinfo/ostype");
+	std::string line;
+	if (std::getline(cpuinfo, line))
 	{
-		m_os = os;
+		m_os = std::move(line);
 		std::cout << "OS: " << m_os << std::endl;
-		return;
 	}
-	std::cout << "Failed to get OS" << std::endl;
 }
 
 void HardwareInfo::InitOSVersion()
 {
-	char version[256];
-	size_t len = sizeof(version);
-	if (sysctlbyname("kern.osrelease", &version, &len, nullptr) == 0)
+	std::ifstream cpuinfo("/proc/cpuinfo/osrelease");
+	std::string line;
+	if (std::getline(cpuinfo, line))
 	{
-		m_osVersion = version;
-		std::cout << "OS Version: " << m_osVersion << std::endl;
-		return;
+		m_osVersion = std::move(line);
+		std::cout << "version: " << m_osVersion << std::endl;
 	}
-	std::cout << "Failed to get OS Version" << std::endl;
 }
 #endif
 
