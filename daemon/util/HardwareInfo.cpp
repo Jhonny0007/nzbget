@@ -135,6 +135,7 @@ void HardwareInfo::InitCpuModel()
 		{
 			m_cpuModel = line.substr(line.find(":") + 2);
 			std::cout << "CPU Model: " << m_cpuModel << std::endl;
+			return;
 		}
 	}
 
@@ -143,7 +144,7 @@ void HardwareInfo::InitCpuModel()
 
 void HardwareInfo::InitOS()
 {
-	std::ifstream cpuinfo("/proc/cpuinfo/ostype");
+	std::ifstream cpuinfo("/proc/sys/kernel/ostype");
 	std::string line;
 	if (std::getline(cpuinfo, line))
 	{
@@ -154,7 +155,7 @@ void HardwareInfo::InitOS()
 
 void HardwareInfo::InitOSVersion()
 {
-	std::ifstream cpuinfo("/proc/cpuinfo/osrelease");
+	std::ifstream cpuinfo("/proc/sys/kernel/osrelease");
 	std::string line;
 	if (std::getline(cpuinfo, line))
 	{
