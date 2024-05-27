@@ -37,6 +37,14 @@ private:
 	std::string m_cpuModel;
 	std::string m_os;
 	std::string m_osVersion;
+
+#ifdef WIN32
+	const long m_win11BuildVersion = 22000;
+	const long m_win10BuildVersion = 10240;
+	const long m_win8BuildVersion = 9200;
+	const long m_win7BuildVersion = 7600;
+	const long m_winXPBuildVersion = 2600;
+#endif
 };
 
 #endif

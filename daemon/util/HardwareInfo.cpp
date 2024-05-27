@@ -41,7 +41,12 @@ void HardwareInfo::InitCpuModel()
 	{
 		char cpuModel[256];
 		DWORD size = sizeof(cpuModel);
-		if (RegQueryValueEx(hKey, "ProcessorNameString", nullptrullptrLPBYTE)cpuModel, &size) == ERROR_SUCCESS)
+		if (RegQueryValueEx(hKey,
+			"ProcessorNameString",
+			nullptr,
+			nullptr,
+			(LPBYTE)cpuModel,
+			&size) == ERROR_SUCCESS)
 		{
 			m_cpuModel = cpuModel;
 			std::cout << "CPU Model: " << m_cpuModel << std::endl;
@@ -65,15 +70,56 @@ void HardwareInfo::InitOS()
 
 void HardwareInfo::InitOSVersion()
 {
-	OSVERSIONINFO info;
-	info.dwOSVersionInfoSize = sizeof(info);
-	if (GetVersionEx(&info))
+	HKEY hKey;
+	if (RegOpenKeyEx(
+		HKEY_LOCAL_MACHINE,
+		"SOFTWARE\\MICROSOFT\\Windows NT\\CurrentVersion",
+		0,
+		KEY_READ,
+		&hKey) == ERROR_SUCCESS)
 	{
-		m_osVersion = std::to_string(info.dwBuildNumber);
-		return;
+		char currentBuild[256];
+		DWORD size = sizeof(currentBuild);
+		if (RegQueryValueEx(hKey,
+			"CurrentBuild",
+			nullptr,
+			nullptr,
+			(LPBYTE)currentBuild,
+			&size) == ERROR_SUCCESS)
+		{
+			long buildNum = std::atol(currentBuild);
+			const std::string build = std::string("(Build ") + currentBuild + ")";
+			std::cout << "Build number: " << buildNum << std::endl;
+			if (buildNum >= m_win11BuildVersion)
+			{
+				m_osVersion = std::string("11 ") + build;
+				return;
+			}
+			if (buildNum >= m_win10BuildVersion)
+			{
+				m_osVersion = std::string("10 ") + build;
+				return;
+			}
+			if (buildNum >= m_win8BuildVersion)
+			{
+				m_osVersion = std::string("8 ") + build;
+				return;
+			}
+			if (buildNum >= m_winXPBuildVersion)
+			{
+				m_osVersion = std::string("XP ") + build;
+				return;
+			}
+			m_osVersion = std::move(build);
+			return;
+		}
+		else
+		{
+			std::cout << "Failed to get currentBuild" << std::endl;
+		}
+		RegCloseKey(hKey);
 	}
 
-	std::cout << "Failed to get OS Version" << std::endl;
 }
 #endif
 
@@ -92,10 +138,53 @@ void HardwareInfo::InitCpuModel()
 		if (line.find("model name") != std::string::npos) {
 			m_cpuModel = line.substr(line.find(":") + 2);
 			std::cout << "CPU Model: " << m_cpuModel << std::endl;
-		}
+}
 	}
 
 	std::cout << "Failed to get CPU Model" << std::endl;
+}
+void HardwareInfo::InitOS()
+{
+	std::string cmd = "sw_vers -productName";
+	FILE* pipe = popen(cmd.c_str(), "r");
+	if (!pipe)
+	{
+		return;
+	}
+
+	char buffer[128];
+	while (!feof(pipe))
+	{
+		if (fgets(buffer, 128, pipe) != nullptr)
+		{
+			m_os += buffer;
+			std::cout << "OS: " << m_os << std::endl;
+		}
+	}
+
+	pclose(pipe);
+}
+
+void HardwareInfo::InitOSVersion()
+{
+	std::string cmd = "sw_vers -productVersion";
+	FILE* pipe = popen(cmd.c_str(), "r");
+	if (!pipe)
+	{
+		return;
+	}
+
+	char buffer[128];
+	while (!feof(pipe))
+	{
+		if (fgets(buffer, 128, pipe) != nullptr)
+		{
+			m_osVersion += buffer;
+			std::cout << "OS Version: " << m_osVersion << std::endl;
+		}
+	}
+
+	pclose(pipe);
 }
 #endif
 
@@ -160,15 +249,15 @@ void HardwareInfo::InitOS()
 {
 	std::string cmd = "sw_vers -productName";
 	FILE* pipe = popen(cmd.c_str(), "r");
-	if (!pipe) 
+	if (!pipe)
 	{
 		return;
 	}
 
 	char buffer[128];
-	while (!feof(pipe)) 
+	while (!feof(pipe))
 	{
-		if (fgets(buffer, 128, pipe) != nullptr) 
+		if (fgets(buffer, 128, pipe) != nullptr)
 		{
 			m_os += buffer;
 			std::cout << "OS: " << m_os << std::endl;
@@ -182,15 +271,15 @@ void HardwareInfo::InitOSVersion()
 {
 	std::string cmd = "sw_vers -productVersion";
 	FILE* pipe = popen(cmd.c_str(), "r");
-	if (!pipe) 
+	if (!pipe)
 	{
 		return;
 	}
 
 	char buffer[128];
-	while (!feof(pipe)) 
+	while (!feof(pipe))
 	{
-		if (fgets(buffer, 128, pipe) != nullptr) 
+		if (fgets(buffer, 128, pipe) != nullptr)
 		{
 			m_osVersion += buffer;
 			std::cout << "OS Version: " << m_osVersion << std::endl;
