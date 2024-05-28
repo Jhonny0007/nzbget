@@ -27,6 +27,7 @@ HardwareInfo::HardwareInfo()
 	InitOS();
 	InitOSVersion();
 	InitArch();
+	InitDiskTotalSize();
 }
 
 #ifdef WIN32
@@ -145,6 +146,22 @@ void HardwareInfo::InitArch()
 	}
 
 	RegCloseKey(hKey);
+}
+
+void HardwareInfo::InitDiskTotalSize()
+{
+	ULARGE_INTEGER freeBytesAvailable;
+	ULARGE_INTEGER totalNumberOfBytes;
+	ULARGE_INTEGER totalNumberOfFreeBytes;
+
+	if (GetDiskFreeSpaceEx(nullptr, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes)) 
+	{
+		m_diskTotalSize = std::to_string(totalNumberOfBytes.QuadPart / (1024 * 1024 * 1024)) + " GB";
+		std::cout << "Disk total size: " << m_diskTotalSize << std::endl;
+		return;
+	}
+
+	std::cout << "Error getting disk information" << std::endl;
 }
 #endif
 
@@ -334,4 +351,9 @@ const std::string& HardwareInfo::GetOSVersion() const
 const std::string& HardwareInfo::GetArch() const
 {
 	return m_arch;
+}
+
+const std::string& HardwareInfo::GetDiskTotalSize() const
+{
+	return m_diskTotalSize;
 }

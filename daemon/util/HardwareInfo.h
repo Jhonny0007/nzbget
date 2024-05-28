@@ -31,15 +31,18 @@ public:
 	const std::string& GetOS() const;
 	const std::string& GetOSVersion() const;
 	const std::string& GetArch() const;
+	const std::string& GetDiskTotalSize() const;
 private:
 	void InitCpuModel();
 	void InitOS();
 	void InitOSVersion();
 	void InitArch();
+	void InitDiskTotalSize();
 	std::string m_arch;
 	std::string m_cpuModel;
 	std::string m_os;
 	std::string m_osVersion;
+	std::string m_diskTotalSize; 
 
 #ifdef WIN32
 	const long m_win11BuildVersion = 22000;
