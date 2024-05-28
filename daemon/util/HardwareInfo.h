@@ -22,27 +22,31 @@
 
 #include <string>
 #include <iostream>
+#include <string_view>
 
 class HardwareInfo final
 {
+	struct DiskState
+	{
+		uint64_t totalSize;
+		uint64_t freeSpace;
+	};
 public:
 	HardwareInfo();
 	const std::string& GetCpuModel() const;
 	const std::string& GetOS() const;
 	const std::string& GetOSVersion() const;
 	const std::string& GetArch() const;
-	const std::string& GetDiskTotalSize() const;
+	DiskState GetDiskState(const char* root = nullptr) const;
 private:
 	void InitCpuModel();
 	void InitOS();
 	void InitOSVersion();
 	void InitArch();
-	void InitDiskTotalSize();
 	std::string m_arch;
 	std::string m_cpuModel;
 	std::string m_os;
 	std::string m_osVersion;
-	std::string m_diskTotalSize; 
 
 #ifdef WIN32
 	const long m_win11BuildVersion = 22000;

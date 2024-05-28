@@ -27,7 +27,7 @@ HardwareInfo::HardwareInfo()
 	InitOS();
 	InitOSVersion();
 	InitArch();
-	InitDiskTotalSize();
+	auto s = GetDiskState();
 }
 
 #ifdef WIN32
@@ -131,10 +131,10 @@ void HardwareInfo::InitArch()
 	char arch[128];
 
 	if (RegOpenKeyEx(
-		HKEY_LOCAL_MACHINE, 
-		"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", 
-		0, 
-		KEY_READ, 
+		HKEY_LOCAL_MACHINE,
+		"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
+		0,
+		KEY_READ,
 		&hKey) == ERROR_SUCCESS)
 	{
 		if (RegQueryValueEx(hKey, "PROCESSOR_ARCHITECTURE", NULL, NULL, (LPBYTE)arch, &dwBufferSize) == ERROR_SUCCESS)
@@ -148,20 +148,17 @@ void HardwareInfo::InitArch()
 	RegCloseKey(hKey);
 }
 
-void HardwareInfo::InitDiskTotalSize()
+HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 {
 	ULARGE_INTEGER freeBytesAvailable;
 	ULARGE_INTEGER totalNumberOfBytes;
-	ULARGE_INTEGER totalNumberOfFreeBytes;
 
-	if (GetDiskFreeSpaceEx(nullptr, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes)) 
+	if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 	{
-		m_diskTotalSize = std::to_string(totalNumberOfBytes.QuadPart / (1024 * 1024 * 1024)) + " GB";
-		std::cout << "Disk total size: " << m_diskTotalSize << std::endl;
-		return;
+		return { totalNumberOfBytes.QuadPart, freeBytesAvailable.QuadPart };
 	}
 
-	std::cout << "Error getting disk information" << std::endl;
+	return { 0, 0 };
 }
 #endif
 
@@ -331,6 +328,22 @@ void HardwareInfo::InitArch()
 	std::cout << "Arch: " << m_arch << std::endl;
 	pclose(pipe);
 }
+
+void HardwareInfo::InitDiskTotalSize()
+{
+	ULARGE_INTEGER freeBytesAvailable;
+	ULARGE_INTEGER totalNumberOfBytes;
+	ULARGE_INTEGER totalNumberOfFreeBytes;
+
+	if (GetDiskFreeSpaceEx(nullptr, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes))
+	{
+		m_diskTotalSize = std::to_string(totalNumberOfBytes.QuadPart / (1024 * 1024 * 1024)) + " GB";
+		std::cout << "Disk total size: " << m_diskTotalSize << std::endl;
+		return;
+	}
+
+	std::cout << "Error getting disk information" << std::endl;
+}
 #endif
 
 const std::string& HardwareInfo::GetCpuModel() const
@@ -351,9 +364,4 @@ const std::string& HardwareInfo::GetOSVersion() const
 const std::string& HardwareInfo::GetArch() const
 {
 	return m_arch;
-}
-
-const std::string& HardwareInfo::GetDiskTotalSize() const
-{
-	return m_diskTotalSize;
 }
