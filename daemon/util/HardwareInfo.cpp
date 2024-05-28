@@ -196,7 +196,7 @@ void HardwareInfo::InitCpuModel()
 {
 	char cpuModel[128];
 	size_t len = sizeof(cpuModel);
-	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr) == 0)
+	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr, 0) == 0)
 	{
 		m_cpuModel = cpuModel;
 		std::cout << "CPU Model: " << m_cpuModel << std::endl;
@@ -210,7 +210,7 @@ void HardwareInfo::InitOS()
 {
 	char os[128];
 	size_t len = sizeof(os);
-	if (sysctlbyname("kern.ostype", &os, &len, nullptr) == 0)
+	if (sysctlbyname("kern.ostype", &os, &len, nullptr, 0) == 0)
 	{
 		m_os = os;
 		std::cout << "OS: " << m_os << std::endl;
@@ -223,7 +223,7 @@ void HardwareInfo::InitOSVersion()
 {
 	char version[128];
 	size_t len = sizeof(version);
-	if (sysctlbyname("kern.osrelease", &version, &len, nullptr) == 0)
+	if (sysctlbyname("kern.osrelease", &version, &len, nullptr, 0) == 0)
 	{
 		m_osVersion = version;
 		std::cout << "OS Version: " << m_osVersion << std::endl;
