@@ -27,13 +27,16 @@ class HardwareInfo final
 {
 public:
 	HardwareInfo();
-	const std::string& GetCpuModel();
-	const std::string& GetOS();
-	const std::string& GetOSVersion();
+	const std::string& GetCpuModel() const;
+	const std::string& GetOS() const;
+	const std::string& GetOSVersion() const;
+	const std::string& GetArch() const;
 private:
 	void InitCpuModel();
 	void InitOS();
 	void InitOSVersion();
+	void InitArch();
+	std::string m_arch;
 	std::string m_cpuModel;
 	std::string m_os;
 	std::string m_osVersion;

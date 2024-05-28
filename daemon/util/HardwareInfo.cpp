@@ -26,6 +26,7 @@ HardwareInfo::HardwareInfo()
 	InitCpuModel();
 	InitOS();
 	InitOSVersion();
+	InitArch();
 }
 
 #ifdef WIN32
@@ -39,7 +40,7 @@ void HardwareInfo::InitCpuModel()
 		KEY_READ,
 		&hKey) == ERROR_SUCCESS)
 	{
-		char cpuModel[256];
+		char cpuModel[128];
 		DWORD size = sizeof(cpuModel);
 		if (RegQueryValueEx(hKey,
 			"ProcessorNameString",
@@ -78,7 +79,7 @@ void HardwareInfo::InitOSVersion()
 		KEY_READ,
 		&hKey) == ERROR_SUCCESS)
 	{
-		char currentBuild[256];
+		char currentBuild[128];
 		DWORD size = sizeof(currentBuild);
 		if (RegQueryValueEx(hKey,
 			"CurrentBuild",
@@ -90,6 +91,8 @@ void HardwareInfo::InitOSVersion()
 			long buildNum = std::atol(currentBuild);
 			const std::string build = std::string("(Build ") + currentBuild + ")";
 			std::cout << "Build number: " << buildNum << std::endl;
+			RegCloseKey(hKey);
+
 			if (buildNum >= m_win11BuildVersion)
 			{
 				m_osVersion = std::string("11 ") + build;
@@ -113,12 +116,35 @@ void HardwareInfo::InitOSVersion()
 			m_osVersion = std::move(build);
 			return;
 		}
-		else
-		{
-			std::cout << "Failed to get currentBuild" << std::endl;
-		}
+
+		std::cout << "Failed to get currentBuild" << std::endl;
+
 		RegCloseKey(hKey);
 	}
+}
+
+void HardwareInfo::InitArch()
+{
+	HKEY hKey;
+	DWORD dwBufferSize = MAX_PATH;
+	char arch[128];
+
+	if (RegOpenKeyEx(
+		HKEY_LOCAL_MACHINE, 
+		"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", 
+		0, 
+		KEY_READ, 
+		&hKey) == ERROR_SUCCESS)
+	{
+		if (RegQueryValueEx(hKey, "PROCESSOR_ARCHITECTURE", NULL, NULL, (LPBYTE)arch, &dwBufferSize) == ERROR_SUCCESS)
+		{
+			m_arch = arch;
+			RegCloseKey(hKey);
+			return;
+		}
+	}
+
+	RegCloseKey(hKey);
 }
 #endif
 
@@ -129,9 +155,9 @@ void HardwareInfo::InitCpuModel()
 	std::ifstream cpuinfo("/proc/cpuinfo");
 	std::string line;
 
-	while (std::getline(cpuinfo, line)) 
+	while (std::getline(cpuinfo, line))
 	{
-		if (line.find("model name") != std::string::npos) 
+		if (line.find("model name") != std::string::npos)
 		{
 			m_cpuModel = line.substr(line.find(":") + 2);
 			std::cout << "CPU Model: " << m_cpuModel << std::endl;
@@ -168,7 +194,7 @@ void HardwareInfo::InitOSVersion()
 #if defined(__unix__) && !defined(__linux__)
 void HardwareInfo::InitCpuModel()
 {
-	char cpuModel[256];
+	char cpuModel[128];
 	size_t len = sizeof(cpuModel);
 	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr) == 0)
 	{
@@ -182,7 +208,7 @@ void HardwareInfo::InitCpuModel()
 
 void HardwareInfo::InitOS()
 {
-	char os[256];
+	char os[128];
 	size_t len = sizeof(os);
 	if (sysctlbyname("kern.ostype", &os, &len, nullptr) == 0)
 	{
@@ -195,7 +221,7 @@ void HardwareInfo::InitOS()
 
 void HardwareInfo::InitOSVersion()
 {
-	char version[256];
+	char version[128];
 	size_t len = sizeof(version);
 	if (sysctlbyname("kern.osrelease", &version, &len, nullptr) == 0)
 	{
@@ -210,7 +236,7 @@ void HardwareInfo::InitOSVersion()
 #ifdef __APPLE__
 void HardwareInfo::InitCpuModel()
 {
-	char cpuModel[256];
+	char cpuModel[128];
 	size_t len = sizeof(cpuModel);
 	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, nullptr, 0) == 0)
 	{
@@ -234,13 +260,12 @@ void HardwareInfo::InitOS()
 	char buffer[128];
 	while (!feof(pipe))
 	{
-		if (fgets(buffer, 128, pipe) != nullptr)
+		if (fgets(buffer, 128, pipe))
 		{
 			m_os += buffer;
-			std::cout << "OS: " << m_os << std::endl;
 		}
 	}
-
+	std::cout << "OS: " << m_os << std::endl;
 	pclose(pipe);
 }
 
@@ -267,12 +292,46 @@ void HardwareInfo::InitOSVersion()
 }
 #endif
 
-const std::string& HardwareInfo::GetCpuModel()
+#ifdef __unix__
+void HardwareInfo::InitArch()
+{
+	const char* cmd = "uname -m";
+	FILE* pipe = popen(cmd, "r");
+	if (!pipe)
+	{
+		std::cout << "Failed to get Arch" << std::endl;
+		return;
+	}
+
+	char buffer[128];
+	while (!feof(pipe))
+	{
+		if (fgets(buffer, 128, pipe))
+		{
+			m_arch += buffer;
+		}
+	}
+	std::cout << "Arch: " << m_arch << std::endl;
+	pclose(pipe);
+}
+#endif
+
+const std::string& HardwareInfo::GetCpuModel() const
 {
 	return m_cpuModel;
 }
 
-const std::string& HardwareInfo::GetOS()
+const std::string& HardwareInfo::GetOS() const
 {
 	return m_os;
+}
+
+const std::string& HardwareInfo::GetOSVersion() const
+{
+	return m_osVersion;
+}
+
+const std::string& HardwareInfo::GetArch() const
+{
+	return m_arch;
 }
