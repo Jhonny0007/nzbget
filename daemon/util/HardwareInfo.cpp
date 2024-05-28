@@ -292,7 +292,7 @@ void HardwareInfo::InitOSVersion()
 }
 #endif
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 void HardwareInfo::InitArch()
 {
 	const char* cmd = "uname -m";
