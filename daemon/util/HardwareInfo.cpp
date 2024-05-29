@@ -340,7 +340,7 @@ HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 		std::cout << "Available HD: " << available << std::endl;
 		return { total, available };
 	}
-	return { 0, 0 }
+	return { 0, 0 };
 }
 #endif
 
