@@ -22,31 +22,38 @@
 
 #include <string>
 #include <iostream>
-#include <string_view>
+#include "Util.h"
 
 class HardwareInfo final
 {
+public:
+	struct CPU
+	{
+		std::string model;
+		std::string arch;
+	};
+
 	struct DiskState
 	{
-		uint64_t totalSize;
-		uint64_t freeSpace;
+		size_t freeSpace;
+		size_t totalSize;
 	};
-public:
+
+	struct OS
+	{
+		std::string name;
+		std::string version;
+	};
+	
 	HardwareInfo();
-	const std::string& GetCpuModel() const;
-	const std::string& GetOS() const;
-	const std::string& GetOSVersion() const;
-	const std::string& GetArch() const;
+	CPU GetCPU() const;
+	OS GetOS() const;
 	DiskState GetDiskState(const char* root = ".") const;
+
 private:
-	void InitCpuModel();
-	void InitOS();
-	void InitOSVersion();
-	void InitArch();
-	std::string m_arch;
-	std::string m_cpuModel;
-	std::string m_os;
-	std::string m_osVersion;
+#ifndef WIN32
+	std::string GetCPUArch() const;
+#endif
 
 #ifdef WIN32
 	const long m_win11BuildVersion = 22000;

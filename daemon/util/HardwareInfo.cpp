@@ -23,129 +23,92 @@
 
 HardwareInfo::HardwareInfo()
 {
-	InitCpuModel();
-	InitOS();
-	InitOSVersion();
-	InitArch();
-	auto s = GetDiskState();
+	auto os = GetOS();
+	std::cout << "OS name: " << os.name << std::endl;
+	std::cout << "OS Version: " << os.version << std::endl;
+	auto cpu = GetCPU();
+	std::cout << "CPU Model: " << cpu.model << std::endl;
+	std::cout << "CPU arch: " << cpu.arch << std::endl;
+	auto diskState = GetDiskState();
+	std::cout << "Available HD: " << diskState.freeSpace << std::endl;
+	std::cout << "Total HD: " << diskState.totalSize << std::endl;
 }
 
 #ifdef WIN32
-void HardwareInfo::InitCpuModel()
+HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
-	HKEY hKey;
-	if (RegOpenKeyEx(
+	HardwareInfo::CPU cpu;
+	int len = 127;
+	char buffer[128];
+	if (Util::RegReadStr(
 		HKEY_LOCAL_MACHINE,
 		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
-		0,
-		KEY_READ,
-		&hKey) == ERROR_SUCCESS)
+		"ProcessorNameString",
+		buffer,
+		&len))
 	{
-		char cpuModel[128];
-		DWORD size = sizeof(cpuModel);
-		if (RegQueryValueEx(hKey,
-			"ProcessorNameString",
-			nullptr,
-			nullptr,
-			(LPBYTE)cpuModel,
-			&size) == ERROR_SUCCESS)
+		cpu.model = buffer;
+	}
+	else
+	{
+		cpu.model = "Unknown";
+	}
+
+	if (Util::RegReadStr(
+		HKEY_LOCAL_MACHINE,
+		"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
+		"PROCESSOR_ARCHITECTURE",
+		buffer,
+		&len))
+	{
+		cpu.arch = buffer;
+	}
+	else
+	{
+		cpu.arch = "Unknown";
+	}
+
+	return cpu;
+}
+
+HardwareInfo::OS HardwareInfo::GetOS() const
+{
+	HardwareInfo::OS os;
+
+	int len = 127;
+	char buffer[128];
+	if (Util::RegReadStr(
+		HKEY_LOCAL_MACHINE,
+		"SOFTWARE\\MICROSOFT\\Windows NT\\CurrentVersion",
+		"CurrentBuild",
+		buffer,
+		&len))
+	{
+		long buildNum = std::atol(buffer);
+		if (buildNum >= m_win11BuildVersion)
 		{
-			m_cpuModel = cpuModel;
-			std::cout << "CPU Model: " << m_cpuModel << std::endl;
+			os.version = "11";
+		}
+		else if (buildNum >= m_win10BuildVersion)
+		{
+			os.version = "10";
+		}
+		else if (buildNum >= m_win8BuildVersion)
+		{
+			os.version = "8";
+		}
+		else if (buildNum >= m_winXPBuildVersion)
+		{
+			os.version = "XP";
 		}
 		else
 		{
-			std::cout << "Failed to get CPU model" << std::endl;
-		}
-		RegCloseKey(hKey);
-
-		return;
-	}
-
-	std::cout << "Failed to open Registry key" << std::endl;
-}
-
-void HardwareInfo::InitOS()
-{
-	m_os = "Windows";
-}
-
-void HardwareInfo::InitOSVersion()
-{
-	HKEY hKey;
-	if (RegOpenKeyEx(
-		HKEY_LOCAL_MACHINE,
-		"SOFTWARE\\MICROSOFT\\Windows NT\\CurrentVersion",
-		0,
-		KEY_READ,
-		&hKey) == ERROR_SUCCESS)
-	{
-		char currentBuild[128];
-		DWORD size = sizeof(currentBuild);
-		if (RegQueryValueEx(hKey,
-			"CurrentBuild",
-			nullptr,
-			nullptr,
-			(LPBYTE)currentBuild,
-			&size) == ERROR_SUCCESS)
-		{
-			long buildNum = std::atol(currentBuild);
-			const std::string build = std::string("(Build ") + currentBuild + ")";
-			std::cout << "Build number: " << buildNum << std::endl;
-			RegCloseKey(hKey);
-
-			if (buildNum >= m_win11BuildVersion)
-			{
-				m_osVersion = std::string("11 ") + build;
-				return;
-			}
-			if (buildNum >= m_win10BuildVersion)
-			{
-				m_osVersion = std::string("10 ") + build;
-				return;
-			}
-			if (buildNum >= m_win8BuildVersion)
-			{
-				m_osVersion = std::string("8 ") + build;
-				return;
-			}
-			if (buildNum >= m_winXPBuildVersion)
-			{
-				m_osVersion = std::string("XP ") + build;
-				return;
-			}
-			m_osVersion = std::move(build);
-			return;
-		}
-
-		std::cout << "Failed to get currentBuild" << std::endl;
-
-		RegCloseKey(hKey);
-	}
-}
-
-void HardwareInfo::InitArch()
-{
-	HKEY hKey;
-	DWORD dwBufferSize = MAX_PATH;
-	char arch[128];
-
-	if (RegOpenKeyEx(
-		HKEY_LOCAL_MACHINE,
-		"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
-		0,
-		KEY_READ,
-		&hKey) == ERROR_SUCCESS)
-	{
-		if (RegQueryValueEx(hKey, "PROCESSOR_ARCHITECTURE", NULL, NULL, (LPBYTE)arch, &dwBufferSize) == ERROR_SUCCESS)
-		{
-			m_arch = arch;
-			RegCloseKey(hKey);
-			return;
+			os.version = "Unknown";
 		}
 	}
 
-	RegCloseKey(hKey);
+	os.name = "Windows";
+	return os;
 }
 
 HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
@@ -155,7 +118,7 @@ HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 
 	if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 	{
-		return { totalNumberOfBytes.QuadPart, freeBytesAvailable.QuadPart };
+		return { freeBytesAvailable.QuadPart, totalNumberOfBytes.QuadPart };
 	}
 
 	return { 0, 0 };
@@ -163,9 +126,11 @@ HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 #endif
 
 #ifdef __linux__
-#include <fstream> 
-void HardwareInfo::InitCpuModel()
+#include <fstream>
+HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
+	HardwareInfo::CPU cpu;
+
 	std::ifstream cpuinfo("/proc/cpuinfo");
 	std::string line;
 
@@ -173,193 +138,194 @@ void HardwareInfo::InitCpuModel()
 	{
 		if (line.find("model name") != std::string::npos)
 		{
-			m_cpuModel = line.substr(line.find(":") + 2);
-			std::cout << "CPU Model: " << m_cpuModel << std::endl;
-			return;
+			cpu.model = line.substr(line.find(":") + 2);
+			break;
 		}
 	}
-
-	std::cout << "Failed to get CPU Model" << std::endl;
+	cpu.arch = GetCPUArch();
+	return cpu;
 }
 
-void HardwareInfo::InitOS()
+HardwareInfo::OS HardwareInfo::GetOS() const
 {
+	HardwareInfo::OS os;
+
 	std::ifstream cpuinfo("/proc/sys/kernel/ostype");
 	std::string line;
 	if (std::getline(cpuinfo, line))
 	{
-		m_os = std::move(line);
-		std::cout << "OS: " << m_os << std::endl;
+		os.name = std::move(line);
 	}
-}
-
-void HardwareInfo::InitOSVersion()
-{
-	std::ifstream cpuinfo("/proc/sys/kernel/osrelease");
-	std::string line;
-	if (std::getline(cpuinfo, line))
+	else
 	{
-		m_osVersion = std::move(line);
-		std::cout << "version: " << m_osVersion << std::endl;
+		os.name = "Unknown";
 	}
+
+	std::ifstream osRelease("/proc/sys/kernel/osrelease");
+	if (std::getline(osRelease, line))
+	{
+		os.version = std::move(line);
+	}
+	else
+	{
+		os.version = "Unknown";
+	}
+
+	return os;
 }
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
-void HardwareInfo::InitCpuModel()
+HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
+	HardwareInfo::CPU cpu;
+
+	size_t len = 127;
 	char cpuModel[128];
-	size_t len = sizeof(cpuModel);
 	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr, 0) == 0)
 	{
-		m_cpuModel = cpuModel;
-		std::cout << "CPU Model: " << m_cpuModel << std::endl;
-		return;
+		cpu.model = cpuModel;
+	}
+	else
+	{
+		cpu.model = "Unknown";
 	}
 
-	std::cout << "Failed to get CPU Model" << std::endl;
+	cpu.arch = GetCPUArch();
+	return cpu;
 }
 
-void HardwareInfo::InitOS()
+HardwareInfo::OS HardwareInfo::GetOS() const
 {
-	char os[128];
-	size_t len = sizeof(os);
-	if (sysctlbyname("kern.ostype", &os, &len, nullptr, 0) == 0)
-	{
-		m_os = os;
-		std::cout << "OS: " << m_os << std::endl;
-		return;
-	}
-	std::cout << "Failed to get OS" << std::endl;
-}
+	HardwareInfo::OS os;
 
-void HardwareInfo::InitOSVersion()
-{
-	char version[128];
-	size_t len = sizeof(version);
-	if (sysctlbyname("kern.osrelease", &version, &len, nullptr, 0) == 0)
+	std::ifstream cpuinfo("/proc/sys/kernel/ostype");
+	std::string line;
+	if (std::getline(cpuinfo, line))
 	{
-		m_osVersion = version;
-		std::cout << "OS Version: " << m_osVersion << std::endl;
-		return;
+		os.name = std::move(line);
 	}
-	std::cout << "Failed to get OS Version" << std::endl;
+	else
+	{
+		os.name = "Unknown";
+	}
+
+	std::ifstream osRelease("/proc/sys/kernel/osrelease");
+	if (std::getline(osRelease, line))
+	{
+		os.version = std::move(line);
+	}
+	else
+	{
+		os.version = "Unknown";
+	}
+
+	return os;
 }
 #endif
 
 #ifdef __APPLE__
-void HardwareInfo::InitCpuModel()
+HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
+	HardwareInfo::CPU cpu;
+
+	size_t len = 127;
 	char cpuModel[128];
-	size_t len = sizeof(cpuModel);
 	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, nullptr, 0) == 0)
 	{
-		m_cpuModel = cpuModel;
-		std::cout << "CPU Model: " << m_cpuModel << std::endl;
-		return;
+		cpu.model = cpuModel;
+	}
+	else
+	{
+		cpu.model = "Unknown";
 	}
 
-	std::cout << "Failed to get CPU Model" << std::endl;
+	cpu.arch = GetCPUArch();
+	return cpu;
 }
 
-void HardwareInfo::InitOS()
+HardwareInfo::OS HardwareInfo::GetOS() const
 {
-	std::string cmd = "sw_vers -productName";
-	FILE* pipe = popen(cmd.c_str(), "r");
-	if (!pipe)
-	{
-		return;
+	HardwareInfo::OS os;
+
+	FILE* pipe = popen("sw_vers", "r");
+	if (!pipe) {
+		os.name = "Unknown";
+		os.version = "Unknown";
+		return os;
 	}
 
 	char buffer[128];
-	while (!feof(pipe))
-	{
+	std::string result = "";
+	while (!feof(pipe)) {
 		if (fgets(buffer, 128, pipe))
 		{
-			m_os += buffer;
-		}
-	}
-	std::cout << "OS: " << m_os << std::endl;
-	pclose(pipe);
-}
-
-void HardwareInfo::InitOSVersion()
-{
-	std::string cmd = "sw_vers -productVersion";
-	FILE* pipe = popen(cmd.c_str(), "r");
-	if (!pipe)
-	{
-		return;
-	}
-
-	char buffer[128];
-	while (!feof(pipe))
-	{
-		if (fgets(buffer, 128, pipe) != nullptr)
-		{
-			m_osVersion += buffer;
-			std::cout << "OS Version: " << m_osVersion << std::endl;
+			result += buffer;
 		}
 	}
 
 	pclose(pipe);
+
+	std::string productName = "ProductName:";
+	size_t pos = result.find(productName);
+	if (pos != std::string::npos) {
+		size_t endPos = result.find("\n", pos);
+		os.name = result.substr(pos + productName.size(), endPos - pos - productName.size());
+	}
+	else
+	{
+		os.name = "Unknown";
+	}
+
+	std::string productVersion = "ProductVersion:";
+	pos = result.find(productVersion);
+	if (pos != std::string::npos) {
+		size_t endPos = result.find("\n", pos);
+		os.version = result.substr(pos + productVersion.size(), endPos - pos - productVersion.size());
+	}
+	else
+	{
+		os.version = "Unknown";
+	}
+
+	return os;
 }
 #endif
 
-#if defined(__unix__) || defined(__APPLE__)
-void HardwareInfo::InitArch()
+#ifndef WIN32
+std::string GetCPUArch() const
 {
 	const char* cmd = "uname -m";
 	FILE* pipe = popen(cmd, "r");
 	if (!pipe)
 	{
-		std::cout << "Failed to get Arch" << std::endl;
-		return;
+		return "Unknown";
 	}
 
+	size_t len = 127;
 	char buffer[128];
 	while (!feof(pipe))
 	{
-		if (fgets(buffer, 128, pipe))
+		if (fgets(buffer, len, pipe))
 		{
-			m_arch += buffer;
+			pclose(pipe);
+			return buffer;
 		}
 	}
-	std::cout << "Arch: " << m_arch << std::endl;
+
 	pclose(pipe);
+	return "Unknown";
 }
 
 HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 {
 	struct statvfs diskdata;
 	if (statvfs(root, &diskdata) == 0)
-	{	
-		size_t total = diskdata.f_blocks * diskdata.f_frsize;
+	{
 		size_t available = diskdata.f_bfree * diskdata.f_frsize;
-		std::cout << "Total HD: " << total << std::endl;
-		std::cout << "Available HD: " << available << std::endl;
-		return { total, available };
+		size_t total = diskdata.f_blocks * diskdata.f_frsize;
+		return { available, total };
 	}
 	return { 0, 0 };
 }
 #endif
-
-const std::string& HardwareInfo::GetCpuModel() const
-{
-	return m_cpuModel;
-}
-
-const std::string& HardwareInfo::GetOS() const
-{
-	return m_os;
-}
-
-const std::string& HardwareInfo::GetOSVersion() const
-{
-	return m_osVersion;
-}
-
-const std::string& HardwareInfo::GetArch() const
-{
-	return m_arch;
-}
