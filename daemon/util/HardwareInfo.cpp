@@ -47,6 +47,7 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		buffer,
 		&len))
 	{
+		Util::Trim(buffer);
 		cpu.model = buffer;
 	}
 	else
@@ -61,6 +62,7 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		buffer,
 		&len))
 	{
+		Util::Trim(buffer);
 		cpu.arch = buffer;
 	}
 	else
@@ -138,6 +140,7 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 	{
 		if (line.find("model name") != std::string::npos)
 		{
+			Util::Trim(line);
 			cpu.model = line.substr(line.find(":") + 2);
 			break;
 		}
@@ -154,6 +157,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::string line;
 	if (std::getline(cpuinfo, line))
 	{
+		Util::Trim(line);
 		os.name = std::move(line);
 	}
 	else
@@ -164,6 +168,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::ifstream osRelease("/proc/sys/kernel/osrelease");
 	if (std::getline(osRelease, line))
 	{
+		Util::Trim(line);
 		os.version = std::move(line);
 	}
 	else
@@ -184,6 +189,7 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 	char cpuModel[128];
 	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr, 0) == 0)
 	{
+		Util::Trim(cpuModel);
 		cpu.model = cpuModel;
 	}
 	else
@@ -203,6 +209,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::string line;
 	if (std::getline(cpuinfo, line))
 	{
+		Util::Trim(line);
 		os.name = std::move(line);
 	}
 	else
@@ -213,6 +220,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::ifstream osRelease("/proc/sys/kernel/osrelease");
 	if (std::getline(osRelease, line))
 	{
+		Util::Trim(line);
 		os.version = std::move(line);
 	}
 	else
@@ -233,6 +241,7 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 	char cpuModel[128];
 	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, nullptr, 0) == 0)
 	{
+		Util::Trim(cpuModel);
 		cpu.model = cpuModel;
 	}
 	else
@@ -271,6 +280,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	if (pos != std::string::npos) {
 		size_t endPos = result.find("\n", pos);
 		os.name = result.substr(pos + productName.size(), endPos - pos - productName.size());
+		Util::Trim(os.name);
 	}
 	else
 	{
@@ -282,6 +292,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	if (pos != std::string::npos) {
 		size_t endPos = result.find("\n", pos);
 		os.version = result.substr(pos + productVersion.size(), endPos - pos - productVersion.size());
+		Util::Trim(os.version);
 	}
 	else
 	{
@@ -309,6 +320,7 @@ std::string HardwareInfo::GetCPUArch() const
 		if (fgets(buffer, len, pipe))
 		{
 			pclose(pipe);
+			Util::Trim(buffer);
 			return buffer;
 		}
 	}
