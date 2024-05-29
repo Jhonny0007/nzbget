@@ -204,12 +204,12 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 HardwareInfo::OS HardwareInfo::GetOS() const
 {
 	HardwareInfo::OS os;
-
-	std::ifstream cpuinfo("/proc/sys/kernel/ostype");
-	std::string line;
-	if (std::getline(cpuinfo, line))
+	
+	int len = 127;
+	char buffer[128];
+	if (sysctlbyname("kern.ostype", &buffer, &len, nullptr, 0) == 0)
 	{
-		os.name = std::move(line);
+		os.name = buffer;
 		Util::Trim(os.name);
 	}
 	else
@@ -217,10 +217,9 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 		os.name = "Unknown";
 	}
 
-	std::ifstream osRelease("/proc/sys/kernel/osrelease");
-	if (std::getline(osRelease, line))
+	if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
 	{
-		os.version = std::move(line);
+		os.version = buffer;
 		Util::Trim(os.version);
 	}
 	else
@@ -313,11 +312,10 @@ std::string HardwareInfo::GetCPUArch() const
 		return "Unknown";
 	}
 
-	size_t len = 127;
-	char buffer[128];
+	char buffer[127];
 	while (!feof(pipe))
 	{
-		if (fgets(buffer, len, pipe))
+		if (fgets(buffer, 128, pipe))
 		{
 			pclose(pipe);
 			Util::Trim(buffer);
