@@ -47,8 +47,8 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		buffer,
 		&len))
 	{
-		Util::Trim(buffer);
 		cpu.model = buffer;
+		Util::Trim(cpu.model);
 	}
 	else
 	{
@@ -62,8 +62,8 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		buffer,
 		&len))
 	{
-		Util::Trim(buffer);
 		cpu.arch = buffer;
+		Util::Trim(cpu.arch);
 	}
 	else
 	{
@@ -140,8 +140,8 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 	{
 		if (line.find("model name") != std::string::npos)
 		{
-			Util::Trim(line);
 			cpu.model = line.substr(line.find(":") + 2);
+			Util::Trim(cpu.model);
 			break;
 		}
 	}
@@ -157,8 +157,8 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::string line;
 	if (std::getline(cpuinfo, line))
 	{
-		Util::Trim(line);
 		os.name = std::move(line);
+		Util::Trim(os.name);
 	}
 	else
 	{
@@ -168,8 +168,8 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::ifstream osRelease("/proc/sys/kernel/osrelease");
 	if (std::getline(osRelease, line))
 	{
-		Util::Trim(line);
 		os.version = std::move(line);
+		Util::Trim(os.version);
 	}
 	else
 	{
@@ -189,8 +189,8 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 	char cpuModel[128];
 	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr, 0) == 0)
 	{
-		Util::Trim(cpuModel);
 		cpu.model = cpuModel;
+		Util::Trim(cpu.model);
 	}
 	else
 	{
@@ -209,8 +209,8 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::string line;
 	if (std::getline(cpuinfo, line))
 	{
-		Util::Trim(line);
 		os.name = std::move(line);
+		Util::Trim(os.name);
 	}
 	else
 	{
@@ -220,8 +220,8 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	std::ifstream osRelease("/proc/sys/kernel/osrelease");
 	if (std::getline(osRelease, line))
 	{
-		Util::Trim(line);
 		os.version = std::move(line);
+		Util::Trim(os.version);
 	}
 	else
 	{
@@ -241,8 +241,8 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 	char cpuModel[128];
 	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, nullptr, 0) == 0)
 	{
-		Util::Trim(cpuModel);
 		cpu.model = cpuModel;
+		Util::Trim(cpu.model);
 	}
 	else
 	{
