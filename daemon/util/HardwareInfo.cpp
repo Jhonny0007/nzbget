@@ -38,7 +38,7 @@ HardwareInfo::HardwareInfo()
 HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
 	HardwareInfo::CPU cpu;
-	int len = 127;
+	int len = 128;
 	char buffer[128];
 	if (Util::RegReadStr(
 		HKEY_LOCAL_MACHINE,
@@ -77,7 +77,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 {
 	HardwareInfo::OS os;
 
-	int len = 127;
+	int len = 128;
 	char buffer[128];
 	if (Util::RegReadStr(
 		HKEY_LOCAL_MACHINE,
@@ -185,7 +185,7 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
 	HardwareInfo::CPU cpu;
 
-	size_t len = 127;
+	size_t len = 128;
 	char cpuModel[128];
 	if (sysctlbyname("hw.model", &cpuModel, &len, nullptr, 0) == 0)
 	{
@@ -205,7 +205,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 {
 	HardwareInfo::OS os;
 	
-	size_t len = 127;
+	size_t len = 128;
 	char buffer[128];
 	if (sysctlbyname("kern.ostype", &buffer, &len, nullptr, 0) == 0)
 	{
@@ -236,11 +236,11 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
 	HardwareInfo::CPU cpu;
 
-	size_t len = 127;
-	char cpuModel[128];
-	if (sysctlbyname("machdep.cpu.brand_string", &cpuModel, &len, nullptr, 0) == 0)
+	size_t len = 128;
+	char buffer[128];
+	if (sysctlbyname("machdep.cpu.brand_string", &buffer, &len, nullptr, 0) == 0)
 	{
-		cpu.model = cpuModel;
+		cpu.model = buffer;
 		Util::Trim(cpu.model);
 	}
 	else
@@ -266,7 +266,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	char buffer[128];
 	std::string result = "";
 	while (!feof(pipe)) {
-		if (fgets(buffer, 128, pipe))
+		if (fgets(buffer, sizeof(buffer), pipe))
 		{
 			result += buffer;
 		}
@@ -312,7 +312,7 @@ std::string HardwareInfo::GetCPUArch() const
 		return "Unknown";
 	}
 
-	char buffer[127];
+	char buffer[128];
 	while (!feof(pipe))
 	{
 		if (fgets(buffer, 128, pipe))
