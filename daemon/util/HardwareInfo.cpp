@@ -205,7 +205,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 {
 	HardwareInfo::OS os;
 	
-	int len = 127;
+	size_t len = 127;
 	char buffer[128];
 	if (sysctlbyname("kern.ostype", &buffer, &len, nullptr, 0) == 0)
 	{
