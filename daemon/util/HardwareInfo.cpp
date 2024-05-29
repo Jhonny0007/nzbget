@@ -293,7 +293,7 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 #endif
 
 #ifndef WIN32
-std::string GetCPUArch() const
+std::string HardwareInfo::GetCPUArch() const
 {
 	const char* cmd = "uname -m";
 	FILE* pipe = popen(cmd, "r");
