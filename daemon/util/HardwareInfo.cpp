@@ -329,20 +329,18 @@ void HardwareInfo::InitArch()
 	pclose(pipe);
 }
 
-void HardwareInfo::InitDiskTotalSize()
+HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 {
-	ULARGE_INTEGER freeBytesAvailable;
-	ULARGE_INTEGER totalNumberOfBytes;
-	ULARGE_INTEGER totalNumberOfFreeBytes;
-
-	if (GetDiskFreeSpaceEx(nullptr, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes))
-	{
-		m_diskTotalSize = std::to_string(totalNumberOfBytes.QuadPart / (1024 * 1024 * 1024)) + " GB";
-		std::cout << "Disk total size: " << m_diskTotalSize << std::endl;
-		return;
+	struct statvfs diskdata;
+	if (statvfs(root, &diskdata) == 0)
+	{	
+		size_t total = diskdata.f_blocks * diskdata.f_frsize;
+		size_t available = diskdata.f_bfree * diskdata.f_frsize;
+		std::cout << "Total HD: " << total << std::endl;
+		std::cout << "Available HD: " << available << std::endl;
+		return { total, available };
 	}
-
-	std::cout << "Error getting disk information" << std::endl;
+	return { 0, 0 }
 }
 #endif
 
