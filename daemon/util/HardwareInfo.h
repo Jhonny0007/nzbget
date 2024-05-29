@@ -37,7 +37,7 @@ public:
 	const std::string& GetOS() const;
 	const std::string& GetOSVersion() const;
 	const std::string& GetArch() const;
-	DiskState GetDiskState(const char* root = nullptr) const;
+	DiskState GetDiskState(const char* root = ".") const;
 private:
 	void InitCpuModel();
 	void InitOS();
