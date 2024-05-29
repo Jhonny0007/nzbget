@@ -38,16 +38,18 @@ HardwareInfo::HardwareInfo()
 HardwareInfo::CPU HardwareInfo::GetCPU() const
 {
 	HardwareInfo::CPU cpu;
+
 	int len = 128;
-	char buffer[128];
+	char cpuModelBuffer[128];
+	char cpuArchBuffer[128];
 	if (Util::RegReadStr(
 		HKEY_LOCAL_MACHINE,
 		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
 		"ProcessorNameString",
-		buffer,
+		cpuModelBuffer,
 		&len))
 	{
-		cpu.model = buffer;
+		cpu.model = cpuModelBuffer;
 		Util::Trim(cpu.model);
 	}
 	else
@@ -59,10 +61,10 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		HKEY_LOCAL_MACHINE,
 		"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
 		"PROCESSOR_ARCHITECTURE",
-		buffer,
+		cpuArchBuffer,
 		&len))
 	{
-		cpu.arch = buffer;
+		cpu.arch = cpuArchBuffer;
 		Util::Trim(cpu.arch);
 	}
 	else
@@ -206,10 +208,10 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	HardwareInfo::OS os;
 	
 	size_t len = 128;
-	char buffer[128];
-	if (sysctlbyname("kern.ostype", &buffer, &len, nullptr, 0) == 0)
+	char osNameBuffer[128];
+	if (sysctlbyname("kern.ostype", &osNameBuffer, &len, nullptr, 0) == 0)
 	{
-		os.name = buffer;
+		os.name = osNameBuffer;
 		Util::Trim(os.name);
 	}
 	else
@@ -217,9 +219,10 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 		os.name = "Unknown";
 	}
 
-	if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
+	char osReleaseBuffer[128];
+	if (sysctlbyname("kern.osrelease", &osReleaseBuffer, &len, nullptr, 0) == 0)
 	{
-		os.version = buffer;
+		os.version = osReleaseBuffer;
 		Util::Trim(os.version);
 	}
 	else
