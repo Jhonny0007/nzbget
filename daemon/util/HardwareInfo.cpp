@@ -21,6 +21,9 @@
 
 #include "HardwareInfo.h"
 
+#include <iostream>
+#include <boost/asio.hpp>
+
 HardwareInfo::HardwareInfo()
 {
 	auto os = GetOS();
@@ -32,6 +35,44 @@ HardwareInfo::HardwareInfo()
 	auto diskState = GetDiskState();
 	std::cout << "Available HD: " << diskState.freeSpace << std::endl;
 	std::cout << "Total HD: " << diskState.totalSize << std::endl;
+	auto network = GetNetwork();
+	std::cout << "Public IP: " << network.publicIP << std::endl;
+	std::cout << "Private IP: " << network.privateIP << std::endl;
+}
+
+HardwareInfo::Network HardwareInfo::GetNetwork() const
+{
+	HardwareInfo::Network network;
+	try {
+		boost::asio::io_context context;
+		boost::asio::ip::tcp::resolver resolver(context);
+		boost::asio::ip::tcp::socket socket(context);
+		boost::asio::connect(socket, resolver.resolve("icanhazip.com", "http"));
+
+		std::string request = "GET / HTTP/1.1\r\nHost: icanhazip.com\r\n\r\n";
+		boost::asio::write(socket, boost::asio::buffer(request));
+
+		char reply[1024];
+		size_t total_read = socket.read_some(boost::asio::buffer(reply, sizeof(reply)));
+
+		std::string response(reply, total_read);
+		size_t pos = response.find("\r\n\r\n");
+
+		if (pos != std::string::npos)
+		{
+			response = response.substr(pos);
+			Util::Trim(response);
+			network.publicIP = response;
+			network.privateIP = socket.local_endpoint().address().to_string();
+		}
+	}
+	catch (std::exception& e)
+	{
+		network.publicIP = "Unknown";
+		network.privateIP = "Unknown";
+	}
+
+	return network;
 }
 
 #ifdef WIN32
@@ -206,7 +247,7 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 HardwareInfo::OS HardwareInfo::GetOS() const
 {
 	HardwareInfo::OS os;
-	
+
 	size_t len = 128;
 	char osNameBuffer[128];
 	if (sysctlbyname("kern.ostype", &osNameBuffer, &len, nullptr, 0) == 0)

@@ -33,6 +33,12 @@ public:
 		std::string arch;
 	};
 
+	struct Network
+	{
+		std::string publicIP;
+		std::string privateIP;
+	};
+
 	struct DiskState
 	{
 		size_t freeSpace;
@@ -47,6 +53,7 @@ public:
 	
 	HardwareInfo();
 	CPU GetCPU() const;
+	Network GetNetwork() const;
 	OS GetOS() const;
 	DiskState GetDiskState(const char* root = ".") const;
 
