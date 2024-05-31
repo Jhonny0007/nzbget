@@ -116,7 +116,6 @@ int main(int argc, char *argv[], char *argp[])
 		);
 #endif
 #endif
-	HardwareInfo gw;
 	Util::Init();
 	YEncode::init();
 
@@ -319,6 +318,9 @@ void NZBGet::Init()
 		info("nzbget %s remote-mode", Util::VersionRevision());
 	}
 
+	info("Using %s", g_Options->GetConfigFilename());
+	info("Access on %s:%i", g_Options->GetControlIp(), g_Options->GetControlPort());
+
 	m_reloading = false;
 
 	if (!m_commandLineParser->GetRemoteClientMode())
@@ -429,7 +431,7 @@ void NZBGet::BootConfig()
 	m_options->SetServerMode(m_commandLineParser->GetServerMode());
 	m_workState->SetPauseDownload(m_commandLineParser->GetPauseDownload());
 	m_workState->SetSpeedLimit(g_Options->GetDownloadRate());
-
+	HardwareInfo gw;
 	m_log->InitOptions();
 
 	if (m_options->GetFatalError())

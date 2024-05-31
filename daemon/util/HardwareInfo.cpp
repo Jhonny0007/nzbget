@@ -19,10 +19,9 @@
 
 #include "nzbget.h"
 
-#include "HardwareInfo.h"
-
-#include <iostream>
 #include <boost/asio.hpp>
+#include "HardwareInfo.h"
+#include "Options.h"
 
 HardwareInfo::HardwareInfo()
 {
@@ -38,11 +37,27 @@ HardwareInfo::HardwareInfo()
 	auto network = GetNetwork();
 	std::cout << "Public IP: " << network.publicIP << std::endl;
 	std::cout << "Private IP: " << network.privateIP << std::endl;
+	auto env = GetEnvironment();
+	std::cout << "Conf. path: " << env.confPath << std::endl;
+	std::cout << "ControlIP IP: " << env.controlIP << std::endl;
+	std::cout << "ControlIP Port: " << env.controlPort << std::endl;
+}
+
+HardwareInfo::Environment HardwareInfo::GetEnvironment() const
+{
+	HardwareInfo::Environment env;
+
+	env.confPath = g_Options->GetConfigFilename();
+	env.controlIP = g_Options->GetControlIp();
+	env.controlPort = g_Options->GetControlPort();
+
+	return env;
 }
 
 HardwareInfo::Network HardwareInfo::GetNetwork() const
 {
 	HardwareInfo::Network network;
+
 	try {
 		boost::asio::io_context context;
 		boost::asio::ip::tcp::resolver resolver(context);

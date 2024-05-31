@@ -33,6 +33,13 @@ public:
 		std::string arch;
 	};
 
+	struct Environment
+	{
+		std::string confPath;
+		std::string controlIP;
+		int controlPort;
+	};
+
 	struct Network
 	{
 		std::string publicIP;
@@ -53,6 +60,7 @@ public:
 	
 	HardwareInfo();
 	CPU GetCPU() const;
+	Environment GetEnvironment() const;
 	Network GetNetwork() const;
 	OS GetOS() const;
 	DiskState GetDiskState(const char* root = ".") const;
