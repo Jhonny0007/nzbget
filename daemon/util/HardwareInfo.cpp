@@ -22,6 +22,9 @@
 #include <boost/asio.hpp>
 #include "HardwareInfo.h"
 #include "Options.h"
+#include "ArticleWriter.h"
+
+using namespace boost;
 
 HardwareInfo::HardwareInfo()
 {
@@ -34,6 +37,7 @@ HardwareInfo::HardwareInfo()
 	auto diskState = GetDiskState();
 	std::cout << "Available HD: " << diskState.freeSpace << std::endl;
 	std::cout << "Total HD: " << diskState.totalSize << std::endl;
+	std::cout << "Cache HD: " << diskState.articleCache << std::endl;
 	auto network = GetNetwork();
 	std::cout << "Public IP: " << network.publicIP << std::endl;
 	std::cout << "Private IP: " << network.privateIP << std::endl;
@@ -41,6 +45,8 @@ HardwareInfo::HardwareInfo()
 	std::cout << "Conf. path: " << env.confPath << std::endl;
 	std::cout << "ControlIP IP: " << env.controlIP << std::endl;
 	std::cout << "ControlIP Port: " << env.controlPort << std::endl;
+	std::cout << "Unrar: " << env.unrarPath << std::endl;
+	std::cout << "SevenZip: " << env.sevenZipPath << std::endl;
 }
 
 HardwareInfo::Environment HardwareInfo::GetEnvironment() const
@@ -50,6 +56,8 @@ HardwareInfo::Environment HardwareInfo::GetEnvironment() const
 	env.confPath = g_Options->GetConfigFilename();
 	env.controlIP = g_Options->GetControlIp();
 	env.controlPort = g_Options->GetControlPort();
+	env.unrarPath = g_Options->GetUnrarCmd();
+	env.sevenZipPath = g_Options->GetSevenZipCmd();
 
 	return env;
 }
@@ -59,16 +67,16 @@ HardwareInfo::Network HardwareInfo::GetNetwork() const
 	HardwareInfo::Network network;
 
 	try {
-		boost::asio::io_context context;
-		boost::asio::ip::tcp::resolver resolver(context);
-		boost::asio::ip::tcp::socket socket(context);
-		boost::asio::connect(socket, resolver.resolve("icanhazip.com", "http"));
+		asio::io_context context;
+		asio::ip::tcp::resolver resolver(context);
+		asio::ip::tcp::socket socket(context);
+		asio::connect(socket, resolver.resolve("icanhazip.com", "http"));
 
 		std::string request = "GET / HTTP/1.1\r\nHost: icanhazip.com\r\n\r\n";
-		boost::asio::write(socket, boost::asio::buffer(request));
+		asio::write(socket, asio::buffer(request));
 
 		char reply[1024];
-		size_t total_read = socket.read_some(boost::asio::buffer(reply, sizeof(reply)));
+		size_t total_read = socket.read_some(asio::buffer(reply, sizeof(reply)));
 
 		std::string response(reply, total_read);
 		size_t pos = response.find("\r\n\r\n");
@@ -175,13 +183,19 @@ HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 {
 	ULARGE_INTEGER freeBytesAvailable;
 	ULARGE_INTEGER totalNumberOfBytes;
+	int64 articleCache = g_ArticleCache->GetAllocated();
+	uint32 articleCacheHi, articleCacheLo;
+	Util::SplitInt64(articleCache, &articleCacheHi, &articleCacheLo);
+	int articleCacheMBytes = static_cast<int>(articleCache / 1024 / 1024);
 
 	if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 	{
-		return { freeBytesAvailable.QuadPart, totalNumberOfBytes.QuadPart };
+		int freeSpace = static_cast<int>(freeBytesAvailable.QuadPart / 1024 / 1024);
+		int totalSpace = static_cast<int>(freeBytesAvailable.QuadPart / 1024 / 1024);
+		return { freeSpace, totalSpace, articleCacheMBytes };
 	}
 
-	return { 0, 0 };
+	return { 0, 0, articleCacheMBytes };
 }
 #endif
 

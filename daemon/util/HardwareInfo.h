@@ -37,6 +37,9 @@ public:
 	{
 		std::string confPath;
 		std::string controlIP;
+		std::string unrarPath;
+		std::string sevenZipPath;
+		std::string pythonPath;
 		int controlPort;
 	};
 
@@ -48,8 +51,9 @@ public:
 
 	struct DiskState
 	{
-		size_t freeSpace;
-		size_t totalSize;
+		int freeSpace;
+		int totalSize;
+		int articleCache;
 	};
 
 	struct OS

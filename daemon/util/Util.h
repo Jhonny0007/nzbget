@@ -37,6 +37,7 @@ public:
 	static bool MatchFileExt(const char* filename, const char* extensionList, const char* listSeparator);
 	static boost::optional<std::string> 
 	FindExecutorProgram(const std::string& filename, const std::string& customPath);
+	static boost::optional<std::string> FindPython();
 
 	/*
 	* Split command line into arguments.
@@ -101,6 +102,8 @@ public:
 	* Returns number of available CPU cores or -1 if it could not be determined
 	*/
 	static int NumberOfCpuCores();
+
+	static std::string m_nullOutput;
 };
 
 class WebUtil
