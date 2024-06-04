@@ -102,8 +102,6 @@ public:
 	* Returns number of available CPU cores or -1 if it could not be determined
 	*/
 	static int NumberOfCpuCores();
-
-	static std::string m_nullOutput;
 };
 
 class WebUtil

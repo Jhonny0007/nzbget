@@ -37,9 +37,9 @@ char	*optarg;		// global argument pointer
 int		optind = 0; 	// global argv index
 
 #ifdef _WIN32
-std::string Util::m_nullOutput = " > nul 2>&1";
+constexpr char* NULL_OUTPUT = " > nul 2>&1";
 #else
-std::string Util::m_nullOutput = " > /dev/null 2>&1";
+constexpr char* NULL_OUTPUT = " > /dev/null 2>&1";
 #endif
 
 int getopt(int argc, char *argv[], char *optstring)
@@ -149,17 +149,17 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 	if (fileExt == ".py")
 	{
-		std::string cmd = "python3 --version" + m_nullOutput;
+		std::string cmd = std::string("python3 --version") + NULL_OUTPUT;
 		if (std::system(cmd.c_str()) == 0)
 		{
 			return std::string("python3");
 		}
-		cmd = "python --version" + m_nullOutput;
+		cmd = std::string("python --version") + NULL_OUTPUT;
 		if (std::system(cmd.c_str()) == 0)
 		{
 			return std::string("python");
 		}
-		cmd = "py --version" + m_nullOutput;
+		cmd = std::string("py --version") + NULL_OUTPUT;
 		if (std::system(cmd.c_str()) == 0)
 		{
 			return std::string("py");
@@ -169,12 +169,12 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 	if (fileExt == ".sh")
 	{
-		std::string cmd = "bash --version" + m_nullOutput;
+		std::string cmd = std::string("bash --version") + NULL_OUTPUT;
 		if (std::system(cmd.c_str()) == 0)
 		{
 			return std::string("bash");
 		}
-		cmd = "sh --version" + m_nullOutput;
+		cmd = std::string("sh --version") + NULL_OUTPUT;
 		if (std::system(cmd.c_str()) == 0)
 		{
 			return std::string("sh");
@@ -184,7 +184,7 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 	if (fileExt == ".js")
 	{
-		const std::string cmd = "node --version" + m_nullOutput;
+		const std::string cmd = std::string("node --version") + NULL_OUTPUT;
 		if (std::system(cmd.c_str()) == 0)
 		{
 			return std::string("node");
@@ -194,7 +194,7 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 	if (fileExt == ".cmd" || fileExt == ".bat")
 	{
-		const std::string cmd = "cmd.exe /c" + m_nullOutput;
+		const std::string cmd = std::string("cmd.exe /c") + NULL_OUTPUT;
 		if (std::system(cmd.c_str()) == 0)
 		{
 			return filename;
@@ -212,17 +212,17 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 boost::optional<std::string> Util::FindPython()
 {
-	std::string cmd = std::string("python3 --version") + m_nullOutput;
+	std::string cmd = std::string("python3 --version") + NULL_OUTPUT;
 	if (std::system(cmd.c_str()) == 0)
 	{
 		return std::string("python3");
 	}
-	cmd = std::string("python --version") + m_nullOutput;
+	cmd = std::string("python --version") + NULL_OUTPUT;
 	if (std::system(cmd.c_str()) == 0)
 	{
 		return std::string("python");
 	}
-	cmd = std::string("py --version") + m_nullOutput;
+	cmd = std::string("py --version") + NULL_OUTPUT;
 	if (std::system(cmd.c_str()) == 0)
 	{
 		return std::string("py");
