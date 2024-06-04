@@ -110,6 +110,9 @@ compiled */
 #pragma warning(disable:4800) // 'type' : forcing value to bool 'true' or 'false' (performance warning)
 #pragma warning(disable:4267) // 'var' : conversion from 'size_t' to 'type', possible loss of data
 
+#define popen _popen
+#define pclose _pclose
+
 #endif
 
 /***************** GLOBAL INCLUDES *****************/

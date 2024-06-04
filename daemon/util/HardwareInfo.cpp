@@ -20,6 +20,8 @@
 #include "nzbget.h"
 
 #include <boost/asio.hpp>
+#include <sstream>
+#include <iostream>
 #include "HardwareInfo.h"
 #include "Options.h"
 #include "ArticleWriter.h"
@@ -47,6 +49,8 @@ HardwareInfo::HardwareInfo()
 	std::cout << "ControlIP Port: " << env.controlPort << std::endl;
 	std::cout << "Unrar: " << env.unrarPath << std::endl;
 	std::cout << "SevenZip: " << env.sevenZipPath << std::endl;
+	std::cout << "Python path: " << env.pythonPath << std::endl;
+	std::cout << "Python version: " << env.pythonVersion << std::endl;
 }
 
 HardwareInfo::Environment HardwareInfo::GetEnvironment() const
@@ -58,7 +62,99 @@ HardwareInfo::Environment HardwareInfo::GetEnvironment() const
 	env.controlPort = g_Options->GetControlPort();
 	env.unrarPath = g_Options->GetUnrarCmd();
 	env.sevenZipPath = g_Options->GetSevenZipCmd();
+	std::string cmd = std::string(g_Options->GetSevenZipCmd());
+	std::stringstream ss;
+	char buffer[128];
+	FILE* pipe = popen(cmd.c_str(), "r");
+	int i = 0;
+	if (pipe) {
+		while (!feof(pipe) && i != 2)
+		{
+			if (fgets(buffer, 128, pipe) != nullptr && i == 1)
+			{
+				ss << buffer;
+			}
+			++i;
+		}
+		i = 0;
+		pclose(pipe);
+	}
 
+	size_t startPos = ss.str().find(")");
+	size_t endPos = ss.str().find("(");
+	if (startPos != std::string::npos && endPos != std::string::npos)
+	{
+		std::string version = ss.str().substr(startPos + 1, endPos);
+		Util::Trim(version);
+	}
+
+	ss.str("");
+	ss.clear();
+	cmd = std::string(g_Options->GetUnrarCmd());
+	pipe = popen(cmd.c_str(), "r");
+	if (pipe) {
+		while (!feof(pipe) && i != 2)
+		{
+			if (fgets(buffer, 128, pipe) != nullptr && i == 1)
+			{
+				ss << buffer;
+			}
+			++i;
+		}
+		pclose(pipe);
+	}
+	std::string version = ss.str().substr(sizeof("UNRAR"), 4);
+	Util::Trim(version);
+
+	auto pythonResult = Util::FindPython();
+	if (pythonResult.has_value())
+	{
+		std::string cmd = pythonResult.get() + " --version";
+		pipe = popen(cmd.c_str(), "r");
+		if (pipe) {
+			while (!feof(pipe))
+			{
+				if (fgets(buffer, 128, pipe) != nullptr)
+				{
+					ss << buffer;
+				}
+			}
+			pclose(pipe);
+		}
+		env.pythonVersion = buffer;
+	}
+	else
+	{
+		env.pythonVersion = "Unknown";
+	}
+
+	ss.str("");
+	ss.clear();
+	if (pythonResult.has_value())
+	{
+#ifdef WIN32
+	std::string findCmd = "where ";
+#else
+	std::string findCmd = "which ";
+#endif
+		std::string cmd = findCmd+ pythonResult.get();
+		pipe = popen(cmd.c_str(), "r");
+		if (pipe) {
+			while (!feof(pipe))
+			{
+				if (fgets(buffer, 128, pipe) != nullptr)
+				{
+					ss << buffer;
+				}
+			}
+			pclose(pipe);
+		}
+		env.pythonPath = buffer;
+	}
+	else
+	{
+		env.pythonPath = "Unknown";
+	}
 	return env;
 }
 

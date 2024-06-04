@@ -40,6 +40,7 @@ public:
 		std::string unrarPath;
 		std::string sevenZipPath;
 		std::string pythonPath;
+		std::string pythonVersion;
 		int controlPort;
 	};
 
