@@ -36,11 +36,6 @@
 char	*optarg;		// global argument pointer
 int		optind = 0; 	// global argv index
 
-#ifdef _WIN32
-constexpr char* NULL_OUTPUT = " > nul 2>&1";
-#else
-constexpr char* NULL_OUTPUT = " > /dev/null 2>&1";
-#endif
 
 int getopt(int argc, char *argv[], char *optstring)
 {
@@ -110,6 +105,11 @@ int getopt(int argc, char *argv[], char *optstring)
 }
 #endif
 
+#ifdef WIN32
+constexpr char* NULL_OUTPUT = " > nul 2>&1";
+#else
+constexpr char* NULL_OUTPUT = " > /dev/null 2>&1";
+#endif
 
 char Util::VersionRevisionBuf[100];
 
