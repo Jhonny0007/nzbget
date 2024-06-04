@@ -37,9 +37,9 @@ char	*optarg;		// global argument pointer
 int		optind = 0; 	// global argv index
 
 #ifdef _WIN32
-const std::string Util::m_nullOutput = " > nul 2>&1";
+std::string Util::m_nullOutput = " > nul 2>&1";
 #else
-const std::string Util::m_nullOutput = " > /dev/null 2>&1";
+std::string Util::m_nullOutput = " > /dev/null 2>&1";
 #endif
 
 int getopt(int argc, char *argv[], char *optstring)
@@ -212,17 +212,17 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 boost::optional<std::string> Util::FindPython()
 {
-	std::string cmd = "python3 --version" + m_nullOutput;
+	std::string cmd = std::string("python3 --version") + m_nullOutput;
 	if (std::system(cmd.c_str()) == 0)
 	{
 		return std::string("python3");
 	}
-	cmd = "python --version" + m_nullOutput;
+	cmd = std::string("python --version") + m_nullOutput;
 	if (std::system(cmd.c_str()) == 0)
 	{
 		return std::string("python");
 	}
-	cmd = "py --version" + m_nullOutput;
+	cmd = std::string("py --version") + m_nullOutput;
 	if (std::system(cmd.c_str()) == 0)
 	{
 		return std::string("py");
