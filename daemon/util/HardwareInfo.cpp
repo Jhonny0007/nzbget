@@ -282,16 +282,13 @@ HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 	int64 articleCache = g_ArticleCache->GetAllocated();
 	uint32 articleCacheHi, articleCacheLo;
 	Util::SplitInt64(articleCache, &articleCacheHi, &articleCacheLo);
-	int articleCacheMBytes = static_cast<int>(articleCache / 1024 / 1024);
 
 	if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 	{
-		int freeSpace = static_cast<int>(freeBytesAvailable.QuadPart / 1024 / 1024);
-		int totalSpace = static_cast<int>(freeBytesAvailable.QuadPart / 1024 / 1024);
-		return { freeSpace, totalSpace, articleCacheMBytes };
+		return { freeBytesAvailable.QuadPart, freeBytesAvailable.QuadPart, static_cast<size_t>(articleCache) };
 	}
 
-	return { 0, 0, articleCacheMBytes };
+	return { 0, 0, static_cast<size_t>(articleCache) };
 }
 #endif
 
@@ -498,13 +495,16 @@ std::string HardwareInfo::GetCPUArch() const
 
 HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
 {
+	int64 articleCache = g_ArticleCache->GetAllocated();
+	uint32 articleCacheHi, articleCacheLo;
+	Util::SplitInt64(articleCache, &articleCacheHi, &articleCacheLo);
 	struct statvfs diskdata;
 	if (statvfs(root, &diskdata) == 0)
 	{
 		size_t available = diskdata.f_bfree * diskdata.f_frsize;
 		size_t total = diskdata.f_blocks * diskdata.f_frsize;
-		return { available, total };
+		return { available, total, static_cast<size_t>(articleCache) };
 	}
-	return { 0, 0 };
+	return { 0, 0, static_cast<size_t>(articleCache) };
 }
 #endif

@@ -52,9 +52,9 @@ public:
 
 	struct DiskState
 	{
-		int freeSpace;
-		int totalSize;
-		int articleCache;
+		size_t freeSpace;
+		size_t totalSize;
+		size_t articleCache;
 	};
 
 	struct OS
