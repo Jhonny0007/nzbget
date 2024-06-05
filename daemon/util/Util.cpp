@@ -106,9 +106,9 @@ int getopt(int argc, char *argv[], char *optstring)
 #endif
 
 #ifdef WIN32
-constexpr char* NULL_OUTPUT = " > nul 2>&1";
+constexpr const char* NULL_OUTPUT = " > nul 2>&1";
 #else
-constexpr char* NULL_OUTPUT = " > /dev/null 2>&1";
+constexpr const char* NULL_OUTPUT = " > /dev/null 2>&1";
 #endif
 
 char Util::VersionRevisionBuf[100];

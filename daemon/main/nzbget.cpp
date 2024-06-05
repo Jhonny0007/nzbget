@@ -431,7 +431,7 @@ void NZBGet::BootConfig()
 	m_options->SetServerMode(m_commandLineParser->GetServerMode());
 	m_workState->SetPauseDownload(m_commandLineParser->GetPauseDownload());
 	m_workState->SetSpeedLimit(g_Options->GetDownloadRate());
-	HardwareInfo gw;
+	HardwareInfo::HardwareInfo hw;
 	m_log->InitOptions();
 
 	if (m_options->GetFatalError())

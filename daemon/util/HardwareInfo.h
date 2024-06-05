@@ -22,25 +22,31 @@
 
 #include <string>
 #include <iostream>
+#include <boost/asio.hpp>
 #include "Util.h"
 
-class HardwareInfo final
+namespace HardwareInfo
 {
-public:
 	struct CPU
 	{
 		std::string model;
 		std::string arch;
 	};
 
+	struct Tool
+	{
+		std::string name;
+		std::string version;
+		std::string path;
+	};
+
 	struct Environment
 	{
-		std::string confPath;
+		Tool python;
+		Tool sevenZip;
+		Tool unrar;
+		std::string configPath;
 		std::string controlIP;
-		std::string unrarPath;
-		std::string sevenZipPath;
-		std::string pythonPath;
-		std::string pythonVersion;
 		int controlPort;
 	};
 
@@ -62,26 +68,37 @@ public:
 		std::string name;
 		std::string version;
 	};
-	
-	HardwareInfo();
-	CPU GetCPU() const;
-	Environment GetEnvironment() const;
-	Network GetNetwork() const;
-	OS GetOS() const;
-	DiskState GetDiskState(const char* root = ".") const;
 
-private:
+	class HardwareInfo final
+	{
+	public:
+		HardwareInfo();
+		~HardwareInfo();
+		CPU GetCPU() const;
+		Environment GetEnvironment() const;
+		Network GetNetwork();
+		OS GetOS() const;
+		DiskState GetDiskState(const char* root = ".") const;
+
+	private:
+		Tool GetSevenZip() const;
+		Tool GetUnrar() const;
+		Tool GetPython() const;
+		boost::asio::io_context m_context;
+		boost::asio::ip::tcp::resolver m_resolver;
+		boost::asio::ip::tcp::socket m_socket;
 #ifndef WIN32
-	std::string GetCPUArch() const;
+		std::string GetCPUArch() const;
 #endif
 
 #ifdef WIN32
-	const long m_win11BuildVersion = 22000;
-	const long m_win10BuildVersion = 10240;
-	const long m_win8BuildVersion = 9200;
-	const long m_win7BuildVersion = 7600;
-	const long m_winXPBuildVersion = 2600;
+		const long m_win11BuildVersion = 22000;
+		const long m_win10BuildVersion = 10240;
+		const long m_win8BuildVersion = 9200;
+		const long m_win7BuildVersion = 7600;
+		const long m_winXPBuildVersion = 2600;
 #endif
-};
+	};
+}
 
 #endif
