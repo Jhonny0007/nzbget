@@ -123,21 +123,17 @@ HardwareInfo::Environment HardwareInfo::GetEnvironment() const
 		}
 		env.pythonVersion = buffer;
 	}
-	else
-	{
-		env.pythonVersion = "Unknown";
-	}
 
 	ss.str("");
 	ss.clear();
 	if (pythonResult.has_value())
 	{
 #ifdef WIN32
-	std::string findCmd = "where ";
+		std::string findCmd = "where ";
 #else
-	std::string findCmd = "which ";
+		std::string findCmd = "which ";
 #endif
-		std::string cmd = findCmd+ pythonResult.get();
+		std::string cmd = findCmd + pythonResult.get();
 		pipe = popen(cmd.c_str(), "r");
 		if (pipe) {
 			while (!feof(pipe))
@@ -151,10 +147,7 @@ HardwareInfo::Environment HardwareInfo::GetEnvironment() const
 		}
 		env.pythonPath = buffer;
 	}
-	else
-	{
-		env.pythonPath = "Unknown";
-	}
+
 	return env;
 }
 
@@ -212,10 +205,6 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		cpu.model = cpuModelBuffer;
 		Util::Trim(cpu.model);
 	}
-	else
-	{
-		cpu.model = "Unknown";
-	}
 
 	if (Util::RegReadStr(
 		HKEY_LOCAL_MACHINE,
@@ -226,10 +215,6 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 	{
 		cpu.arch = cpuArchBuffer;
 		Util::Trim(cpu.arch);
-	}
-	else
-	{
-		cpu.arch = "Unknown";
 	}
 
 	return cpu;
@@ -264,10 +249,6 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 		else if (buildNum >= m_winXPBuildVersion)
 		{
 			os.version = "XP";
-		}
-		else
-		{
-			os.version = "Unknown";
 		}
 	}
 
@@ -318,27 +299,44 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 {
 	HardwareInfo::OS os;
 
-	std::ifstream cpuinfo("/proc/sys/kernel/ostype");
-	std::string line;
-	if (std::getline(cpuinfo, line))
+	std::ifstream osInfo("/etc/os-release");
+	if (!osInfo.is_open())
 	{
-		os.name = std::move(line);
-		Util::Trim(os.name);
-	}
-	else
-	{
-		os.name = "Unknown";
+		return os;
 	}
 
-	std::ifstream osRelease("/proc/sys/kernel/osrelease");
-	if (std::getline(osRelease, line))
+	size_t startPos = 0;
+	std::string line;
+	while (std::getline(osInfo, line))
 	{
-		os.version = std::move(line);
-		Util::Trim(os.version);
-	}
-	else
-	{
-		os.version = "Unknown";
+		if (os.name && os.version)
+		{
+			break;
+		}
+
+		if (!os.name && line.find("NAME") != std::string::npos)
+		{
+			startPos = sizeof("NAME=");
+			os.name = line.substr(startPos);
+			Util::Trim(os.name);
+			continue;
+		}
+
+		if (!os.version && line.find("VERSION_ID") != std::string::npos)
+		{
+			startPos = sizeof("VERSION_ID=");
+			os.version = line.substr(startPos);
+			Util::Trim(os.version);
+			continue;
+		}
+
+		if (!os.version && line.find("BUILD_ID") != std::string::npos)
+		{
+			startPos = sizeof("BUILD_ID=");
+			os.version = line.substr(startPos);
+			Util::Trim(os.version);
+			continue;
+		}
 	}
 
 	return os;
@@ -357,10 +355,6 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		cpu.model = cpuModel;
 		Util::Trim(cpu.model);
 	}
-	else
-	{
-		cpu.model = "Unknown";
-	}
 
 	cpu.arch = GetCPUArch();
 	return cpu;
@@ -377,20 +371,12 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 		os.name = osNameBuffer;
 		Util::Trim(os.name);
 	}
-	else
-	{
-		os.name = "Unknown";
-	}
 
 	char osReleaseBuffer[128];
 	if (sysctlbyname("kern.osrelease", &osReleaseBuffer, &len, nullptr, 0) == 0)
 	{
 		os.version = osReleaseBuffer;
 		Util::Trim(os.version);
-	}
-	else
-	{
-		os.version = "Unknown";
 	}
 
 	return os;
@@ -409,10 +395,6 @@ HardwareInfo::CPU HardwareInfo::GetCPU() const
 		cpu.model = buffer;
 		Util::Trim(cpu.model);
 	}
-	else
-	{
-		cpu.model = "Unknown";
-	}
 
 	cpu.arch = GetCPUArch();
 	return cpu;
@@ -423,15 +405,15 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 	HardwareInfo::OS os;
 
 	FILE* pipe = popen("sw_vers", "r");
-	if (!pipe) {
-		os.name = "Unknown";
-		os.version = "Unknown";
+	if (!pipe)
+	{
 		return os;
 	}
 
 	char buffer[128];
 	std::string result = "";
-	while (!feof(pipe)) {
+	while (!feof(pipe))
+	{
 		if (fgets(buffer, sizeof(buffer), pipe))
 		{
 			result += buffer;
@@ -442,26 +424,20 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 
 	std::string productName = "ProductName:";
 	size_t pos = result.find(productName);
-	if (pos != std::string::npos) {
+	if (pos != std::string::npos)
+	{
 		size_t endPos = result.find("\n", pos);
 		os.name = result.substr(pos + productName.size(), endPos - pos - productName.size());
 		Util::Trim(os.name);
 	}
-	else
-	{
-		os.name = "Unknown";
-	}
 
 	std::string productVersion = "ProductVersion:";
 	pos = result.find(productVersion);
-	if (pos != std::string::npos) {
+	if (pos != std::string::npos)
+	{
 		size_t endPos = result.find("\n", pos);
 		os.version = result.substr(pos + productVersion.size(), endPos - pos - productVersion.size());
 		Util::Trim(os.version);
-	}
-	else
-	{
-		os.version = "Unknown";
 	}
 
 	return os;
@@ -475,7 +451,7 @@ std::string HardwareInfo::GetCPUArch() const
 	FILE* pipe = popen(cmd, "r");
 	if (!pipe)
 	{
-		return "Unknown";
+		return "";
 	}
 
 	char buffer[128];
@@ -490,7 +466,8 @@ std::string HardwareInfo::GetCPUArch() const
 	}
 
 	pclose(pipe);
-	return "Unknown";
+
+	return "";
 }
 
 HardwareInfo::DiskState HardwareInfo::GetDiskState(const char* root) const
