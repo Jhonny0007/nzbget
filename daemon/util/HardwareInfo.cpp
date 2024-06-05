@@ -305,35 +305,31 @@ HardwareInfo::OS HardwareInfo::GetOS() const
 		return os;
 	}
 
-	size_t startPos = 0;
 	std::string line;
 	while (std::getline(osInfo, line))
 	{
-		if (os.name && os.version)
+		if (!os.name.empty() && !os.version.empty())
 		{
 			break;
 		}
 
-		if (!os.name && line.find("NAME") != std::string::npos)
+		if (os.name.empty() && line.find("NAME=") != std::string::npos)
 		{
-			startPos = sizeof("NAME=");
-			os.name = line.substr(startPos);
+			os.name = line.substr(line.find("="));
 			Util::Trim(os.name);
 			continue;
 		}
 
-		if (!os.version && line.find("VERSION_ID") != std::string::npos)
+		if (os.version.empty() && line.find("VERSION_ID=") != std::string::npos)
 		{
-			startPos = sizeof("VERSION_ID=");
-			os.version = line.substr(startPos);
+			os.version = line.substr(line.find("="));
 			Util::Trim(os.version);
 			continue;
 		}
 
-		if (!os.version && line.find("BUILD_ID") != std::string::npos)
+		if (os.version.empty() && line.find("BUILD_ID=") != std::string::npos)
 		{
-			startPos = sizeof("BUILD_ID=");
-			os.version = line.substr(startPos);
+			os.version = line.substr(line.find("="));
 			Util::Trim(os.version);
 			continue;
 		}
