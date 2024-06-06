@@ -193,7 +193,7 @@ namespace HardwareInfo
 
 		if (!FileSystem::FileExists(path.c_str()))
 		{
-			return unrar;
+			return sevenZip;
 		}
 
 		sevenZip.path = std::move(path);
