@@ -59,7 +59,9 @@ namespace HardwareInfo
 		std::cout << "ControlIP IP: " << env.controlIP << std::endl;
 		std::cout << "ControlIP Port: " << env.controlPort << std::endl;
 		std::cout << "Unrar: " << env.unrar.path << std::endl;
+		std::cout << "Unrar version: " << env.unrar.version << std::endl;
 		std::cout << "SevenZip: " << env.sevenZip.path << std::endl;
+		std::cout << "SevenZip version: " << env.sevenZip.version << std::endl;
 		std::cout << "Python path: " << env.python.path << std::endl;
 		std::cout << "Python version: " << env.python.version << std::endl;
 	}
