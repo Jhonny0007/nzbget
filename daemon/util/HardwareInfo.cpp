@@ -20,6 +20,7 @@
 #include "nzbget.h"
 
 #include <iostream>
+#include <regex>
 #include "HardwareInfo.h"
 #include "Options.h"
 #include "ArticleWriter.h"
@@ -35,6 +36,22 @@ namespace HardwareInfo
 	const char* FIND_CMD = "readlink -f ";
 #endif
 	const size_t BUFFER_SIZE = 256;
+
+	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) {
+		/*
+		7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
+			or
+		UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
+		*/
+		std::regex pattern("((\d+\.?\d*))"); // float number
+		std::smatch match;
+		if (std::regex_search(line, match, pattern))
+		{
+			return match[1].str();
+		}
+
+		return std::string("");
+		};
 
 	HardwareInfo::HardwareInfo()
 		: m_context{}
@@ -139,13 +156,7 @@ namespace HardwareInfo
 
 		tool.name = "UnRAR";
 		tool.path = GetUnpackerPath(g_Options->GetAppDir(), g_Options->GetUnrarCmd());
-		tool.version = GetUnpackerVersion(tool.path, "UNRAR", [](const std::string& line) {
-			// UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
-			std::string version = line.substr(sizeof("UNRAR"), 4);
-			Util::Trim(version);
-
-			return version;
-			});
+		tool.version = GetUnpackerVersion(tool.path, "UNRAR", UnpackerVersionParserFunc);
 
 		return tool;
 	}
@@ -156,15 +167,7 @@ namespace HardwareInfo
 
 		tool.name = "7-Zip";
 		tool.path = GetUnpackerPath(g_Options->GetAppDir(), g_Options->GetSevenZipCmd());
-		tool.version = GetUnpackerVersion(tool.path, tool.name.c_str(), [](const std::string& line) {
-			// 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-			size_t startPos = line.find(")");
-			size_t endPos = line.find("(");
-			std::string version = line.substr(startPos + 1, endPos - 1);
-			Util::Trim(version);
-
-			return version;
-			});
+		tool.version = GetUnpackerVersion(tool.path, tool.name.c_str(), UnpackerVersionParserFunc);
 
 		return tool;
 	}
