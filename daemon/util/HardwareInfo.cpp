@@ -32,7 +32,7 @@ namespace HardwareInfo
 #ifdef WIN32
 	constexpr const char* FIND_CMD = "where ";
 #else
-	constexpr const char* FIND_CMD = "which ";
+	constexpr const char* FIND_CMD = "readlink -f ";
 #endif
 
 	HardwareInfo::HardwareInfo()
@@ -135,15 +135,20 @@ namespace HardwareInfo
 		Tool unrar;
 		unrar.name = "UnRAR";
 
-		std::string unrarCmd = g_Options->GetUnrarCmd();
-		if (unrarCmd.empty())
+		std::string path = g_Options->GetUnrarCmd();
+		if (path.empty())
 		{
 			return unrar;
 		}
 
-		Util::Trim(unrarCmd);
-		unrarCmd = unrarCmd.substr(0, unrarCmd.find(" "));
-		unrar.path = std::move(unrarCmd);
+		path = path.substr(0, path.find(" "));
+
+		if (!FileSystem::FileExists(path.c_str()))
+		{
+			return unrar;
+		}
+
+		unrar.path = std::move(path);
 
 		FILE* pipe = popen(unrar.path.c_str(), "r");
 		if (!pipe)
@@ -177,15 +182,21 @@ namespace HardwareInfo
 		Tool sevenZip;
 		sevenZip.name = "7-Zip";
 
-		std::string sevenZipCmd = g_Options->GetSevenZipCmd();
-		if (sevenZipCmd.empty())
+		std::string path = g_Options->GetSevenZipCmd();
+		if (path.empty())
 		{
 			return sevenZip;
 		}
 
-		Util::Trim(sevenZipCmd);
-		sevenZipCmd = sevenZipCmd.substr(0, sevenZipCmd.find(" "));
-		sevenZip.path = std::move(sevenZipCmd);
+		Util::Trim(path);
+		path = path.substr(0, path.find(" "));
+
+		if (!FileSystem::FileExists(path.c_str()))
+		{
+			return unrar;
+		}
+
+		sevenZip.path = std::move(path);
 
 		FILE* pipe = popen(sevenZip.path.c_str(), "r");
 		if (!pipe)
@@ -548,7 +559,7 @@ namespace HardwareInfo
 		}
 
 		return { 0, 0, static_cast<size_t>(articleCache) };
-		}
+	}
 #endif
 
-		}
+}
