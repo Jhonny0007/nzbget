@@ -30,10 +30,11 @@ namespace HardwareInfo
 	using namespace boost;
 
 #ifdef WIN32
-	constexpr const char* FIND_CMD = "where ";
+	const char* FIND_CMD = "where ";
 #else
-	constexpr const char* FIND_CMD = "readlink -f ";
+	const char* FIND_CMD = "readlink -f ";
 #endif
+	const size_t BUFFER_SIZE = 256;
 
 	HardwareInfo::HardwareInfo()
 		: m_context{}
@@ -103,8 +104,8 @@ namespace HardwareInfo
 			return python;
 		}
 
-		char buffer[128];
-		if (!feof(pipe) && fgets(buffer, 128, pipe) != nullptr)
+		char buffer[BUFFER_SIZE];
+		if (!feof(pipe) && fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 		{
 			python.version = buffer;
 			Util::Trim(python.version);
@@ -119,7 +120,7 @@ namespace HardwareInfo
 			return python;
 		}
 
-		if (!feof(pipe) && fgets(buffer, 128, pipe) != nullptr)
+		if (!feof(pipe) && fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 		{
 			python.path = buffer;
 			Util::Trim(python.path);
@@ -141,14 +142,22 @@ namespace HardwareInfo
 			return unrar;
 		}
 
-		path = path.substr(0, path.find(" "));
+		std::string unrarPath = path.substr(0, path.find(" "));
 
-		if (!FileSystem::FileExists(path.c_str()))
+		if (FileSystem::FileExists(unrarPath.c_str()))
 		{
-			return unrar;
+			unrar.path = std::move(unrarPath);
 		}
+		else
+		{
+			std::string absolutePath = std::string(g_Options->GetAppDir()) + PATH_SEPARATOR + unrarPath;
+			if (!FileSystem::FileExists(absolutePath.c_str()))
+			{
+				return unrar;
+			}
 
-		unrar.path = std::move(path);
+			unrar.path = std::move(absolutePath);
+		}
 
 		FILE* pipe = popen(unrar.path.c_str(), "r");
 		if (!pipe)
@@ -156,10 +165,10 @@ namespace HardwareInfo
 			return unrar;
 		}
 
-		char buffer[128];
+		char buffer[BUFFER_SIZE];
 		while (!feof(pipe))
 		{
-			if (fgets(buffer, 128, pipe) != nullptr)
+			if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 			{
 				// UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
 				if (strstr(buffer, "UNRAR"))
@@ -188,15 +197,24 @@ namespace HardwareInfo
 			return sevenZip;
 		}
 
-		Util::Trim(path);
 		path = path.substr(0, path.find(" "));
 
-		if (!FileSystem::FileExists(path.c_str()))
-		{
-			return sevenZip;
-		}
+		std::string sevenZipPath = path.substr(0, path.find(" "));
 
-		sevenZip.path = std::move(path);
+		if (FileSystem::FileExists(sevenZipPath.c_str()))
+		{
+			sevenZip.path = std::move(sevenZipPath);
+		}
+		else
+		{
+			std::string absolutePath = std::string(g_Options->GetAppDir()) + PATH_SEPARATOR + sevenZipPath;
+			if (!FileSystem::FileExists(absolutePath.c_str()))
+			{
+				return sevenZip;
+			}
+
+			sevenZip.path = std::move(absolutePath);
+		}
 
 		FILE* pipe = popen(sevenZip.path.c_str(), "r");
 		if (!pipe)
@@ -204,10 +222,10 @@ namespace HardwareInfo
 			return sevenZip;
 		}
 
-		char buffer[128];
+		char buffer[BUFFER_SIZE];
 		while (!feof(pipe))
 		{
-			if (fgets(buffer, 128, pipe) != nullptr)
+			if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 			{
 				// 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
 				if (strstr(buffer, "7-Zip"))
@@ -269,9 +287,9 @@ namespace HardwareInfo
 	{
 		CPU cpu;
 
-		int len = 128;
-		char cpuModelBuffer[128];
-		char cpuArchBuffer[128];
+		int len = BUFFER_SIZE;
+		char cpuModelBuffer[BUFFER_SIZE];
+		char cpuArchBuffer[BUFFER_SIZE];
 		if (Util::RegReadStr(
 			HKEY_LOCAL_MACHINE,
 			"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
@@ -301,8 +319,8 @@ namespace HardwareInfo
 	{
 		OS os;
 
-		int len = 128;
-		char buffer[128];
+		int len = BUFFER_SIZE;
+		char buffer[BUFFER_SIZE];
 		if (Util::RegReadStr(
 			HKEY_LOCAL_MACHINE,
 			"SOFTWARE\\MICROSOFT\\Windows NT\\CurrentVersion",
@@ -422,8 +440,8 @@ namespace HardwareInfo
 	{
 		CPU cpu;
 
-		size_t len = 128;
-		char cpuModel[128];
+		size_t len = BUFFER_SIZE;
+		char cpuModel[BUFFER_SIZE];
 		if (sysctlbyname("hw.model", &cpuModel, &len, nullptr, 0) == 0)
 		{
 			cpu.model = cpuModel;
@@ -438,15 +456,15 @@ namespace HardwareInfo
 	{
 		OS os;
 
-		size_t len = 128;
-		char osNameBuffer[128];
+		size_t len = BUFFER_SIZE;
+		char osNameBuffer[BUFFER_SIZE];
 		if (sysctlbyname("kern.ostype", &osNameBuffer, &len, nullptr, 0) == 0)
 		{
 			os.name = osNameBuffer;
 			Util::Trim(os.name);
 		}
 
-		char osReleaseBuffer[128];
+		char osReleaseBuffer[BUFFER_SIZE];
 		if (sysctlbyname("kern.osrelease", &osReleaseBuffer, &len, nullptr, 0) == 0)
 		{
 			os.version = osReleaseBuffer;
@@ -462,8 +480,8 @@ namespace HardwareInfo
 	{
 		CPU cpu;
 
-		size_t len = 128;
-		char buffer[128];
+		size_t len = BUFFER_SIZE;
+		char buffer[BUFFER_SIZE];
 		if (sysctlbyname("machdep.cpu.brand_string", &buffer, &len, nullptr, 0) == 0)
 		{
 			cpu.model = buffer;
@@ -484,7 +502,7 @@ namespace HardwareInfo
 			return os;
 		}
 
-		char buffer[128];
+		char buffer[BUFFER_SIZE];
 		std::string result = "";
 		while (!feof(pipe))
 		{
@@ -528,10 +546,10 @@ namespace HardwareInfo
 			return "";
 		}
 
-		char buffer[128];
+		char buffer[BUFFER_SIZE];
 		while (!feof(pipe))
 		{
-			if (fgets(buffer, 128, pipe))
+			if (fgets(buffer, BUFFER_SIZE, pipe))
 			{
 				pclose(pipe);
 				Util::Trim(buffer);
