@@ -43,11 +43,11 @@ namespace HardwareInfo
 			or
 		UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
 		*/
-		std::regex pattern("((\d+\.?\d*))"); // float number
+		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
 		std::smatch match;
 		if (std::regex_search(line, match, pattern))
 		{
-			return match[1].str();
+			return match[0].str();
 		}
 
 		return std::string("");
