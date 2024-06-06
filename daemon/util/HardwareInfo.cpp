@@ -133,109 +133,84 @@ namespace HardwareInfo
 
 	Tool HardwareInfo::GetUnrar() const
 	{
-		Tool unrar;
-		unrar.name = "UnRAR";
+		Tool tool;
 
-		std::string path = g_Options->GetUnrarCmd();
-		if (path.empty())
-		{
-			return unrar;
-		}
+		tool.name = "UnRAR";
+		tool.path = GetUnpackerPath(g_Options->GetAppDir(), g_Options->GetUnrarCmd());
+		tool.version = GetUnpackerVersion(tool.path, "UNRAR", [](const std::string& line) {
+			// UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
+			std::string version = line.substr(sizeof("UNRAR"), 4);
+			Util::Trim(version);
 
-		std::string unrarPath = path.substr(0, path.find(" "));
+			return version;
+			});
 
-		if (FileSystem::FileExists(unrarPath.c_str()))
-		{
-			unrar.path = std::move(unrarPath);
-		}
-		else
-		{
-			std::string absolutePath = std::string(g_Options->GetAppDir()) + PATH_SEPARATOR + unrarPath;
-			if (!FileSystem::FileExists(absolutePath.c_str()))
-			{
-				return unrar;
-			}
-
-			unrar.path = std::move(absolutePath);
-		}
-
-		FILE* pipe = popen(unrar.path.c_str(), "r");
-		if (!pipe)
-		{
-			return unrar;
-		}
-
-		char buffer[BUFFER_SIZE];
-		while (!feof(pipe))
-		{
-			if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
-			{
-				// UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
-				if (strstr(buffer, "UNRAR"))
-				{
-					std::string version = std::string(buffer).substr(sizeof("UNRAR"), 4);
-					Util::Trim(version);
-					unrar.version = std::move(version);
-					break;
-				}
-			}
-		}
-
-		pclose(pipe);
-
-		return unrar;
+		return tool;
 	}
 
 	Tool HardwareInfo::GetSevenZip() const
 	{
-		Tool sevenZip;
-		sevenZip.name = "7-Zip";
+		Tool tool;
 
-		std::string path = g_Options->GetSevenZipCmd();
-		if (path.empty())
+		tool.name = "7-Zip";
+		tool.path = GetUnpackerPath(g_Options->GetAppDir(), g_Options->GetSevenZipCmd());
+		tool.version = GetUnpackerVersion(tool.path, tool.name.c_str(), [](const std::string& line) {
+			// 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
+			size_t startPos = line.find(")");
+			size_t endPos = line.find("(");
+			std::string version = line.substr(startPos + 1, endPos - 1);
+			Util::Trim(version);
+
+			return version;
+			});
+
+		return tool;
+	}
+
+	std::string HardwareInfo::GetUnpackerPath(const char* appDir, const char* unpackerCmd) const
+	{
+		if (Util::EmptyStr(appDir) || Util::EmptyStr(unpackerCmd))
 		{
-			return sevenZip;
+			return "";
 		}
 
+		std::string path = unpackerCmd;
+		Util::Trim(path);
+
+		// getting the path itself without any keys
 		path = path.substr(0, path.find(" "));
 
-		std::string sevenZipPath = path.substr(0, path.find(" "));
-
-		if (FileSystem::FileExists(sevenZipPath.c_str()))
+		if (FileSystem::FileExists(path.c_str()))
 		{
-			sevenZip.path = std::move(sevenZipPath);
-		}
-		else
-		{
-			std::string absolutePath = std::string(g_Options->GetAppDir()) + PATH_SEPARATOR + sevenZipPath;
-			if (!FileSystem::FileExists(absolutePath.c_str()))
-			{
-				return sevenZip;
-			}
-
-			sevenZip.path = std::move(absolutePath);
+			return path;
 		}
 
-		FILE* pipe = popen(sevenZip.path.c_str(), "r");
+		std::string absPath = std::string(appDir) + PATH_SEPARATOR + path;
+		if (FileSystem::FileExists(absPath.c_str()))
+		{
+			return absPath;
+		}
+
+		return "";
+	}
+
+	std::string HardwareInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const
+	{
+		FILE* pipe = popen(path.c_str(), "r");
 		if (!pipe)
 		{
-			return sevenZip;
+			return "";
 		}
 
+		std::string version;
 		char buffer[BUFFER_SIZE];
 		while (!feof(pipe))
 		{
 			if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 			{
-				// 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-				if (strstr(buffer, "7-Zip"))
+				if (strstr(buffer, marker))
 				{
-					std::string line = std::string(buffer);
-					size_t startPos = line.find(")");
-					size_t endPos = line.find("(");
-					std::string version = line.substr(startPos + 1, endPos - 1);
-					Util::Trim(version);
-					sevenZip.version = std::move(version);
+					version = parser(buffer);
 					break;
 				}
 			}
@@ -243,7 +218,7 @@ namespace HardwareInfo
 
 		pclose(pipe);
 
-		return sevenZip;
+		return version;
 	}
 
 	Network HardwareInfo::GetNetwork()

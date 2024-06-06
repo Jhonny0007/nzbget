@@ -27,6 +27,8 @@
 
 namespace HardwareInfo
 {
+	using UnpackerVersionParser = std::function<std::string(const std::string&)>;
+
 	struct CPU
 	{
 		std::string model;
@@ -81,9 +83,11 @@ namespace HardwareInfo
 		DiskState GetDiskState(const char* root = ".") const;
 
 	private:
+		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
-		Tool GetPython() const;
+		std::string GetUnpackerPath(const char* appDir, const char* unpackerCmd) const;
+		std::string GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const;
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
 		boost::asio::ip::tcp::socket m_socket;
