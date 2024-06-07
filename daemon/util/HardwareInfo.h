@@ -86,7 +86,7 @@ namespace HardwareInfo
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
-		std::string GetUnpackerPath(const char* appDir, const char* unpackerCmd) const;
+		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const;
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;

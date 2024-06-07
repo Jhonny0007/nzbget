@@ -38,11 +38,8 @@ namespace HardwareInfo
 	const size_t BUFFER_SIZE = 256;
 
 	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) {
-		/*
-		7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-		or
-		UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
-		*/
+		// 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
+		// UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
 		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
 		std::smatch match;
 		if (std::regex_search(line, match, pattern))
@@ -155,7 +152,7 @@ namespace HardwareInfo
 		Tool tool;
 
 		tool.name = "UnRAR";
-		tool.path = GetUnpackerPath(g_Options->GetAppDir(), g_Options->GetUnrarCmd());
+		tool.path = GetUnpackerPath(g_Options->GetUnrarCmd());
 		tool.version = GetUnpackerVersion(tool.path, "UNRAR", UnpackerVersionParserFunc);
 
 		return tool;
@@ -166,15 +163,15 @@ namespace HardwareInfo
 		Tool tool;
 
 		tool.name = "7-Zip";
-		tool.path = GetUnpackerPath(g_Options->GetAppDir(), g_Options->GetSevenZipCmd());
+		tool.path = GetUnpackerPath(g_Options->GetSevenZipCmd());
 		tool.version = GetUnpackerVersion(tool.path, tool.name.c_str(), UnpackerVersionParserFunc);
 
 		return tool;
 	}
 
-	std::string HardwareInfo::GetUnpackerPath(const char* appDir, const char* unpackerCmd) const
+	std::string HardwareInfo::GetUnpackerPath(const char* unpackerCmd) const
 	{
-		if (Util::EmptyStr(appDir) || Util::EmptyStr(unpackerCmd))
+		if (Util::EmptyStr(unpackerCmd))
 		{
 			return "";
 		}
@@ -185,18 +182,27 @@ namespace HardwareInfo
 		// getting the path itself without any keys
 		path = path.substr(0, path.find(" "));
 
-		if (FileSystem::FileExists(path.c_str()))
+#ifdef WIN32
+		char buffer[BUFFER_SIZE];
+		DWORD len = GetFullPathNameA(path.c_str(), BUFFER_SIZE, buffer, nullptr);
+
+		if (len != 0)
 		{
-			return path;
+			return buffer;
 		}
 
-		std::string absPath = std::string(appDir) + PATH_SEPARATOR + path;
-		if (FileSystem::FileExists(absPath.c_str()))
+		return "";
+#else
+		char buffer[BUFFER_SIZE];
+		const char* absPath = realpath(path.c_str(), buffer);
+
+		if (absPath != nullptr)
 		{
 			return absPath;
 		}
 
 		return "";
+#endif
 	}
 
 	std::string HardwareInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parseVersion) const
@@ -240,7 +246,8 @@ namespace HardwareInfo
 			size_t totalSize = m_socket.read_some(asio::buffer(buffer, 1024));
 
 			std::string response(buffer, totalSize);
-			if (response.find("200 OK") == std::string::npos) {
+			if (response.find("200 OK") == std::string::npos)
+			{
 				debug("Failed to get public and private IP: %s", buffer);
 				return network;
 			}
@@ -519,7 +526,7 @@ namespace HardwareInfo
 		}
 
 		return os;
-}
+	}
 #endif
 
 #ifndef WIN32
