@@ -182,27 +182,14 @@ namespace HardwareInfo
 		// getting the path itself without any keys
 		path = path.substr(0, path.find(" "));
 
-#ifdef WIN32
-		char buffer[BUFFER_SIZE];
-		DWORD len = GetFullPathNameA(path.c_str(), BUFFER_SIZE, buffer, nullptr);
+		auto result = FileSystem::GetRealPath(path);
 
-		if (len != 0)
+		if (result.has_value())
 		{
-			return buffer;
+			return result.get();
 		}
 
-		return "";
-#else
-		char buffer[BUFFER_SIZE];
-		const char* absPath = realpath(path.c_str(), buffer);
-
-		if (absPath != nullptr)
-		{
-			return absPath;
-		}
-
-		return "";
-#endif
+		return path;
 	}
 
 	std::string HardwareInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parseVersion) const
@@ -465,7 +452,7 @@ namespace HardwareInfo
 		}
 
 		return os;
-}
+	}
 #endif
 
 #ifdef __APPLE__

@@ -586,6 +586,28 @@ bool FileSystem::CreateDirectory(const char* dirFilename)
 	return DirectoryExists(dirFilename);
 }
 
+boost::optional<std::string> FileSystem::GetRealPath(const std::string& path)
+{
+	char buffer[256];
+
+#ifdef WIN32
+	FileSystem::SetCurrentDirectory(g_Options->GetAppDir());
+	DWORD len = GetFullPathName(path.c_str(), 256, buffer, nullptr);
+	if (len != 0)
+	{
+		return buffer;
+	}
+#else
+	const char* realPath = realpath(path.c_str(), buffer);
+	if (realPath != nullptr)
+	{
+		return buffer;
+	}
+#endif
+
+	return boost::none;
+}
+
 bool FileSystem::RemoveDirectory(const char* dirFilename)
 {
 #ifdef WIN32
