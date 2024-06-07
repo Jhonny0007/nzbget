@@ -424,7 +424,7 @@ namespace HardwareInfo
 		}
 
 		return os;
-}
+	}
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
@@ -449,22 +449,23 @@ namespace HardwareInfo
 		OS os;
 
 		size_t len = BUFFER_SIZE;
-		char osNameBuffer[BUFFER_SIZE];
-		if (sysctlbyname("kern.ostype", &osNameBuffer, &len, nullptr, 0) == 0)
+		char buffer[len];
+		if (sysctlbyname("kern.ostype", &buffer, &len, nullptr, 0) == 0)
 		{
-			os.name = osNameBuffer;
+			os.name = buffer;
 			Util::Trim(os.name);
 		}
 
-		char osReleaseBuffer[BUFFER_SIZE];
-		if (sysctlbyname("kern.osrelease", &osReleaseBuffer, &len, nullptr, 0) == 0)
+		len = BUFFER_SIZE;
+
+		if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
 		{
-			os.version = osReleaseBuffer;
+			os.version = buffer;
 			Util::Trim(os.version);
 		}
 
 		return os;
-	}
+}
 #endif
 
 #ifdef __APPLE__
