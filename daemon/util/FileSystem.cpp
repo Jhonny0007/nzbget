@@ -595,13 +595,13 @@ boost::optional<std::string> FileSystem::GetRealPath(const std::string& path)
 	DWORD len = GetFullPathName(path.c_str(), 256, buffer, nullptr);
 	if (len != 0)
 	{
-		return buffer;
+		return boost::optional<std::string>{ buffer };
 	}
 #else
 	const char* realPath = realpath(path.c_str(), buffer);
 	if (realPath != nullptr)
 	{
-		return buffer;
+		return boost::optional<std::string>{ buffer };
 	}
 #endif
 
