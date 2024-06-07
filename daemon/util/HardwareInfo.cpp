@@ -40,7 +40,7 @@ namespace HardwareInfo
 	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) {
 		/*
 		7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-			or
+		or
 		UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
 		*/
 		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
@@ -199,7 +199,7 @@ namespace HardwareInfo
 		return "";
 	}
 
-	std::string HardwareInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const
+	std::string HardwareInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parseVersion) const
 	{
 		FILE* pipe = popen(path.c_str(), "r");
 		if (!pipe)
@@ -215,7 +215,7 @@ namespace HardwareInfo
 			{
 				if (strstr(buffer, marker))
 				{
-					version = parser(buffer);
+					version = parseVersion(buffer);
 					break;
 				}
 			}
@@ -328,6 +328,7 @@ namespace HardwareInfo
 		}
 
 		os.name = "Windows";
+
 		return os;
 	}
 
@@ -356,8 +357,12 @@ namespace HardwareInfo
 		CPU cpu;
 
 		std::ifstream cpuinfo("/proc/cpuinfo");
-		std::string line;
+		if (!cpuinfo.is_open())
+		{
+			return cpu;
+		}
 
+		std::string line;
 		while (std::getline(cpuinfo, line))
 		{
 			if (line.find("model name") != std::string::npos)
@@ -412,7 +417,7 @@ namespace HardwareInfo
 		}
 
 		return os;
-	}
+}
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
@@ -469,6 +474,7 @@ namespace HardwareInfo
 		}
 
 		cpu.arch = GetCPUArch();
+
 		return cpu;
 	}
 
@@ -513,7 +519,7 @@ namespace HardwareInfo
 		}
 
 		return os;
-	}
+}
 #endif
 
 #ifndef WIN32
