@@ -80,6 +80,8 @@ namespace HardwareInfo
 		Environment GetEnvironment() const;
 		Network GetNetwork();
 		OS GetOS() const;
+		std::string GetOpenSSLVersion() const;
+		std::string GetGnuTLSVersion() const;
 		DiskState GetDiskState(const char* root = ".") const;
 
 	private:
@@ -91,6 +93,8 @@ namespace HardwareInfo
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
 		boost::asio::ip::tcp::socket m_socket;
+		std::string m_openSSLVersion;
+		std::string m_gnuTLSLVersion;
 #ifndef WIN32
 		std::string GetCPUArch() const;
 #endif

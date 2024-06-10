@@ -78,6 +78,24 @@ namespace HardwareInfo
 		std::cout << "SevenZip version: " << env.sevenZip.version << std::endl;
 		std::cout << "Python path: " << env.python.path << std::endl;
 		std::cout << "Python version: " << env.python.version << std::endl;
+		std::cout << "OPENSSL: " << GetOpenSSLVersion() << std::endl;
+		std::cout << "GNUTLS: " << GetGnuTLSVersion() << std::endl;
+	}
+
+	std::string HardwareInfo::GetOpenSSLVersion() const
+	{
+#ifdef HAVE_OPENSSL
+		return OPENSSL_FULL_VERSION_STR;
+#endif
+		return "";
+	}
+
+	std::string HardwareInfo::GetGnuTLSVersion() const
+	{
+#ifdef HAVE_LIBGNUTLS
+		return GNUTLS_VERSION;
+#endif
+		return "";
 	}
 
 	HardwareInfo::~HardwareInfo()
@@ -408,7 +426,7 @@ namespace HardwareInfo
 				Util::Trim(os.version);
 				continue;
 			}
-		}
+	}
 
 		return os;
 	}
@@ -449,7 +467,7 @@ namespace HardwareInfo
 		{
 			os.version = buffer;
 			Util::Trim(os.version);
-		}
+}
 
 		return os;
 	}
