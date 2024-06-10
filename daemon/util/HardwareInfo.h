@@ -22,6 +22,7 @@
 
 #include <string>
 #include <iostream>
+#include <chrono>
 #include <boost/asio.hpp>
 #include "Util.h"
 
@@ -78,7 +79,7 @@ namespace HardwareInfo
 		~HardwareInfo();
 		CPU GetCPU() const;
 		Environment GetEnvironment() const;
-		Network GetNetwork();
+		const Network& GetNetwork() &;
 		OS GetOS() const;
 		std::string GetOpenSSLVersion() const;
 		std::string GetGnuTLSVersion() const;
@@ -96,11 +97,14 @@ namespace HardwareInfo
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
 		boost::asio::ip::tcp::socket m_socket;
+		std::chrono::time_point<std::chrono::system_clock> m_tp;
+		Network m_network;
 		std::string m_openSSLVersion;
 		std::string m_gnuTLSLVersion;
 		std::string m_zLibVersion;
 		std::string m_cursesVersion;
 		std::string m_libXml2Version;
+		
 #ifndef WIN32
 		std::string GetCPUArch() const;
 #endif

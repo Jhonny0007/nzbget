@@ -33,7 +33,8 @@ namespace HardwareInfo
 #ifdef HAVE_NCURSES_NCURSES_H
 #include <ncurses/ncurses.h>
 #endif
-
+	using namespace std::chrono;
+	using namespace std::literals;
 	using namespace boost;
 
 #ifdef WIN32
@@ -60,6 +61,7 @@ namespace HardwareInfo
 		: m_context{}
 		, m_resolver{ m_context }
 		, m_socket{ m_context }
+		, m_tp{ system_clock::now() }
 	{
 		auto os = GetOS();
 		std::cout << "OS name: " << os.name << std::endl;
@@ -89,6 +91,7 @@ namespace HardwareInfo
 		std::cout << "Zlib: " << GetZLibVersion() << std::endl;
 		std::cout << "Curses lib: " << GetCursesVersion() << std::endl;
 		std::cout << "xml2 lib: " << GetLibXml2Version() << std::endl;
+		GetNetwork();
 	}
 
 	std::string HardwareInfo::GetLibXml2Version() const
@@ -271,9 +274,15 @@ namespace HardwareInfo
 		return version;
 	}
 
-	Network HardwareInfo::GetNetwork()
+	const Network& HardwareInfo::GetNetwork() &
 	{
-		Network network;
+		auto now = system_clock::now();
+		if (!m_network.privateIP.empty() || !m_network.publicIP.empty() && (now - m_tp) < 2h)
+		{
+			return m_network;
+		}
+
+		m_tp = std::move(now);
 
 		try {
 			asio::connect(m_socket, m_resolver.resolve("icanhazip.com", "http"));
@@ -288,7 +297,7 @@ namespace HardwareInfo
 			if (response.find("200 OK") == std::string::npos)
 			{
 				debug("Failed to get public and private IP: %s", buffer);
-				return network;
+				return m_network;
 			}
 
 			size_t headersEndPos = response.find("\r\n\r\n");
@@ -296,8 +305,8 @@ namespace HardwareInfo
 			{
 				response = response.substr(headersEndPos);
 				Util::Trim(response);
-				network.publicIP = std::move(response);
-				network.privateIP = m_socket.local_endpoint().address().to_string();
+				m_network.publicIP = std::move(response);
+				m_network.privateIP = m_socket.local_endpoint().address().to_string();
 			}
 		}
 		catch (std::exception& e)
@@ -305,7 +314,7 @@ namespace HardwareInfo
 			debug("Failed to get public and private IP: %s", e.what());
 		}
 
-		return network;
+		return m_network;
 	}
 
 #ifdef WIN32
