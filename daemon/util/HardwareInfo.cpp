@@ -81,30 +81,49 @@ namespace HardwareInfo
 		std::cout << "OPENSSL: " << GetOpenSSLVersion() << std::endl;
 		std::cout << "GNUTLS: " << GetGnuTLSVersion() << std::endl;
 		std::cout << "Zlib: " << GetZLibVersion() << std::endl;
+		std::cout << "Curses lib: " << GetCursesVersion() << std::endl;
+		std::cout << "xml2 lib: " << GetLibXml2Version() << std::endl;
+	}
+
+	std::string HardwareInfo::GetLibXml2Version() const
+	{
+		return LIBXML_DOTTED_VERSION;
+	}
+
+	std::string HardwareInfo::GetCursesVersion() const
+	{
+#ifdef HAVE_NCURSES_H
+		return NCURSES_VERSION;
+#else
+		return "";
+#endif
 	}
 
 	std::string HardwareInfo::GetZLibVersion() const
 	{
 #ifndef DISABLE_GZIP
 		return ZLIB_VERSION;
-#endif
+#else
 		return "";
+#endif
 	}
 
 	std::string HardwareInfo::GetOpenSSLVersion() const
 	{
 #ifdef HAVE_OPENSSL
 		return OPENSSL_FULL_VERSION_STR;
-#endif
+#else
 		return "";
+#endif
 	}
 
 	std::string HardwareInfo::GetGnuTLSVersion() const
 	{
 #ifdef HAVE_LIBGNUTLS
 		return GNUTLS_VERSION;
-#endif
+#else
 		return "";
+#endif
 	}
 
 	HardwareInfo::~HardwareInfo()

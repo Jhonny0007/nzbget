@@ -83,6 +83,8 @@ namespace HardwareInfo
 		std::string GetOpenSSLVersion() const;
 		std::string GetGnuTLSVersion() const;
 		std::string GetZLibVersion() const;
+		std::string GetCursesVersion() const;
+		std::string GetLibXml2Version() const;
 		DiskState GetDiskState(const char* root = ".") const;
 
 	private:
@@ -96,9 +98,9 @@ namespace HardwareInfo
 		boost::asio::ip::tcp::socket m_socket;
 		std::string m_openSSLVersion;
 		std::string m_gnuTLSLVersion;
+		std::string m_zLibVersion;
 		std::string m_cursesVersion;
-		std::string m_parCheckVersion;
-		std::string m_zlibVersion;
+		std::string m_libXml2Version;
 #ifndef WIN32
 		std::string GetCPUArch() const;
 #endif
