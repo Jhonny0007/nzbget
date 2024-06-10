@@ -80,13 +80,13 @@ namespace HardwareInfo
 		CPU GetCPU() const;
 		Environment GetEnvironment() const;
 		const Network& GetNetwork() &;
+		const DiskState& GetDiskState(const char* root = ".") &;
 		OS GetOS() const;
 		std::string GetOpenSSLVersion() const;
 		std::string GetGnuTLSVersion() const;
 		std::string GetZLibVersion() const;
 		std::string GetCursesVersion() const;
 		std::string GetLibXml2Version() const;
-		DiskState GetDiskState(const char* root = ".") const;
 
 	private:
 		Tool GetPython() const;
@@ -97,8 +97,10 @@ namespace HardwareInfo
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
 		boost::asio::ip::tcp::socket m_socket;
-		std::chrono::time_point<std::chrono::system_clock> m_tp;
+		std::chrono::time_point<std::chrono::system_clock> m_networkTimePoint;
+		std::chrono::time_point<std::chrono::system_clock> m_diskStateTimePoint;
 		Network m_network;
+		DiskState m_diskState;
 		std::string m_openSSLVersion;
 		std::string m_gnuTLSLVersion;
 		std::string m_zLibVersion;

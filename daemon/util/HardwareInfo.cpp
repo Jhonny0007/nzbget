@@ -61,7 +61,8 @@ namespace HardwareInfo
 		: m_context{}
 		, m_resolver{ m_context }
 		, m_socket{ m_context }
-		, m_tp{ system_clock::now() }
+		, m_networkTimePoint{ system_clock::now() }
+		, m_diskStateTimePoint{ system_clock::now() }
 	{
 		auto os = GetOS();
 		std::cout << "OS name: " << os.name << std::endl;
@@ -274,15 +275,15 @@ namespace HardwareInfo
 		return version;
 	}
 
-	const Network& HardwareInfo::GetNetwork() &
+	const Network& HardwareInfo::GetNetwork()&
 	{
 		auto now = system_clock::now();
-		if (!m_network.privateIP.empty() || !m_network.publicIP.empty() && (now - m_tp) < 2h)
+		if (!m_network.privateIP.empty() || !m_network.publicIP.empty() && (now - m_networkTimePoint) < 2h)
 		{
 			return m_network;
 		}
 
-		m_tp = std::move(now);
+		m_networkTimePoint = std::move(now);
 
 		try {
 			asio::connect(m_socket, m_resolver.resolve("icanhazip.com", "http"));
@@ -387,8 +388,16 @@ namespace HardwareInfo
 		return os;
 	}
 
-	DiskState HardwareInfo::GetDiskState(const char* root) const
+	const DiskState& HardwareInfo::GetDiskState(const char* root)&
 	{
+		auto now = system_clock::now();
+		if ((now - m_diskStateTimePoint) < 1s)
+		{
+			return m_diskState;
+		}
+
+		m_diskStateTimePoint = std::move(now);
+
 		ULARGE_INTEGER freeBytesAvailable;
 		ULARGE_INTEGER totalNumberOfBytes;
 
@@ -398,10 +407,14 @@ namespace HardwareInfo
 
 		if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 		{
-			return { freeBytesAvailable.QuadPart, freeBytesAvailable.QuadPart, static_cast<size_t>(articleCache) };
+			m_diskState.freeSpace = freeBytesAvailable.QuadPart;
+			m_diskState.totalSize = totalNumberOfBytes.QuadPart;
+			m_diskState.articleCache = static_cast<size_t>(articleCache);
+
+			return m_diskState;
 		}
 
-		return { 0, 0, static_cast<size_t>(articleCache) };
+		return m_diskState;
 	}
 #endif
 
@@ -468,8 +481,8 @@ namespace HardwareInfo
 				os.version = line.substr(line.find("="));
 				Util::Trim(os.version);
 				continue;
-	}
-}
+			}
+		}
 
 		return os;
 	}
