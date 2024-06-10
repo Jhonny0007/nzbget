@@ -80,6 +80,15 @@ namespace HardwareInfo
 		std::cout << "Python version: " << env.python.version << std::endl;
 		std::cout << "OPENSSL: " << GetOpenSSLVersion() << std::endl;
 		std::cout << "GNUTLS: " << GetGnuTLSVersion() << std::endl;
+		std::cout << "Zlib: " << GetZLibVersion() << std::endl;
+	}
+
+	std::string HardwareInfo::GetZLibVersion() const
+	{
+#ifndef DISABLE_GZIP
+		return ZLIB_VERSION;
+#endif
+		return "";
 	}
 
 	std::string HardwareInfo::GetOpenSSLVersion() const
@@ -426,7 +435,7 @@ namespace HardwareInfo
 				Util::Trim(os.version);
 				continue;
 			}
-	}
+		}
 
 		return os;
 	}
@@ -467,7 +476,7 @@ namespace HardwareInfo
 		{
 			os.version = buffer;
 			Util::Trim(os.version);
-}
+		}
 
 		return os;
 	}
