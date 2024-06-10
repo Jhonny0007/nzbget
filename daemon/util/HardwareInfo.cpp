@@ -27,6 +27,12 @@
 
 namespace HardwareInfo
 {
+#ifdef HAVE_NCURSES_H
+#include <ncurses.h>
+#endif
+#ifdef HAVE_NCURSES_NCURSES_H
+#include <ncurses/ncurses.h>
+#endif
 
 	using namespace boost;
 
@@ -453,8 +459,8 @@ namespace HardwareInfo
 				os.version = line.substr(line.find("="));
 				Util::Trim(os.version);
 				continue;
-			}
-		}
+	}
+}
 
 		return os;
 	}
