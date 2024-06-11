@@ -298,7 +298,7 @@ namespace HardwareInfo
 	const Network& HardwareInfo::GetNetwork()
 	{
 		auto now = system_clock::now();
-		if (!m_network.privateIP.empty() || !m_network.publicIP.empty() && (now - m_networkTimePoint) < 2h)
+		if (!m_network.privateIP.empty() && !m_network.publicIP.empty() && (now - m_networkTimePoint) < 2h)
 		{
 			return m_network;
 		}
