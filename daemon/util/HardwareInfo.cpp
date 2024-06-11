@@ -627,7 +627,7 @@ namespace HardwareInfo
 		{
 			size_t endPos = result.find("\n", pos);
 			m_os.version = result.substr(pos + productVersion.size(), endPos - pos - productVersion.size());
-			Util::Trim(os.version);
+			Util::Trim(m_os.version);
 		}
 	}
 #endif
