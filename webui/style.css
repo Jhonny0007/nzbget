@@ -58,6 +58,10 @@ body {
 	color: inherit;
 }
 
+.config-status {
+	max-width: 1024px;
+}
+
 /* EXTENSION MANAGER */
 .extension-manager__td {
 	vertical-align: middle !important;
