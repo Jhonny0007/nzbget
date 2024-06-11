@@ -536,7 +536,7 @@ namespace HardwareInfo
 			m_cpu.model = "Unknown";
 		}
 
-		cpu.arch = GetCPUArch();
+		m_cpu.arch = GetCPUArch();
 	}
 
 	void HardwareInfo::InitOS()
@@ -559,7 +559,7 @@ namespace HardwareInfo
 		if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
 		{
 			m_os.version = buffer;
-			Util::Trim(os.version);
+			Util::Trim(m_os.version);
 		}
 		else
 		{
