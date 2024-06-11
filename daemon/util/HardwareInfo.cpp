@@ -465,9 +465,11 @@ namespace HardwareInfo
 			{
 				m_cpu.model = line.substr(line.find(":") + 2);
 				Util::Trim(m_cpu.model);
-				break;
+				return;
 			}
 		}
+
+		debug("Failed to find CPU model.");
 	}
 
 	void HardwareInfo::InitOS()
@@ -478,7 +480,7 @@ namespace HardwareInfo
 		std::ifstream osInfo("/etc/os-release");
 		if (!osInfo.is_open())
 		{
-			debug("Faield to get OS info. Couldn't read '/etc/os-release'.");
+			debug("Failed to get OS info. Couldn't read '/etc/os-release'.");
 			return;
 		}
 
@@ -487,7 +489,7 @@ namespace HardwareInfo
 		{
 			if (!m_os.name.empty() && !m_os.version.empty())
 			{
-				break;
+				return;
 			}
 
 			if (m_os.name.empty() && line.find("NAME=") == 0)
