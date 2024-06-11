@@ -80,7 +80,7 @@ namespace HardwareInfo
 		Environment GetEnvironment() const;
 		const CPU& GetCPU() const;
 		const Network& GetNetwork();
-		const DiskState& GetDiskState(const char* root = ".")&;
+		DiskState GetDiskState(const char* root = ".") const;
 		const OS& GetOS() const;
 		const std::string& GetOpenSSLVersion() const;
 		const std::string& GetGnuTLSVersion() const;
@@ -101,9 +101,7 @@ namespace HardwareInfo
 		boost::asio::ip::tcp::resolver m_resolver;
 		boost::asio::ip::tcp::socket m_socket;
 		std::chrono::time_point<std::chrono::system_clock> m_networkTimePoint;
-		std::chrono::time_point<std::chrono::system_clock> m_diskStateTimePoint;
 		Network m_network;
-		DiskState m_diskState;
 		CPU m_cpu;
 		OS m_os;
 		std::string m_openSSLVersion;

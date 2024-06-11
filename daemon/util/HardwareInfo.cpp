@@ -62,7 +62,6 @@ namespace HardwareInfo
 		, m_resolver{ m_context }
 		, m_socket{ m_context }
 		, m_networkTimePoint{ system_clock::now() }
-		, m_diskStateTimePoint{ system_clock::now() }
 	{
 		InitCPU();
 		InitOS();
@@ -420,15 +419,9 @@ namespace HardwareInfo
 		m_os.name = "Windows";
 	}
 
-	const DiskState& HardwareInfo::GetDiskState(const char* root)&
+	DiskState HardwareInfo::GetDiskState(const char* root) const
 	{
-		auto now = system_clock::now();
-		if ((now - m_diskStateTimePoint) < 1s)
-		{
-			return m_diskState;
-		}
-
-		m_diskStateTimePoint = std::move(now);
+		DiskState diskState;
 
 		ULARGE_INTEGER freeBytesAvailable;
 		ULARGE_INTEGER totalNumberOfBytes;
@@ -439,14 +432,14 @@ namespace HardwareInfo
 
 		if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 		{
-			m_diskState.freeSpace = freeBytesAvailable.QuadPart;
-			m_diskState.totalSize = totalNumberOfBytes.QuadPart;
-			m_diskState.articleCache = static_cast<size_t>(articleCache);
+			diskState.freeSpace = freeBytesAvailable.QuadPart;
+			diskState.totalSize = totalNumberOfBytes.QuadPart;
+			diskState.articleCache = static_cast<size_t>(articleCache);
 
-			return m_diskState;
+			return diskState;
 		}
 
-		return m_diskState;
+		return diskState;
 	}
 #endif
 
