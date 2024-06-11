@@ -632,6 +632,7 @@ var Config = (new function($)
 	var $ConfigTabBadgeEmpty;
 	var $ConfigContent;
 	var $ConfigInfo;
+	var $ConfigStatus;
 	var $ConfigTitle;
 	var $ConfigTable;
 	var $ViewButton;
@@ -661,6 +662,7 @@ var Config = (new function($)
 		$ConfigTabBadgeEmpty = $('#ConfigTabBadgeEmpty');
 		$ConfigContent = $('#ConfigContent');
 		$ConfigInfo = $('#ConfigInfo');
+		$ConfigStatus = $('#ConfigStatus');
 		$ConfigTitle = $('#ConfigTitle');
 		$ViewButton = $('#Config_ViewButton');
 		$LeaveConfigDialog = $('#LeaveConfigDialog');
@@ -1438,6 +1440,14 @@ var Config = (new function($)
 			$ConfigInfo.show();
 			$ConfigData.children().hide();
 			$ConfigTitle.text('INFO');
+			return;
+		}
+
+		if (sectionId === 'Config-Status')
+		{
+			$ConfigData.children().hide();
+			$('.config-status', $ConfigData).show();
+			$ConfigTitle.text('STATUS');
 			return;
 		}
 
