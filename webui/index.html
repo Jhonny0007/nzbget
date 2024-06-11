@@ -656,11 +656,10 @@
 													</div>
 												</div>
 
-												<h4>Environment</h4>
 												<table class="table table-striped table-bordered datatable">
 													<tbody>
-														<tr><th>NZBGet version</th><td class="text-right" id="StatDialog_DataVersion">24.2</td></tr>
-														<tr><th>Uptime</th><td class="text-right" id="StatDialog_DataUptime">1:47:06</td></tr>
+														<tr><th width="50%">NZBGet version</th><td class="text-right" id="StatDialog_DataVersion">24.2</td></tr>
+														<tr><th width="50%">Uptime</th><td class="text-right" id="StatDialog_DataUptime">1:47:06</td></tr>
 													</tbody>
 												</table>
 
@@ -668,9 +667,14 @@
 
 												<h4>Operation System</h4>
 												<table class="table table-striped table-bordered datatable">
+													<thead>
+														<tr>
+															<th width="50%">Name</th>
+															<th width="50%">Version</th>
+														</tr>
+													</thead>
 													<tbody>
-														<tr><th>Name</th><td class="text-right" id="StatDialog_DataVersion">Windows</td></tr>
-														<tr><th>Version</th><td class="text-right" id="StatDialog_DataUptime">11</td></tr>
+														<tr><td class="text-right" id="StatDialog_DataVersion">Windows</td><td class="text-right" id="StatDialog_DataUptime">11</td></tr>
 													</tbody>
 												</table>
 												
@@ -678,9 +682,17 @@
 
 												<h4>CPU</h4>
 												<table class="table table-striped table-bordered datatable">
+													<thead>
+														<tr>
+															<th width="50%">Model</th>
+															<th width="50%">Arch</th>
+														</tr>
+													</thead>
 													<tbody>
-														<tr><th>Model</th><td class="text-right" id="StatDialog_DataVersion">AMD Ryzen 7 7735HS with Radeon Graphics</td></tr>
-														<tr><th>Arch</th><td class="text-right" id="StatDialog_DataUptime">x86_64</td></tr>
+														<tr>
+															<td class="text-right" id="StatDialog_DataVersion">AMD Ryzen 7 7735HS with Radeon Graphics</td>
+															<td class="text-right" id="StatDialog_DataUptime">x86_64</td>
+														</tr>
 													</tbody>
 												</table>
 												
@@ -689,10 +701,10 @@
 												<h4>Disk & Hardware</h4>
 												<table class="table table-striped table-bordered datatable">
 													<tbody>
-														<tr><th>Free disk space</th><td class="text-right" id="StatDialog_DataFree">455859712000</td></tr>
-														<tr><th>Total disk space</th><td class="text-right" id="StatDialog_DataFree">749331279872</td></tr>
-														<tr id="StatDialog_ArticleCache_Row"><td>Article cache</td><td class="text-right" id="StatDialog_ArticleCache"></td></tr>
-														<tr><th>Total downloaded</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
+														<tr><th width="50%">Free disk space</th><td class="text-right" id="StatDialog_DataFree">455859712000</td></tr>
+														<tr><th width="50%">Total disk space</th><td class="text-right" id="StatDialog_DataFree">749331279872</td></tr>
+														<tr><td>Article cache</td><td class="text-right" id="StatDialog_ArticleCache"></td></tr>
+														<tr><th width="50%">Total downloaded</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
 													</tbody>
 												</table>
 
@@ -701,11 +713,11 @@
 												<h4>Network</h4>
 												<table class="table table-striped table-bordered datatable">
 													<tbody>
-														<tr><th>Local IP</th><td class="text-right" id="StatDialog_DataFree">192.168.1.11</td></tr>
-														<tr><th>Public IP</th><td class="text-right" id="StatDialog_DataAverageSpeed">37.214.10.145</td></tr>
-														<tr><th>Average download speed</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
-														<tr><th>Current download speed</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
-														<tr><th>Current speed limit</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
+														<tr><th width="50%">Local IP</th><td class="text-right" id="StatDialog_DataFree">192.168.1.11</td></tr>
+														<tr><th width="50%">Public IP</th><td class="text-right" id="StatDialog_DataAverageSpeed">37.214.10.145</td></tr>
+														<tr><th width="50%">Average download speed</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
+														<tr><th width="50%">Current download speed</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
+														<tr><th width="50%">Current speed limit</th><td class="text-right" id="StatDialog_DataAverageSpeed"></td></tr>
 													</tbody>
 												</table>
 
@@ -715,15 +727,34 @@
 												<table class="table table-striped table-bordered datatable">
 													<thead>
 														<tr>
-															<th scope="col">Name</th>
-															<th scope="col">Version</th>
-															<th scope="col">Path</th>
+															<th width="25%">Name</th>
+															<th width="25%">Version</th>
+															<th width="50%">Path</th>
 														</tr>
 													</thead>
 													<tbody>
 														<tr><th>Python</th><td class="text-right" id="StatDialog_DataFree">3.12.3</td><td class="text-right" id="StatDialog_DataFree">C:\Users\asus\AppData\Local\Programs\Python\Python312\python.exe</td></tr>
 														<tr><th>UnRAR</th><td class="text-right" id="StatDialog_DataFree">5.70</td><td class="text-right" id="StatDialog_DataFree">D:\Dev\nzbget\build\Debug\UnRAR.exe</td></tr>
 														<tr><th>7-Zip</th><td class="text-right" id="StatDialog_DataAverageSpeed">19.00</td><td class="text-right" id="StatDialog_DataFree">D:\Dev\nzbget\build\Debug\7za.exe</td></tr>
+													</tbody>
+												</table>
+
+												<br>
+
+												<h4>Libraries</h4>
+												<table class="table table-striped table-bordered datatable">
+													<thead>
+														<tr>
+															<th width="50%">Name</th>
+															<th width="50%">Version</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr><th>OpenSSL</th><td class="text-right" id="StatDialog_DataFree">3.0.11</td></tr>
+														<tr><th>GnuTLS</th><td class="text-right" id="StatDialog_DataFree">Not used</td></tr>
+														<tr><th>ZLib</th><td class="text-right" id="StatDialog_DataAverageSpeed">1.2.13</td></tr>
+														<tr><th>NCurses</th><td class="text-right" id="StatDialog_DataAverageSpeed">6.4</td></tr>
+														<tr><th>LibXML2</th><td class="text-right" id="StatDialog_DataAverageSpeed">2.9.14</td></tr>
 													</tbody>
 												</table>
 											</section>
