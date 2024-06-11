@@ -40,7 +40,7 @@ namespace HardwareInfo
 #ifdef WIN32
 	const char* FIND_CMD = "where ";
 #else
-	const char* FIND_CMD = "readlink -f ";
+	const char* FIND_CMD = "which ";
 #endif
 	const size_t BUFFER_SIZE = 256;
 
