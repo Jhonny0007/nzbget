@@ -77,21 +77,24 @@ namespace HardwareInfo
 	public:
 		HardwareInfo();
 		~HardwareInfo();
-		CPU GetCPU() const;
 		Environment GetEnvironment() const;
-		const Network& GetNetwork() &;
-		const DiskState& GetDiskState(const char* root = ".") &;
-		OS GetOS() const;
-		std::string GetOpenSSLVersion() const;
-		std::string GetGnuTLSVersion() const;
-		std::string GetZLibVersion() const;
-		std::string GetCursesVersion() const;
-		std::string GetLibXml2Version() const;
+		const CPU& GetCPU() const;
+		const Network& GetNetwork();
+		const DiskState& GetDiskState(const char* root = ".")&;
+		const OS& GetOS() const;
+		const std::string& GetOpenSSLVersion() const;
+		const std::string& GetGnuTLSVersion() const;
+		const std::string& GetZLibVersion() const;
+		const std::string& GetCursesVersion() const;
+		const std::string& GetLibXml2Version() const;
 
 	private:
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
+		void InitCPU();
+		void InitOS();
+		void InitLibrariesVersions();
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const;
 		boost::asio::io_context m_context;
@@ -101,12 +104,14 @@ namespace HardwareInfo
 		std::chrono::time_point<std::chrono::system_clock> m_diskStateTimePoint;
 		Network m_network;
 		DiskState m_diskState;
+		CPU m_cpu;
+		OS m_os;
 		std::string m_openSSLVersion;
 		std::string m_gnuTLSLVersion;
 		std::string m_zLibVersion;
 		std::string m_cursesVersion;
 		std::string m_libXml2Version;
-		
+
 #ifndef WIN32
 		std::string GetCPUArch() const;
 #endif
