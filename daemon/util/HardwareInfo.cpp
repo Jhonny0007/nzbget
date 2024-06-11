@@ -474,13 +474,12 @@ namespace HardwareInfo
 
 	void HardwareInfo::InitOS()
 	{
-		m_os.name = "Unknown";
-		m_os.version = "Unknown";
-
 		std::ifstream osInfo("/etc/os-release");
 		if (!osInfo.is_open())
 		{
 			debug("Failed to get OS info. Couldn't read '/etc/os-release'.");
+			m_os.name = "Unknown";
+			m_os.version = "Unknown";
 			return;
 		}
 
@@ -513,7 +512,12 @@ namespace HardwareInfo
 				continue;
 			}
 		}
-	}
+
+		debug("Failed to find OS info.");
+
+		m_os.name = "Unknown";
+		m_os.version = "Unknown";
+}
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
