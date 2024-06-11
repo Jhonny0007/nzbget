@@ -331,7 +331,7 @@ namespace HardwareInfo
 				m_network.privateIP = m_socket.local_endpoint().address().to_string();
 			}
 		}
-		catch (std::exception& e)
+		catch (const std::exception& e)
 		{
 			debug("Failed to get public and private IP: %s", e.what());
 		}
@@ -570,7 +570,7 @@ namespace HardwareInfo
 #endif
 
 #ifdef __APPLE__
-	void HardwareInfo::InitCPU() const
+	void HardwareInfo::InitCPU()
 	{
 		size_t len = BUFFER_SIZE;
 		char buffer[BUFFER_SIZE];
