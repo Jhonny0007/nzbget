@@ -94,7 +94,7 @@ namespace HardwareInfo
 		Tool GetUnrar() const;
 		void InitCPU();
 		void InitOS();
-		void InitLibrariesVersions();
+		void InitLibsVersions();
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const;
 		boost::asio::io_context m_context;

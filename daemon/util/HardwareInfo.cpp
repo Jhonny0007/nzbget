@@ -65,6 +65,7 @@ namespace HardwareInfo
 	{
 		InitCPU();
 		InitOS();
+		InitLibsVersions();
 		auto os = GetOS();
 		std::cout << "OS name: " << os.name << std::endl;
 		std::cout << "OS Version: " << os.version << std::endl;
@@ -129,7 +130,7 @@ namespace HardwareInfo
 		return m_gnuTLSLVersion;
 	}
 
-	void HardwareInfo::InitLibrariesVersions()
+	void HardwareInfo::InitLibsVersions()
 	{
 		m_libXml2Version = LIBXML_DOTTED_VERSION;
 #ifdef HAVE_NCURSES_H
