@@ -726,7 +726,7 @@ boost::optional<FileSystem::DiskState> FileSystem::GetDiskState(const char* path
 		return FileSystem::DiskState{ available, total };
 	}
 #endif
-	boost::none;
+	return boost::none;
 }
 
 bool FileSystem::RenameBak(const char* filename, const char* bakPart, bool removeOldExtension, CString& newName)
