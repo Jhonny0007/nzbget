@@ -83,6 +83,7 @@ namespace HardwareInfo
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
+		bool IsRunningInDocker() const;
 		void InitCPU();
 		void InitOS();
 		void InitLibsVersions();

@@ -105,6 +105,11 @@ namespace HardwareInfo
 		}
 	}
 
+	bool HardwareInfo::IsRunningInDocker() const
+	{
+		return FileSystem::FileExists("/.dockerenv");
+	}
+
 	const std::string& HardwareInfo::GetLibXml2Version() const
 	{
 		return m_libXml2Version;
@@ -471,6 +476,12 @@ namespace HardwareInfo
 			{
 				m_os.name = line.substr(line.find("=") + 1);
 				Util::Trim(m_os.name);
+
+				if (IsRunningInDocker())
+				{
+					m_os.name += " (Running in Docker)";
+				}
+
 				continue;
 			}
 
