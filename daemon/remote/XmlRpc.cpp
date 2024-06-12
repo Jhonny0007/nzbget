@@ -1323,6 +1323,9 @@ void StatusXmlCommand::Execute()
 		"\"FreeDiskSpaceLo\" : %u,\n"
 		"\"FreeDiskSpaceHi\" : %u,\n"
 		"\"FreeDiskSpaceMB\" : %i,\n"
+		"\"TotalDiskSpaceLo\" : %u,\n"
+		"\"TotalDiskSpaceHi\" : %u,\n"
+		"\"TotalDiskSpaceMB\" : %i,\n"
 		"\"ServerTime\" : %i,\n"
 		"\"ResumeTime\" : %i,\n"
 		"\"FeedActive\" : %s,\n"
@@ -1399,14 +1402,19 @@ void StatusXmlCommand::Execute()
 	Util::SplitInt64(dayBytes, &daySizeHi, &daySizeLo);
 
 	uint32 freeDiskSpaceHi, freeDiskSpaceLo;
+	uint32 totalDiskSpaceHi, totalDiskSpaceLo;
 	int64 freeDiskSpace = 0;
+	int64 totalDiskSpace = 0;
 	auto res = FileSystem::GetDiskState(g_Options->GetDestDir());
 	if (res.has_value())
 	{
-		freeDiskSpace = res.get().available;
+		freeDiskSpace = static_cast<int64>(res.get().available);
+		totalDiskSpace = static_cast<int64>(res.get().total);
 	}
 	Util::SplitInt64(freeDiskSpace, &freeDiskSpaceHi, &freeDiskSpaceLo);
+	Util::SplitInt64(totalDiskSpace, &totalDiskSpaceHi, &totalDiskSpaceLo);
 	int freeDiskSpaceMB = static_cast<int>(freeDiskSpace / 1024 / 1024);
+	int totalDiskSpaceMB = static_cast<int>(totalDiskSpace / 1024 / 1024);
 
 	int serverTime = (int)Util::CurrentTime();
 	int resumeTime = (int)g_WorkState->GetResumeTime();
@@ -1422,8 +1430,8 @@ void StatusXmlCommand::Execute()
 		postJobCount, postJobCount, urlCount, upTimeSec, downloadTimeSec,
 		BoolToStr(downloadPaused), BoolToStr(downloadPaused), BoolToStr(downloadPaused),
 		BoolToStr(serverStandBy), BoolToStr(postPaused), BoolToStr(scanPaused), BoolToStr(quotaReached),
-		freeDiskSpaceLo, freeDiskSpaceHi,	freeDiskSpaceMB, serverTime, resumeTime,
-		BoolToStr(feedActive), queuedScripts);
+		freeDiskSpaceLo, freeDiskSpaceHi, freeDiskSpaceMB, totalDiskSpaceLo, totalDiskSpaceHi, totalDiskSpaceMB,
+		serverTime, resumeTime, BoolToStr(feedActive), queuedScripts);
 
 	int index = 0;
 	for (NewsServer* server : g_ServerPool->GetServers())

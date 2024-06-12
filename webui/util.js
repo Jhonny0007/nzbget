@@ -100,7 +100,7 @@ var Util = (new function($)
 
 		if (sizeMB >= 1024 * 1024 * 100)
 		{
-			return this.round0(sizeMB / 1024.0 / 1024.0) + '&nbsp;TB';
+			return Math.floor(sizeMB / 1024.0 / 1024.0) + '&nbsp;TB';
 		}
 		else if (sizeMB >= 1024 * 1024 * 10)
 		{
@@ -112,7 +112,7 @@ var Util = (new function($)
 		}
 		else if (sizeMB >= 1024 * 100)
 		{
-			return this.round0(sizeMB / 1024.0) + '&nbsp;GB';
+			return Math.floor(sizeMB / 1024.0) + '&nbsp;GB';
 		}
 		else if (sizeMB >= 1024 * 10)
 		{
@@ -124,7 +124,7 @@ var Util = (new function($)
 		}
 		else if (sizeMB >= 100)
 		{
-			return this.round0(sizeMB) + '&nbsp;MB';
+			return Math.floor(sizeMB) + '&nbsp;MB';
 		}
 		else if (sizeMB >= 10)
 		{
