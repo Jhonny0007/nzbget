@@ -61,9 +61,8 @@ namespace HardwareInfo
 
 	struct DiskState
 	{
-		size_t freeSpace;
-		size_t totalSize;
-		size_t articleCache;
+		size_t available;
+		size_t total;
 	};
 
 	struct OS

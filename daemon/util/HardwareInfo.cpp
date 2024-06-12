@@ -45,8 +45,8 @@ namespace HardwareInfo
 	const size_t BUFFER_SIZE = 256;
 
 	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) {
-		// 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-		// UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
+		// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
+		// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
 		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
 		std::smatch match;
 		if (std::regex_search(line, match, pattern))
@@ -73,9 +73,8 @@ namespace HardwareInfo
 		std::cout << "CPU Model: " << cpu.model << std::endl;
 		std::cout << "CPU arch: " << cpu.arch << std::endl;
 		auto diskState = GetDiskState();
-		std::cout << "Available HD: " << diskState.freeSpace << std::endl;
-		std::cout << "Total HD: " << diskState.totalSize << std::endl;
-		std::cout << "Cache HD: " << diskState.articleCache << std::endl;
+		std::cout << "Available HD: " << diskState.available << std::endl;
+		std::cout << "Total HD: " << diskState.total << std::endl;
 		auto network = GetNetwork();
 		std::cout << "Public IP: " << network.publicIP << std::endl;
 		std::cout << "Private IP: " << network.privateIP << std::endl;
@@ -133,25 +132,21 @@ namespace HardwareInfo
 	void HardwareInfo::InitLibsVersions()
 	{
 		m_libXml2Version = LIBXML_DOTTED_VERSION;
+
 #ifdef HAVE_NCURSES_H
 		m_cursesVersion = NCURSES_VERSION;
-#else
-		m_cursesVersion = "Not used";
 #endif
+
 #ifndef DISABLE_GZIP
 		m_zLibVersion = ZLIB_VERSION;
-#else
-		m_zLibVersion = "Not used";
 #endif
+
 #ifdef HAVE_OPENSSL
 		m_openSSLVersion = OPENSSL_FULL_VERSION_STR;
-#else
-		m_openSSLVersion = "Not used";
 #endif
+
 #ifdef HAVE_LIBGNUTLS
 		m_gnuTLSLVersion = GNUTLS_VERSION;
-#else
-		m_gnuTLSLVersion = "Not used";
 #endif
 	}
 
@@ -182,8 +177,8 @@ namespace HardwareInfo
 	Tool HardwareInfo::GetPython() const
 	{
 		Tool python;
-		python.name = "Python";
 
+		python.name = "Python";
 		auto result = Util::FindPython();
 		if (!result.has_value())
 		{
@@ -200,8 +195,14 @@ namespace HardwareInfo
 		char buffer[BUFFER_SIZE];
 		if (!feof(pipe) && fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 		{
-			python.version = buffer;
-			Util::Trim(python.version);
+			// e.g. Python 3.12.3
+			std::string version = buffer;
+			Util::Trim(version);
+			size_t pos = version.find(" ");
+			if (pos != std::string::npos)
+			{
+				python.version = version.substr(pos + 1);
+			}
 		}
 
 		pclose(pipe);
@@ -358,7 +359,7 @@ namespace HardwareInfo
 		else
 		{
 			debug("Failed to get CPU model. Couldn't read the Windows Registry.");
-			m_cpu.model = "Unknown";
+			m_cpu.model = "";
 		}
 
 		if (Util::RegReadStr(
@@ -374,7 +375,7 @@ namespace HardwareInfo
 		else
 		{
 			debug("Failed to get CPU arch. Couldn't read the Windows Registry.");
-			m_cpu.arch = "Unknown";
+			m_cpu.arch = "";
 		}
 	}
 
@@ -392,7 +393,7 @@ namespace HardwareInfo
 			long buildNum = std::atol(buffer);
 			if (buildNum == 0)
 			{
-				m_os.version = "Unknown";
+				m_os.version = "";
 			}
 			else if (buildNum >= m_win11BuildVersion)
 			{
@@ -422,25 +423,19 @@ namespace HardwareInfo
 
 	DiskState HardwareInfo::GetDiskState(const char* root) const
 	{
-		DiskState diskState;
-
 		ULARGE_INTEGER freeBytesAvailable;
 		ULARGE_INTEGER totalNumberOfBytes;
 
-		int64 articleCache = g_ArticleCache->GetAllocated();
-		uint32 articleCacheHi, articleCacheLo;
-		Util::SplitInt64(articleCache, &articleCacheHi, &articleCacheLo);
-
 		if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 		{
-			diskState.freeSpace = freeBytesAvailable.QuadPart;
-			diskState.totalSize = totalNumberOfBytes.QuadPart;
-			diskState.articleCache = static_cast<size_t>(articleCache);
-
-			return diskState;
+			size_t available = freeBytesAvailable.QuadPart;
+			size_t total = totalNumberOfBytes.QuadPart;
+			return { available, total };
 		}
 
-		return diskState;
+		debug("Failed to get Disk state.");
+
+		return { 0, 0 };
 	}
 #endif
 
@@ -448,7 +443,6 @@ namespace HardwareInfo
 #include <fstream>
 	void HardwareInfo::InitCPU()
 	{
-		m_cpu.model = "Unknown";
 		m_cpu.arch = GetCPUArch();
 
 		std::ifstream cpuinfo("/proc/cpuinfo");
@@ -478,8 +472,6 @@ namespace HardwareInfo
 		if (!osInfo.is_open())
 		{
 			debug("Failed to get OS info. Couldn't read '/etc/os-release'.");
-			m_os.name = "Unknown";
-			m_os.version = "Unknown";
 			return;
 		}
 
@@ -514,10 +506,7 @@ namespace HardwareInfo
 		}
 
 		debug("Failed to find OS info.");
-
-		m_os.name = "Unknown";
-		m_os.version = "Unknown";
-}
+	}
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
@@ -533,7 +522,7 @@ namespace HardwareInfo
 		else
 		{
 			debug("Failed to get CPU model. Couldn't read 'hw.model'.");
-			m_cpu.model = "Unknown";
+			m_cpu.model = "";
 		}
 
 		m_cpu.arch = GetCPUArch();
@@ -551,7 +540,6 @@ namespace HardwareInfo
 		else
 		{
 			debug("Failed to get OS name. Couldn't read 'kern.ostype'.");
-			m_os.name = "Unknown";
 		}
 
 		len = BUFFER_SIZE;
@@ -564,7 +552,6 @@ namespace HardwareInfo
 		else
 		{
 			debug("Failed to get OS version. Failed to read 'kern.osrelease'.");
-			m_os.version = "Unknown";
 		}
 	}
 #endif
@@ -582,7 +569,6 @@ namespace HardwareInfo
 		else
 		{
 			debug("Failed to get CPU model. Couldn't read 'machdep.cpu.brand_string'.");
-			m_cpu.model = "Unknown";
 		}
 
 		m_cpu.arch = GetCPUArch();
@@ -590,9 +576,6 @@ namespace HardwareInfo
 
 	void HardwareInfo::InitOS()
 	{
-		m_os.name = "Unknown";
-		m_os.version = "Unknown";
-
 		FILE* pipe = popen("sw_vers", "r");
 		if (!pipe)
 		{
@@ -640,7 +623,8 @@ namespace HardwareInfo
 		if (!pipe)
 		{
 			debug("Failed to get CPU arch. Couldn't read 'uname -m'.");
-			return "Unknown";
+
+			return "";
 		}
 
 		char buffer[BUFFER_SIZE];
@@ -658,24 +642,22 @@ namespace HardwareInfo
 
 		debug("Failed to find CPU arch.");
 
-		return "Unknown";
+		return "";
 	}
 
 	DiskState HardwareInfo::GetDiskState(const char* root) const
 	{
-		int64 articleCache = g_ArticleCache->GetAllocated();
-		uint32 articleCacheHi, articleCacheLo;
-		Util::SplitInt64(articleCache, &articleCacheHi, &articleCacheLo);
 		struct statvfs diskdata;
-
 		if (statvfs(root, &diskdata) == 0)
 		{
 			size_t available = diskdata.f_bfree * diskdata.f_frsize;
 			size_t total = diskdata.f_blocks * diskdata.f_frsize;
-			return { available, total, static_cast<size_t>(articleCache) };
+			return { available, total };
 		}
 
-		return { 0, 0, static_cast<size_t>(articleCache) };
+		debug("Failed to get Disk state.");
+
+		return { 0, 0 };
 	}
 #endif
 
