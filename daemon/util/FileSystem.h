@@ -28,6 +28,12 @@
 
 class FileSystem
 {
+	struct DiskState
+	{
+		size_t available;
+		size_t total;
+	};
+
 public:
 	static CString GetLastErrorMessage();
 	static char* BaseFileName(const char* filename);
@@ -59,7 +65,7 @@ public:
 	static CString GetCurrentDirectory();
 	static bool SetCurrentDirectory(const char* dirFilename);
 	static int64 FileSize(const char* filename);
-	static int64 FreeDiskSize(const char* path);
+	static boost::optional<DiskState> GetDiskState(const char* path);
 	static bool DirEmpty(const char* dirFilename);
 	static bool RenameBak(const char* filename, const char* bakPart, bool removeOldExtension, CString& newName);
 #ifndef WIN32

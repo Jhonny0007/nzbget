@@ -707,22 +707,26 @@ int64 FileSystem::FileSize(const char* filename)
 #endif
 }
 
-int64 FileSystem::FreeDiskSize(const char* path)
+boost::optional<FileSystem::DiskState> FileSystem::GetDiskState(const char* path)
 {
 #ifdef WIN32
-	ULARGE_INTEGER free, dummy;
-	if (GetDiskFreeSpaceEx(path, &free, &dummy, &dummy))
+	ULARGE_INTEGER freeBytesAvailable;
+	ULARGE_INTEGER totalNumberOfBytes;
+
+	if (GetDiskFreeSpaceEx(path, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 	{
-		return free.QuadPart;
+		return FileSystem::DiskState{ freeBytesAvailable.QuadPart, totalNumberOfBytes.QuadPart };
 	}
 #else
 	struct statvfs diskdata;
-	if (!statvfs(path, &diskdata))
+	if (statvfs(path, &diskdata) == 0)
 	{
-		return (int64)diskdata.f_frsize * (int64)diskdata.f_bavail;
+		size_t available = diskdata.f_bfree * diskdata.f_frsize;
+		size_t total = diskdata.f_blocks * diskdata.f_frsize;
+		return FileSystem::DiskState{ available, total };
 	}
 #endif
-	return -1;
+	boost::none;
 }
 
 bool FileSystem::RenameBak(const char* filename, const char* bakPart, bool removeOldExtension, CString& newName)

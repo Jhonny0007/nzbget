@@ -23,7 +23,8 @@
 #include <regex>
 #include "HardwareInfo.h"
 #include "Options.h"
-#include "ArticleWriter.h"
+#include "FileSystem.h"
+#include "Log.h"
 
 namespace HardwareInfo
 {
@@ -72,7 +73,7 @@ namespace HardwareInfo
 		auto cpu = GetCPU();
 		std::cout << "CPU Model: " << cpu.model << std::endl;
 		std::cout << "CPU arch: " << cpu.arch << std::endl;
-		auto diskState = GetDiskState();
+		auto diskState = FileSystem::GetDiskState(".").value();
 		std::cout << "Available HD: " << diskState.available << std::endl;
 		std::cout << "Total HD: " << diskState.total << std::endl;
 		auto network = GetNetwork();
@@ -420,23 +421,6 @@ namespace HardwareInfo
 
 		m_os.name = "Windows";
 	}
-
-	DiskState HardwareInfo::GetDiskState(const char* root) const
-	{
-		ULARGE_INTEGER freeBytesAvailable;
-		ULARGE_INTEGER totalNumberOfBytes;
-
-		if (GetDiskFreeSpaceEx(root, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
-		{
-			size_t available = freeBytesAvailable.QuadPart;
-			size_t total = totalNumberOfBytes.QuadPart;
-			return { available, total };
-		}
-
-		debug("Failed to get Disk state.");
-
-		return { 0, 0 };
-	}
 #endif
 
 #ifdef __linux__
@@ -643,21 +627,6 @@ namespace HardwareInfo
 		debug("Failed to find CPU arch.");
 
 		return "";
-	}
-
-	DiskState HardwareInfo::GetDiskState(const char* root) const
-	{
-		struct statvfs diskdata;
-		if (statvfs(root, &diskdata) == 0)
-		{
-			size_t available = diskdata.f_bfree * diskdata.f_frsize;
-			size_t total = diskdata.f_blocks * diskdata.f_frsize;
-			return { available, total };
-		}
-
-		debug("Failed to get Disk state.");
-
-		return { 0, 0 };
 	}
 #endif
 

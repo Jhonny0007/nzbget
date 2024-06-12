@@ -1399,9 +1399,14 @@ void StatusXmlCommand::Execute()
 	Util::SplitInt64(dayBytes, &daySizeHi, &daySizeLo);
 
 	uint32 freeDiskSpaceHi, freeDiskSpaceLo;
-	int64 freeDiskSpace = FileSystem::FreeDiskSize(g_Options->GetDestDir());
+	int64 freeDiskSpace = 0;
+	auto res = FileSystem::GetDiskState(g_Options->GetDestDir());
+	if (res.has_value())
+	{
+		freeDiskSpace = res.get().available;
+	}
 	Util::SplitInt64(freeDiskSpace, &freeDiskSpaceHi, &freeDiskSpaceLo);
-	int freeDiskSpaceMB = (int)(freeDiskSpace / 1024 / 1024);
+	int freeDiskSpaceMB = static_cast<int>(freeDiskSpace / 1024 / 1024);
 
 	int serverTime = (int)Util::CurrentTime();
 	int resumeTime = (int)g_WorkState->GetResumeTime();

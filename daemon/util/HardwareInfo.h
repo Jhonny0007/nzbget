@@ -24,7 +24,6 @@
 #include <iostream>
 #include <chrono>
 #include <boost/asio.hpp>
-#include "Util.h"
 
 namespace HardwareInfo
 {
@@ -59,12 +58,6 @@ namespace HardwareInfo
 		std::string privateIP;
 	};
 
-	struct DiskState
-	{
-		size_t available;
-		size_t total;
-	};
-
 	struct OS
 	{
 		std::string name;
@@ -79,7 +72,6 @@ namespace HardwareInfo
 		Environment GetEnvironment() const;
 		const CPU& GetCPU() const;
 		const Network& GetNetwork();
-		DiskState GetDiskState(const char* root = ".") const;
 		const OS& GetOS() const;
 		const std::string& GetOpenSSLVersion() const;
 		const std::string& GetGnuTLSVersion() const;
