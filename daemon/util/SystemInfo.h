@@ -17,15 +17,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HARDWARE_INFO_H
-#define HARDWARE_INFO_H
+#ifndef SYSTEM_INFO_H
+#define SYSTEM_INFO_H
 
 #include <string>
 #include <iostream>
-#include <chrono>
 #include <boost/asio.hpp>
 
-namespace HardwareInfo
+namespace SystemInfo
 {
 	using UnpackerVersionParser = std::function<std::string(const std::string&)>;
 
@@ -64,11 +63,11 @@ namespace HardwareInfo
 		std::string version;
 	};
 
-	class HardwareInfo final
+	class SystemInfo final
 	{
 	public:
-		HardwareInfo();
-		~HardwareInfo();
+		SystemInfo();
+		~SystemInfo();
 		Environment GetEnvironment() const;
 		const CPU& GetCPU() const;
 		const Network& GetNetwork();
@@ -83,7 +82,6 @@ namespace HardwareInfo
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
-		bool IsRunningInDocker() const;
 		void InitCPU();
 		void InitOS();
 		void InitLibsVersions();
@@ -92,10 +90,9 @@ namespace HardwareInfo
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
 		boost::asio::ip::tcp::socket m_socket;
-		std::chrono::time_point<std::chrono::system_clock> m_networkTimePoint;
-		Network m_network;
-		CPU m_cpu;
-		OS m_os;
+		Network m_network{};
+		CPU m_cpu{};
+		OS m_os{};
 		std::string m_openSSLVersion;
 		std::string m_gnuTLSLVersion;
 		std::string m_zLibVersion;
@@ -104,6 +101,7 @@ namespace HardwareInfo
 
 #ifndef WIN32
 		std::string GetCPUArch() const;
+		bool IsRunningInDocker() const;
 #endif
 
 #ifdef WIN32

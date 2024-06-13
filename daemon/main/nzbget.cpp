@@ -99,7 +99,7 @@ int g_ArgumentCount;
 char* (*g_EnvironmentVariables)[] = nullptr;
 char* (*g_Arguments)[] = nullptr;
 
-#include "HardwareInfo.h"
+#include "SystemInfo.h"
 /*
  * Main entry point
  */
@@ -431,7 +431,7 @@ void NZBGet::BootConfig()
 	m_options->SetServerMode(m_commandLineParser->GetServerMode());
 	m_workState->SetPauseDownload(m_commandLineParser->GetPauseDownload());
 	m_workState->SetSpeedLimit(g_Options->GetDownloadRate());
-	HardwareInfo::HardwareInfo hw;
+	SystemInfo::SystemInfo sw;
 	m_log->InitOptions();
 
 	if (m_options->GetFatalError())

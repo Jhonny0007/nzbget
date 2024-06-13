@@ -19,14 +19,13 @@
 
 #include "nzbget.h"
 
-#include <iostream>
 #include <regex>
-#include "HardwareInfo.h"
+#include "SystemInfo.h"
 #include "Options.h"
 #include "FileSystem.h"
 #include "Log.h"
 
-namespace HardwareInfo
+namespace SystemInfo
 {
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
@@ -34,8 +33,6 @@ namespace HardwareInfo
 #ifdef HAVE_NCURSES_NCURSES_H
 #include <ncurses/ncurses.h>
 #endif
-	using namespace std::chrono;
-	using namespace std::literals;
 	using namespace boost;
 
 #ifdef WIN32
@@ -58,11 +55,10 @@ namespace HardwareInfo
 		return std::string("");
 		};
 
-	HardwareInfo::HardwareInfo()
+	SystemInfo::SystemInfo()
 		: m_context{}
 		, m_resolver{ m_context }
 		, m_socket{ m_context }
-		, m_networkTimePoint{ system_clock::now() }
 	{
 		InitCPU();
 		InitOS();
@@ -94,10 +90,9 @@ namespace HardwareInfo
 		std::cout << "Zlib: " << GetZLibVersion() << std::endl;
 		std::cout << "Curses lib: " << GetCursesVersion() << std::endl;
 		std::cout << "xml2 lib: " << GetLibXml2Version() << std::endl;
-		GetNetwork();
 	}
 
-	HardwareInfo::~HardwareInfo()
+	SystemInfo::~SystemInfo()
 	{
 		if (m_socket.is_open())
 		{
@@ -105,37 +100,32 @@ namespace HardwareInfo
 		}
 	}
 
-	bool HardwareInfo::IsRunningInDocker() const
-	{
-		return FileSystem::FileExists("/.dockerenv");
-	}
-
-	const std::string& HardwareInfo::GetLibXml2Version() const
+	const std::string& SystemInfo::GetLibXml2Version() const
 	{
 		return m_libXml2Version;
 	}
 
-	const std::string& HardwareInfo::GetCursesVersion() const
+	const std::string& SystemInfo::GetCursesVersion() const
 	{
 		return m_cursesVersion;
 	}
 
-	const std::string& HardwareInfo::GetZLibVersion() const
+	const std::string& SystemInfo::GetZLibVersion() const
 	{
 		return m_zLibVersion;
 	}
 
-	const std::string& HardwareInfo::GetOpenSSLVersion() const
+	const std::string& SystemInfo::GetOpenSSLVersion() const
 	{
 		return m_openSSLVersion;
 	}
 
-	const std::string& HardwareInfo::GetGnuTLSVersion() const
+	const std::string& SystemInfo::GetGnuTLSVersion() const
 	{
 		return m_gnuTLSLVersion;
 	}
 
-	void HardwareInfo::InitLibsVersions()
+	void SystemInfo::InitLibsVersions()
 	{
 		m_libXml2Version = LIBXML_DOTTED_VERSION;
 
@@ -156,17 +146,17 @@ namespace HardwareInfo
 #endif
 	}
 
-	const CPU& HardwareInfo::GetCPU() const
+	const CPU& SystemInfo::GetCPU() const
 	{
 		return m_cpu;
 	}
 
-	const OS& HardwareInfo::GetOS() const
+	const OS& SystemInfo::GetOS() const
 	{
 		return m_os;
 	}
 
-	Environment HardwareInfo::GetEnvironment() const
+	Environment SystemInfo::GetEnvironment() const
 	{
 		Environment env;
 
@@ -180,7 +170,7 @@ namespace HardwareInfo
 		return env;
 	}
 
-	Tool HardwareInfo::GetPython() const
+	Tool SystemInfo::GetPython() const
 	{
 		Tool python;
 
@@ -231,7 +221,7 @@ namespace HardwareInfo
 		return python;
 	}
 
-	Tool HardwareInfo::GetUnrar() const
+	Tool SystemInfo::GetUnrar() const
 	{
 		Tool tool;
 
@@ -242,7 +232,7 @@ namespace HardwareInfo
 		return tool;
 	}
 
-	Tool HardwareInfo::GetSevenZip() const
+	Tool SystemInfo::GetSevenZip() const
 	{
 		Tool tool;
 
@@ -253,7 +243,7 @@ namespace HardwareInfo
 		return tool;
 	}
 
-	std::string HardwareInfo::GetUnpackerPath(const char* unpackerCmd) const
+	std::string SystemInfo::GetUnpackerPath(const char* unpackerCmd) const
 	{
 		if (Util::EmptyStr(unpackerCmd))
 		{
@@ -267,7 +257,7 @@ namespace HardwareInfo
 		return path.substr(0, path.find(" "));
 	}
 
-	std::string HardwareInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parseVersion) const
+	std::string SystemInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parseVersion) const
 	{
 		FILE* pipe = popen(path.c_str(), "r");
 		if (!pipe)
@@ -294,16 +284,8 @@ namespace HardwareInfo
 		return version;
 	}
 
-	const Network& HardwareInfo::GetNetwork()
+	const Network& SystemInfo::GetNetwork()
 	{
-		auto now = system_clock::now();
-		if (!m_network.privateIP.empty() && !m_network.publicIP.empty() && (now - m_networkTimePoint) < 2h)
-		{
-			return m_network;
-		}
-
-		m_networkTimePoint = std::move(now);
-
 		try {
 			asio::connect(m_socket, m_resolver.resolve("icanhazip.com", "http"));
 
@@ -338,7 +320,7 @@ namespace HardwareInfo
 	}
 
 #ifdef WIN32
-	void HardwareInfo::InitCPU()
+	void SystemInfo::InitCPU()
 	{
 		int len = BUFFER_SIZE;
 		char cpuModelBuffer[BUFFER_SIZE];
@@ -355,8 +337,7 @@ namespace HardwareInfo
 		}
 		else
 		{
-			debug("Failed to get CPU model. Couldn't read the Windows Registry.");
-			m_cpu.model = "";
+			debug("Failed to get CPU model. Couldn't read Windows Registry.");
 		}
 
 		if (Util::RegReadStr(
@@ -371,12 +352,11 @@ namespace HardwareInfo
 		}
 		else
 		{
-			debug("Failed to get CPU arch. Couldn't read the Windows Registry.");
-			m_cpu.arch = "";
+			debug("Failed to get CPU arch. Couldn't read Windows Registry.");
 		}
 	}
 
-	void HardwareInfo::InitOS()
+	void SystemInfo::InitOS()
 	{
 		int len = BUFFER_SIZE;
 		char buffer[BUFFER_SIZE];
@@ -411,8 +391,7 @@ namespace HardwareInfo
 		}
 		else
 		{
-			debug("Failed to get OS version. Couldn't read the Windows Registry.");
-			m_os.version = "Unknown";
+			debug("Failed to get OS version. Couldn't read Windows Registry.");
 		}
 
 		m_os.name = "Windows";
@@ -421,7 +400,12 @@ namespace HardwareInfo
 
 #ifdef __linux__
 #include <fstream>
-	void HardwareInfo::InitCPU()
+	bool SystemInfo::IsRunningInDocker() const
+	{
+		return FileSystem::FileExists("/.dockerenv");
+	}
+
+	void SystemInfo::InitCPU()
 	{
 		m_cpu.arch = GetCPUArch();
 
@@ -446,7 +430,7 @@ namespace HardwareInfo
 		debug("Failed to find CPU model.");
 	}
 
-	void HardwareInfo::InitOS()
+	void SystemInfo::InitOS()
 	{
 		std::ifstream osInfo("/etc/os-release");
 		if (!osInfo.is_open())
@@ -496,7 +480,7 @@ namespace HardwareInfo
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
-	void HardwareInfo::InitCPU()
+	void SystemInfo::InitCPU()
 	{
 		size_t len = BUFFER_SIZE;
 		char cpuModel[BUFFER_SIZE];
@@ -514,7 +498,7 @@ namespace HardwareInfo
 		m_cpu.arch = GetCPUArch();
 	}
 
-	void HardwareInfo::InitOS()
+	void SystemInfo::InitOS()
 	{
 		size_t len = BUFFER_SIZE;
 		char buffer[len];
@@ -543,7 +527,7 @@ namespace HardwareInfo
 #endif
 
 #ifdef __APPLE__
-	void HardwareInfo::InitCPU()
+	void SystemInfo::InitCPU()
 	{
 		size_t len = BUFFER_SIZE;
 		char buffer[BUFFER_SIZE];
@@ -560,7 +544,7 @@ namespace HardwareInfo
 		m_cpu.arch = GetCPUArch();
 	}
 
-	void HardwareInfo::InitOS()
+	void SystemInfo::InitOS()
 	{
 		FILE* pipe = popen("sw_vers", "r");
 		if (!pipe)
@@ -602,7 +586,7 @@ namespace HardwareInfo
 #endif
 
 #ifndef WIN32
-	std::string HardwareInfo::GetCPUArch() const
+	std::string SystemInfo::GetCPUArch() const
 	{
 		const char* cmd = "uname -m";
 		FILE* pipe = popen(cmd, "r");

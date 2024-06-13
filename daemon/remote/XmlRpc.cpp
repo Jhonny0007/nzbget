@@ -121,6 +121,12 @@ public:
 	virtual void Execute();
 };
 
+class SysInfoXmlCommand: public SafeXmlCommand
+{
+public:
+	virtual void Execute();
+};
+
 class LogXmlCommand: public SafeXmlCommand
 {
 public:
@@ -646,6 +652,10 @@ std::unique_ptr<XmlCommand> XmlRpcProcessor::CreateCommand(const char* methodNam
 	else if (!strcasecmp(methodName, "status"))
 	{
 		command = std::make_unique<StatusXmlCommand>();
+	}
+	else if (!strcasecmp(methodName, "sysinfo"))
+	{
+		command = std::make_unique<SysInfoXmlCommand>();
 	}
 	else if (!strcasecmp(methodName, "log"))
 	{
@@ -1442,6 +1452,19 @@ void StatusXmlCommand::Execute()
 	}
 
 	AppendResponse(IsJson() ? JSON_STATUS_END : XML_STATUS_END);
+}
+
+void SysInfoXmlCommand::Execute()
+{
+	int rate = 0;
+	if (!NextParamAsInt(&rate) || rate < 0)
+	{
+		BuildErrorResponse(2, "Invalid parameter");
+		return;
+	}
+
+	g_WorkState->SetSpeedLimit(rate * 1024);
+	BuildBoolResponse(true);
 }
 
 // struct[] log(idfrom, entries)
