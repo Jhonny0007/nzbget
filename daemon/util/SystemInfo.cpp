@@ -24,6 +24,8 @@
 #include "Options.h"
 #include "FileSystem.h"
 #include "Log.h"
+#include "Json.h"
+#include "Xml.h"
 
 namespace SystemInfo
 {
@@ -63,33 +65,6 @@ namespace SystemInfo
 		InitCPU();
 		InitOS();
 		InitLibsVersions();
-		auto os = GetOS();
-		std::cout << "OS name: " << os.name << std::endl;
-		std::cout << "OS Version: " << os.version << std::endl;
-		auto cpu = GetCPU();
-		std::cout << "CPU Model: " << cpu.model << std::endl;
-		std::cout << "CPU arch: " << cpu.arch << std::endl;
-		auto diskState = FileSystem::GetDiskState(".").value();
-		std::cout << "Available HD: " << diskState.available << std::endl;
-		std::cout << "Total HD: " << diskState.total << std::endl;
-		auto network = GetNetwork();
-		std::cout << "Public IP: " << network.publicIP << std::endl;
-		std::cout << "Private IP: " << network.privateIP << std::endl;
-		auto env = GetEnvironment();
-		std::cout << "Conf. path: " << env.configPath << std::endl;
-		std::cout << "ControlIP IP: " << env.controlIP << std::endl;
-		std::cout << "ControlIP Port: " << env.controlPort << std::endl;
-		std::cout << "Unrar: " << env.unrar.path << std::endl;
-		std::cout << "Unrar version: " << env.unrar.version << std::endl;
-		std::cout << "SevenZip: " << env.sevenZip.path << std::endl;
-		std::cout << "SevenZip version: " << env.sevenZip.version << std::endl;
-		std::cout << "Python path: " << env.python.path << std::endl;
-		std::cout << "Python version: " << env.python.version << std::endl;
-		std::cout << "OPENSSL: " << GetOpenSSLVersion() << std::endl;
-		std::cout << "GNUTLS: " << GetGnuTLSVersion() << std::endl;
-		std::cout << "Zlib: " << GetZLibVersion() << std::endl;
-		std::cout << "Curses lib: " << GetCursesVersion() << std::endl;
-		std::cout << "xml2 lib: " << GetLibXml2Version() << std::endl;
 	}
 
 	SystemInfo::~SystemInfo()
@@ -100,49 +75,82 @@ namespace SystemInfo
 		}
 	}
 
-	const std::string& SystemInfo::GetLibXml2Version() const
+	std::string ToJsonStr(const SystemInfo& sysInfo)
 	{
-		return m_libXml2Version;
+		Json::JsonObject json;
+		Json::JsonObject osJson;
+		Json::JsonObject networkJson;
+		Json::JsonObject cpuJson;
+		Json::JsonArray toolsJson;
+		Json::JsonArray librariesJson;
+
+		const auto& os = sysInfo.GetOS();
+		const auto& network = sysInfo.GetNetwork();
+		const auto& cpu = sysInfo.GetCPU();
+		const auto& tools = sysInfo.GetTools();
+		const auto& libraries = sysInfo.GetLibraries();
+
+		osJson["Name"] = os.name;
+		osJson["Version"] = os.version;
+		networkJson["PublicIP"] = network.publicIP;
+		networkJson["PrivateIP"] = network.privateIP;
+		cpuJson["Model"] = cpu.model;
+		cpuJson["Arch"] = cpu.arch;
+
+		for (const auto& tool : tools)
+		{
+			Json::JsonObject toolJson;
+			toolJson["Name"] = tool.name;
+			toolJson["Version"] = tool.version;
+			toolJson["Path"] = tool.path;
+			toolsJson.push_back(std::move(toolJson));
+		}
+
+		for (const auto& library : libraries)
+		{
+			Json::JsonObject libraryJson;
+			libraryJson["Name"] = library.name;
+			libraryJson["Version"] = library.version;
+			librariesJson.push_back(std::move(libraryJson));
+		}
+		json["OS"] = std::move(osJson);
+		json["CPU"] = std::move(cpuJson);
+		json["Network"] = std::move(networkJson);
+		json["Tools"] = std::move(toolsJson);
+		json["Libraries"] = std::move(librariesJson);
+
+		return Json::Serialize(json);
 	}
 
-	const std::string& SystemInfo::GetCursesVersion() const
+	std::string ToXmlStr(const SystemInfo& sysInfo)
 	{
-		return m_cursesVersion;
+		return "";
 	}
 
-	const std::string& SystemInfo::GetZLibVersion() const
+	const std::vector<Library>& SystemInfo::GetLibraries() const
 	{
-		return m_zLibVersion;
-	}
-
-	const std::string& SystemInfo::GetOpenSSLVersion() const
-	{
-		return m_openSSLVersion;
-	}
-
-	const std::string& SystemInfo::GetGnuTLSVersion() const
-	{
-		return m_gnuTLSLVersion;
+		return m_libraries;
 	}
 
 	void SystemInfo::InitLibsVersions()
 	{
-		m_libXml2Version = LIBXML_DOTTED_VERSION;
+		m_libraries.reserve(4);
+		m_libraries.push_back({ "LibXML2", LIBXML_DOTTED_VERSION });
 
-#ifdef HAVE_NCURSES_H
-		m_cursesVersion = NCURSES_VERSION;
+#ifdef HAVE_NCURSES_H || defined(HAVE_NCURSES_NCURSES_H)
+		m_libraries.push_back({ "ncurses", NCURSES_VERSION });
 #endif
 
 #ifndef DISABLE_GZIP
-		m_zLibVersion = ZLIB_VERSION;
+		m_libraries.push_back({ "Gzip", ZLIB_VERSION });
 #endif
 
 #ifdef HAVE_OPENSSL
-		m_openSSLVersion = OPENSSL_FULL_VERSION_STR;
+		m_libraries.push_back({ "OpenSSL", OPENSSL_FULL_VERSION_STR });
 #endif
 
 #ifdef HAVE_LIBGNUTLS
-		m_gnuTLSLVersion = GNUTLS_VERSION;
+		m_libraries.push_back({ "GnuTLS", GNUTLS_VERSION });
 #endif
 	}
 
@@ -156,18 +164,15 @@ namespace SystemInfo
 		return m_os;
 	}
 
-	Environment SystemInfo::GetEnvironment() const
+	std::vector<Tool> SystemInfo::GetTools() const
 	{
-		Environment env;
+		std::vector<Tool> tools{
+			GetPython(),
+			GetSevenZip(),
+			GetUnrar(),
+		};
 
-		env.configPath = g_Options->GetConfigFilename();
-		env.controlIP = g_Options->GetControlIp();
-		env.controlPort = g_Options->GetControlPort();
-		env.python = GetPython();
-		env.unrar = GetUnrar();
-		env.sevenZip = GetSevenZip();
-
-		return env;
+		return tools;
 	}
 
 	Tool SystemInfo::GetPython() const
@@ -284,8 +289,10 @@ namespace SystemInfo
 		return version;
 	}
 
-	const Network& SystemInfo::GetNetwork()
+	Network SystemInfo::GetNetwork() const
 	{
+		Network network{};
+
 		try {
 			asio::connect(m_socket, m_resolver.resolve("icanhazip.com", "http"));
 
@@ -299,7 +306,7 @@ namespace SystemInfo
 			if (response.find("200 OK") == std::string::npos)
 			{
 				debug("Failed to get public and private IP: %s", buffer);
-				return m_network;
+				return network;
 			}
 
 			size_t headersEndPos = response.find("\r\n\r\n");
@@ -307,8 +314,8 @@ namespace SystemInfo
 			{
 				response = response.substr(headersEndPos);
 				Util::Trim(response);
-				m_network.publicIP = std::move(response);
-				m_network.privateIP = m_socket.local_endpoint().address().to_string();
+				network.publicIP = std::move(response);
+				network.privateIP = m_socket.local_endpoint().address().to_string();
 			}
 		}
 		catch (const std::exception& e)
@@ -316,7 +323,7 @@ namespace SystemInfo
 			debug("Failed to get public and private IP: %s", e.what());
 		}
 
-		return m_network;
+		return network;
 	}
 
 #ifdef WIN32
@@ -492,7 +499,6 @@ namespace SystemInfo
 		else
 		{
 			debug("Failed to get CPU model. Couldn't read 'hw.model'.");
-			m_cpu.model = "";
 		}
 
 		m_cpu.arch = GetCPUArch();

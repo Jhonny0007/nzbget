@@ -34,21 +34,17 @@ namespace SystemInfo
 		std::string arch;
 	};
 
+	struct Library
+	{
+		std::string name;
+		std::string version;
+	};
+
 	struct Tool
 	{
 		std::string name;
 		std::string version;
 		std::string path;
-	};
-
-	struct Environment
-	{
-		Tool python;
-		Tool sevenZip;
-		Tool unrar;
-		std::string configPath;
-		std::string controlIP;
-		int controlPort;
 	};
 
 	struct Network
@@ -68,15 +64,11 @@ namespace SystemInfo
 	public:
 		SystemInfo();
 		~SystemInfo();
-		Environment GetEnvironment() const;
+		std::vector<Tool> GetTools() const;
+		Network GetNetwork() const;
+		const std::vector<Library>& GetLibraries() const;
 		const CPU& GetCPU() const;
-		const Network& GetNetwork();
 		const OS& GetOS() const;
-		const std::string& GetOpenSSLVersion() const;
-		const std::string& GetGnuTLSVersion() const;
-		const std::string& GetZLibVersion() const;
-		const std::string& GetCursesVersion() const;
-		const std::string& GetLibXml2Version() const;
 
 	private:
 		Tool GetPython() const;
@@ -87,17 +79,14 @@ namespace SystemInfo
 		void InitLibsVersions();
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const;
-		boost::asio::io_context m_context;
-		boost::asio::ip::tcp::resolver m_resolver;
-		boost::asio::ip::tcp::socket m_socket;
-		Network m_network{};
-		CPU m_cpu{};
-		OS m_os{};
-		std::string m_openSSLVersion;
-		std::string m_gnuTLSLVersion;
-		std::string m_zLibVersion;
-		std::string m_cursesVersion;
-		std::string m_libXml2Version;
+
+		mutable boost::asio::io_context m_context;
+		mutable boost::asio::ip::tcp::resolver m_resolver;
+		mutable boost::asio::ip::tcp::socket m_socket;
+
+		CPU m_cpu;
+		OS m_os;
+		std::vector<Library> m_libraries;
 
 #ifndef WIN32
 		std::string GetCPUArch() const;
@@ -112,6 +101,12 @@ namespace SystemInfo
 		const long m_winXPBuildVersion = 2600;
 #endif
 	};
+
+	std::string ToJsonStr(const SystemInfo& sysInfo);
+	std::string ToXmlStr(const SystemInfo& sysInfo);
 }
 
+extern SystemInfo::SystemInfo* g_SystemInfo;
+
 #endif
+

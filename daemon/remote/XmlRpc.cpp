@@ -37,6 +37,7 @@
 #include "CommandScript.h"
 #include "UrlCoordinator.h"
 #include "ExtensionManager.h"
+#include "SystemInfo.h"
 
 extern void ExitProc();
 extern void Reload();
@@ -1456,15 +1457,11 @@ void StatusXmlCommand::Execute()
 
 void SysInfoXmlCommand::Execute()
 {
-	int rate = 0;
-	if (!NextParamAsInt(&rate) || rate < 0)
-	{
-		BuildErrorResponse(2, "Invalid parameter");
-		return;
-	}
+	std::string response = IsJson()
+		? SystemInfo::ToJsonStr(*g_SystemInfo)
+		: SystemInfo::ToXmlStr(*g_SystemInfo);
 
-	g_WorkState->SetSpeedLimit(rate * 1024);
-	BuildBoolResponse(true);
+	AppendResponse(response.c_str());
 }
 
 // struct[] log(idfrom, entries)

@@ -1447,6 +1447,10 @@ var Config = (new function($)
 		{
 			$ConfigData.children().hide();
 			$('.config-status', $ConfigData).show();
+			RPC.call('sysinfo', [], function(data)
+			{
+				console.log(data)
+			});
 			$ConfigTitle.text('STATUS');
 			return;
 		}

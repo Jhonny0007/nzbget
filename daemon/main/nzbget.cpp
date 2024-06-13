@@ -56,6 +56,7 @@
 #include "CommandScript.h"
 #include "YEncode.h"
 #include "ExtensionManager.h"
+#include "SystemInfo.h"
 
 #ifdef WIN32
 #include "WinService.h"
@@ -90,6 +91,7 @@ ServiceCoordinator* g_ServiceCoordinator;
 ScriptConfig* g_ScriptConfig;
 CommandScriptLog* g_CommandScriptLog;
 ExtensionManager::Manager* g_ExtensionManager;
+SystemInfo::SystemInfo* g_SystemInfo;
 
 #ifdef WIN32
 WinConsole* g_WinConsole;
@@ -201,6 +203,7 @@ private:
 	std::unique_ptr<ScriptConfig> m_scriptConfig;
 	std::unique_ptr<CommandScriptLog> m_commandScriptLog;
 	std::unique_ptr<ExtensionManager::Manager> m_extensionManager;
+	std::unique_ptr<SystemInfo::SystemInfo> m_systemInfo;
 
 #ifdef WIN32
 	std::unique_ptr<WinConsole> m_winConsole;
@@ -403,6 +406,9 @@ void NZBGet::CreateGlobals()
 
 	m_extensionManager = std::make_unique<ExtensionManager::Manager>();
 	g_ExtensionManager = m_extensionManager.get();
+
+	m_systemInfo = std::make_unique<SystemInfo::SystemInfo>();
+	g_SystemInfo = m_systemInfo.get();
 
 	m_scheduler = std::make_unique<Scheduler>();
 
