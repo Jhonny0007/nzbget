@@ -52,7 +52,6 @@ public:
 	static bool FileExists(const char* filename);
 	static bool DirectoryExists(const char* dirFilename);
 	static bool CreateDirectory(const char* dirFilename);
-	static boost::optional<std::string> GetRealPath(const std::string& path);
 
 	/* Delete empty directory */
 	static bool RemoveDirectory(const char* dirFilename);

@@ -264,16 +264,7 @@ namespace HardwareInfo
 		Util::Trim(path);
 
 		// getting the path itself without any keys
-		path = path.substr(0, path.find(" "));
-
-		auto result = FileSystem::GetRealPath(path);
-
-		if (result.has_value())
-		{
-			return result.get();
-		}
-
-		return path;
+		return path.substr(0, path.find(" "));
 	}
 
 	std::string HardwareInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parseVersion) const

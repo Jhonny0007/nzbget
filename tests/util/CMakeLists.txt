@@ -4,6 +4,7 @@ file(GLOB UtilTestSrc
 	UtilTest.cpp
 	NStringTest.cpp
 	JsonTest.cpp
+	${CMAKE_SOURCE_DIR}/main/Options.cpp 
 	${CMAKE_SOURCE_DIR}/daemon/util/FileSystem.cpp 
 	${CMAKE_SOURCE_DIR}/daemon/util/NString.cpp 
 	${CMAKE_SOURCE_DIR}/daemon/util/Util.cpp 
