@@ -137,7 +137,7 @@ namespace SystemInfo
 		m_libraries.reserve(4);
 		m_libraries.push_back({ "LibXML2", LIBXML_DOTTED_VERSION });
 
-#ifdef HAVE_NCURSES_H || defined(HAVE_NCURSES_NCURSES_H)
+#if defined(HAVE_NCURSES_H) || defined(HAVE_NCURSES_NCURSES_H)
 		m_libraries.push_back({ "ncurses", NCURSES_VERSION });
 #endif
 
