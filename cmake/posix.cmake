@@ -48,8 +48,9 @@ if(ENABLE_STATIC)
 else()
 	find_package(Threads REQUIRED)
 	find_package(LibXml2 REQUIRED)
+	find_package(cpuid REQUIRED)
 
-	set(LIBS ${LIBS} Threads::Threads LibXml2::LibXml2)
+	set(LIBS ${LIBS} Threads::Threads cpuid::cpuid LibXml2::LibXml2)
 	set(INCLUDES ${INCLUDES} ${LIBXML2_INCLUDE_DIR})
 
 	if(NOT DISABLE_TLS)
