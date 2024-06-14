@@ -78,7 +78,7 @@ namespace SystemInfo
 		struct cpu_raw_data_t raw;
 		struct cpu_id_t data;
 
-		if (cpuid_get_raw_data(&raw) < 0)
+		if (cpuid_get_raw_data(&raw) < 0 || cpu_identify(&raw, &data) < 0)
 		{
 			std::cout << "Sorry, cannot get the CPUID raw data.\n";
 			std::cout << "Error: " << cpuid_error() << std::endl;

@@ -14,7 +14,7 @@ set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Threads REQUIRED)
 find_package(LibXml2 REQUIRED)
-find_library(cpuid REQUIRED)
+find_package(cpuid REQUIRED)
 find_package(Boost REQUIRED COMPONENTS json)
 
 set(LIBS Threads::Threads cpuid::cpuid Boost::json LibXml2::LibXml2)
