@@ -20,6 +20,8 @@
 #include "nzbget.h"
 
 #include <regex>
+
+#include <libcpuid/libcpuid.h>
 #include "SystemInfo.h"
 #include "Options.h"
 #include "FileSystem.h"
@@ -35,6 +37,7 @@ namespace SystemInfo
 #ifdef HAVE_NCURSES_NCURSES_H
 #include <ncurses/ncurses.h>
 #endif
+
 	using namespace boost;
 
 #ifdef WIN32
@@ -42,6 +45,7 @@ namespace SystemInfo
 #else
 	const char* FIND_CMD = "which ";
 #endif
+
 	const size_t BUFFER_SIZE = 256;
 
 	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) {
@@ -65,6 +69,37 @@ namespace SystemInfo
 		InitCPU();
 		InitOS();
 		InitLibsVersions();
+
+		if (!cpuid_present())
+		{
+			std::cout << "Not supported" << std::endl;
+		}
+
+		struct cpu_raw_data_t raw;
+		struct cpu_id_t data;
+
+		if (cpuid_get_raw_data(&raw) < 0)
+		{
+			std::cout << "Sorry, cannot get the CPUID raw data.\n";
+			std::cout << "Error: " << cpuid_error() << std::endl;
+		}
+		printf("Found: %s CPU\n", data.vendor_str);
+		printf("Processor model is `%s'\n", data.cpu_codename);
+		printf("The full brand string is `%s'\n", data.brand_str);
+		printf("The processor has %dK L1 cache and %dK L2 cache\n", data.l1_data_cache, data.l2_cache);
+		printf("The processor has %d cores and %d logical processors\n", data.num_cores, data.num_logical_cpus);
+		printf("Supported multimedia instruction sets:\n");
+		printf("  MMX         : %s\n", data.flags[CPU_FEATURE_MMX] ? "present" : "absent");
+		printf("  MMX-extended: %s\n", data.flags[CPU_FEATURE_MMXEXT] ? "present" : "absent");
+		printf("  SSE         : %s\n", data.flags[CPU_FEATURE_SSE] ? "present" : "absent");
+		printf("  SSE2        : %s\n", data.flags[CPU_FEATURE_SSE2] ? "present" : "absent");
+		printf("  SSSE3       : %s\n", data.flags[CPU_FEATURE_SSSE3] ? "present" : "absent");
+		printf("  SSE4.1      : %s\n", data.flags[CPU_FEATURE_SSE4_1] ? "present" : "absent");
+		printf("  SSE4.2      : %s\n", data.flags[CPU_FEATURE_SSE4_2] ? "present" : "absent");
+		printf("  AES         : %s\n", data.flags[CPU_FEATURE_AES] ? "present" : "absent");
+
+		printf("CPU clock is: %d MHz (according to your OS)\n", cpu_clock_by_os());
+		printf("CPU clock is: %d MHz (tested)\n", cpu_clock_measure(200, 0));
 	}
 
 	SystemInfo::~SystemInfo()
@@ -529,7 +564,7 @@ namespace SystemInfo
 		}
 
 		debug("Failed to find OS info.");
-}
+	}
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
