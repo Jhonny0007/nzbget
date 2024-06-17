@@ -397,9 +397,9 @@ namespace SystemInfo
 		Network network{};
 
 		try {
-			asio::connect(m_socket, m_resolver.resolve("icanhazip.com", "http"));
+			asio::connect(m_socket, m_resolver.resolve("ip.nzbget.com", "http"));
 
-			std::string request = "GET / HTTP/1.1\r\nHost: icanhazip.com\r\n\r\n";
+			std::string request = "GET / HTTP/1.1\r\nHost: ip.nzbget.com\r\n\r\n";
 			asio::write(m_socket, asio::buffer(request));
 
 			char buffer[1024];
