@@ -21,13 +21,18 @@
 
 #include <regex>
 
-#include <libcpuid/libcpuid.h>
 #include "SystemInfo.h"
 #include "Options.h"
 #include "FileSystem.h"
 #include "Log.h"
 #include "Json.h"
 #include "Xml.h"
+
+#ifdef WIN32
+#include <intrin.h>
+#else
+#include <cpuid.h>
+#endif
 
 namespace SystemInfo
 {
@@ -70,36 +75,51 @@ namespace SystemInfo
 		InitOS();
 		InitLibsVersions();
 
-		if (!cpuid_present())
-		{
-			std::cout << "Not supported" << std::endl;
-		}
+		int cpuinfo[4]; // Array to store CPUID results
 
-		struct cpu_raw_data_t raw;
-		struct cpu_id_t data;
+		__cpuid(cpuinfo, 1);
 
-		if (cpuid_get_raw_data(&raw) < 0 || cpu_identify(&raw, &data) < 0)
-		{
-			std::cout << "Sorry, cannot get the CPUID raw data.\n";
-			std::cout << "Error: " << cpuid_error() << std::endl;
-		}
-		printf("Found: %s CPU\n", data.vendor_str);
-		printf("Processor model is `%s'\n", data.cpu_codename);
-		printf("The full brand string is `%s'\n", data.brand_str);
-		printf("The processor has %dK L1 cache and %dK L2 cache\n", data.l1_data_cache, data.l2_cache);
-		printf("The processor has %d cores and %d logical processors\n", data.num_cores, data.num_logical_cpus);
-		printf("Supported multimedia instruction sets:\n");
-		printf("  MMX         : %s\n", data.flags[CPU_FEATURE_MMX] ? "present" : "absent");
-		printf("  MMX-extended: %s\n", data.flags[CPU_FEATURE_MMXEXT] ? "present" : "absent");
-		printf("  SSE         : %s\n", data.flags[CPU_FEATURE_SSE] ? "present" : "absent");
-		printf("  SSE2        : %s\n", data.flags[CPU_FEATURE_SSE2] ? "present" : "absent");
-		printf("  SSSE3       : %s\n", data.flags[CPU_FEATURE_SSSE3] ? "present" : "absent");
-		printf("  SSE4.1      : %s\n", data.flags[CPU_FEATURE_SSE4_1] ? "present" : "absent");
-		printf("  SSE4.2      : %s\n", data.flags[CPU_FEATURE_SSE4_2] ? "present" : "absent");
-		printf("  AES         : %s\n", data.flags[CPU_FEATURE_AES] ? "present" : "absent");
+		uint32_t eax = cpuinfo[0];
+		uint32_t ebx = cpuinfo[1];
+		uint32_t ecx = cpuinfo[2];
+		uint32_t edx = cpuinfo[3];
 
-		printf("CPU clock is: %d MHz (according to your OS)\n", cpu_clock_by_os());
-		printf("CPU clock is: %d MHz (tested)\n", cpu_clock_measure(200, 0));
+		// Detect MMX
+		bool has_mmx = (edx & (1 << 23)) != 0;
+
+		// Detect MMX-Extended (not a separate feature, implied by MMX)
+
+		// Detect SSE2
+		bool has_sse2 = (edx & (1 << 26)) != 0;
+
+		// Detect SSE3
+		bool has_sse3 = (ecx & (1 << 0)) != 0;
+
+		// Detect SSSE3
+		bool has_ssse3 = (ecx & (1 << 9)) != 0;
+
+		// Detect SSE4.1
+		bool has_sse41 = (ecx & (1 << 19)) != 0;
+
+		// Detect SSE4.2
+		bool has_sse42 = (ecx & (1 << 20)) != 0;
+
+		// Detect AES 
+		bool has_aes = (ecx & (1 << 25)) != 0;
+
+		// Detect CRC
+		// (NOTE: CRC support is not directly signaled in CPUID, but is often tied to AVX2)
+		bool has_avx2 = (ecx & (1 << 28)) != 0;
+
+		std::cout << "CPU Features:" << std::endl;
+		std::cout << "MMX: " << (has_mmx ? "Yes" : "No") << std::endl;
+		std::cout << "SSE2: " << (has_sse2 ? "Yes" : "No") << std::endl;
+		std::cout << "SSE3: " << (has_sse3 ? "Yes" : "No") << std::endl;
+		std::cout << "SSSE3: " << (has_ssse3 ? "Yes" : "No") << std::endl;
+		std::cout << "SSE4.1: " << (has_sse41 ? "Yes" : "No") << std::endl;
+		std::cout << "SSE4.2: " << (has_sse42 ? "Yes" : "No") << std::endl;
+		std::cout << "AES: " << (has_aes ? "Yes" : "No") << std::endl;
+		std::cout << "AVX2: " << (has_avx2 ? "Yes (Likely has CRC support)" : "No") << std::endl;
 	}
 
 	SystemInfo::~SystemInfo()
