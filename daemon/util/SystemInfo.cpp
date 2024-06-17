@@ -75,14 +75,16 @@ namespace SystemInfo
 		InitOS();
 		InitLibsVersions();
 
-		int cpuinfo[4]; // Array to store CPUID results
-
-		__cpuid(cpuinfo, 1);
-
-		uint32_t eax = cpuinfo[0];
-		uint32_t ebx = cpuinfo[1];
-		uint32_t ecx = cpuinfo[2];
-		uint32_t edx = cpuinfo[3];
+		int regs[4];
+#ifdef WIN32
+		__cpuid(regs, 1);
+#else
+		__cpuid(1, regs[0], regs[1], regs[2], regs[3]);
+#endif
+		uint32_t eax = regs[0];
+		uint32_t ebx = regs[1];
+		uint32_t ecx = regs[2];
+		uint32_t edx = regs[3];
 
 		// Detect MMX
 		bool has_mmx = (edx & (1 << 23)) != 0;
@@ -198,8 +200,8 @@ namespace SystemInfo
 		Xml::AddNewNode(osNode, "Version", "string", os.name.c_str());
 		Xml::AddNewNode(networkNode, "PublicIP", "string", network.publicIP.c_str());
 		Xml::AddNewNode(networkNode, "PrivateIP", "string", network.privateIP.c_str());
-		Xml::AddNewNode(cpuNode, "Model", "string", network.publicIP.c_str());
-		Xml::AddNewNode(cpuNode, "PrivateIP", "string", network.privateIP.c_str());
+		Xml::AddNewNode(cpuNode, "Model", "string", cpu.model.c_str());
+		Xml::AddNewNode(cpuNode, "Arch", "string", cpu.arch.c_str());
 
 		for (const auto& tool : tools)
 		{
@@ -584,7 +586,7 @@ namespace SystemInfo
 		}
 
 		debug("Failed to find OS info.");
-	}
+}
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
