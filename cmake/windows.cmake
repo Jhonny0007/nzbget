@@ -14,10 +14,9 @@ set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Threads REQUIRED)
 find_package(LibXml2 REQUIRED)
-find_package(cpuid REQUIRED)
 find_package(Boost REQUIRED COMPONENTS json)
 
-set(LIBS Threads::Threads cpuid::cpuid Boost::json LibXml2::LibXml2)
+set(LIBS Threads::Threads Boost::json LibXml2::LibXml2)
 set(INCLUDES ${Boost_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
 if(NOT DISABLE_TLS)
