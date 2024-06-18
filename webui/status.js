@@ -65,6 +65,11 @@ var Status = (new function($)
 		/^\d+(h|m)?$/i, // relative minutes or hours
 	];
 
+	this.getStatus = function()
+	{
+		return status;
+	}
+
 	this.init = function()
 	{
 		$CHPauseDownload = $('#CHPauseDownload');
@@ -517,7 +522,6 @@ var StatDialog = (new function($)
 	var $StatDialog_DataTotalDownloaded;
 	var $StatDialog_DataRemaining;
 	var $StatDialog_DataFree;
-	var $StatDialog_DataTotal;
 	var $StatDialog_DataAverageSpeed;
 	var $StatDialog_DataCurrentSpeed;
 	var $StatDialog_DataSpeedLimit;
@@ -566,7 +570,6 @@ var StatDialog = (new function($)
 		$StatDialog_DataTotalDownloaded = $('#StatDialog_DataTotalDownloaded');
 		$StatDialog_DataRemaining = $('#StatDialog_DataRemaining');
 		$StatDialog_DataFree = $('#StatDialog_DataFree');
-		$StatDialog_DataTotal = $('#StatDialog_DataTotal');
 		$StatDialog_DataAverageSpeed = $('#StatDialog_DataAverageSpeed');
 		$StatDialog_DataCurrentSpeed = $('#StatDialog_DataCurrentSpeed');
 		$StatDialog_DataSpeedLimit = $('#StatDialog_DataSpeedLimit');
@@ -708,7 +711,6 @@ var StatDialog = (new function($)
 		$StatDialog_DataTotalDownloaded.html(Util.formatSizeMB(status.DownloadedSizeMB));
 		$StatDialog_DataRemaining.html(Util.formatSizeMB(status.RemainingSizeMB));
 		$StatDialog_DataFree.html(Util.formatSizeMB(status.FreeDiskSpaceMB));
-		$StatDialog_DataTotal.html(Util.formatSizeMB(status.TotalDiskSpaceMB));
 		$StatDialog_DataAverageSpeed.html(Util.formatSpeed(status.AverageDownloadRate));
 		$StatDialog_DataCurrentSpeed.html(Util.formatSpeed(status.DownloadRate));
 		$StatDialog_DataSpeedLimit.html(Util.formatSpeed(status.DownloadLimit));

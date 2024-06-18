@@ -52,6 +52,7 @@ var Options = (new function($)
 
 	this.init = function()
 	{
+		SystemInfo.init();
 	}
 
 	this.update = function()
@@ -1443,14 +1444,11 @@ var Config = (new function($)
 			return;
 		}
 
-		if (sectionId === 'Config-Status')
+		if (sectionId === SystemInfo.id)
 		{
 			$ConfigData.children().hide();
 			$('.config-status', $ConfigData).show();
-			RPC.call('sysinfo', [], function(data)
-			{
-				console.log(data)
-			});
+			SystemInfo.loadSystemInfo();
 			$ConfigTitle.text('STATUS');
 			return;
 		}
@@ -3408,6 +3406,8 @@ var ExecScriptDialog = (new function($)
 
 }(jQuery));
 
+/*** EXTENSION MANAGET *******************************************************/
+
 function Extension()
 {
 	this.id = '';
@@ -4258,4 +4258,105 @@ var ExtensionManager = (new function($)
 			sortExtensionsByOrder(installedExtensions, splitString(order));
 		}
 	}
+}(jQuery))
+
+
+/*** STATUS PAGE *******************************************************/
+
+var SystemInfo = (new function($)
+{
+	this.id = "Config-SystemInfo";
+
+	var $SysInfo_OS;
+	var $SysInfo_AppVersion;
+	var $SysInfo_Uptime;
+	var $SysInfo_ConfPath;
+	var $SysInfo_CPUModel;
+	var $SysInfo_Arch;
+	var $SysInfo_PrivateIP;
+	var $SysInfo_PublicIP;
+	var $SysInfo_DiskSpace;
+	var $SysInfo_TotalDiskSpace;
+	var $SysInfo_ArticleCache;
+	var $SysInfo_ToolsTable;
+	var $SysInfo_LibrariesTable;
+
+	this.init = function()
+	{
+		$SysInfo_OS = $('#SysInfo_OS');
+		$SysInfo_AppVersion = $('#SysInfo_AppVersion');
+		$SysInfo_Uptime = $('#SysInfo_Uptime');
+		$SysInfo_ConfPath = $('#SysInfo_ConfPath');
+		$SysInfo_CPUModel = $('#SysInfo_CPUModel');
+		$SysInfo_Arch = $('#SysInfo_Arch');
+		$SysInfo_PrivateIP = $('#SysInfo_PrivateIP');
+		$SysInfo_PublicIP = $('#SysInfo_PublicIP');
+		$SysInfo_DiskSpace = $('#SysInfo_DiskSpace');
+		$SysInfo_TotalDiskSpace = $('#SysInfo_TotalDiskSpace');
+		$SysInfo_ArticleCache = $('#SysInfo_ArticleCache');
+		$SysInfo_ToolsTable = $('#SysInfo_ToolsTable');
+		$SysInfo_LibrariesTable = $('#SysInfo_LibrariesTable');
+	}
+
+	this.loadSystemInfo = function()
+	{
+		RPC.call('sysinfo', [], 
+			function (sysInfo)
+			{
+				render(sysInfo);
+			},
+			function (err)
+			{
+				console.error(err);
+			}
+		);
+	}
+
+	function render(sysInfo)
+	{
+		console.log(sysInfo);
+		console.log(Options)
+		console.log(Status.getStatus())
+		$SysInfo_ToolsTable.empty();
+		$SysInfo_LibrariesTable.empty();
+		$SysInfo_OS.text(sysInfo['OS'].Name + ' ' + sysInfo['OS'].Version);
+		$SysInfo_CPUModel.text(sysInfo['CPU'].Model);
+		$SysInfo_Arch.text(sysInfo['CPU'].Arch);
+		$SysInfo_PrivateIP.text(sysInfo['Network'].PrivateIP);
+		$SysInfo_PublicIP.text(sysInfo['Network'].PublicIP);
+		$SysInfo_AppVersion.text(Options.option('Version'));
+		$SysInfo_Uptime.text(Util.formatTimeHMS(Status.getStatus()['UpTimeSec']));
+		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
+		$SysInfo_DiskSpace.text(Util.formatSizeMB(Status.getStatus()['FreeDiskSpaceMB']));
+		$SysInfo_TotalDiskSpace.text(Util.formatSizeMB(Status.getStatus()['TotalDiskSpaceMB']));
+		$SysInfo_ArticleCache.text(Util.formatSizeMB(Options.option('ArticleCache')));
+		sysInfo['Tools'].forEach(function(tool)
+			{
+				var tr = $('<tr>');
+				var tdName = $('<td>');
+				var tdVersion = $('<td>');
+				var tdPath = $('<td>');
+				tdName.text(tool.Name);
+				tdVersion.text(tool.Version);
+				tdPath.text(tool.Path);
+				tr.append(tdName);
+				tr.append(tdVersion);
+				tr.append(tdPath);
+				$SysInfo_ToolsTable.append(tr);
+			}
+		);
+		sysInfo['Libraries'].forEach(function(lib)
+			{
+				var tr = $('<tr>');
+				var tdName = $('<td>');
+				var tdVersion = $('<td>');
+				tdName.text(lib.Name);
+				tdVersion.text(lib.Version);
+				tr.append(tdName);
+				tr.append(tdVersion);
+				$SysInfo_LibrariesTable.append(tr);
+			}
+		);
+	}
+
 }(jQuery))

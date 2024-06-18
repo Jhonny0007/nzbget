@@ -1419,8 +1419,9 @@ void StatusXmlCommand::Execute()
 	auto res = FileSystem::GetDiskState(g_Options->GetDestDir());
 	if (res.has_value())
 	{
-		freeDiskSpace = static_cast<int64>(res.get().available);
-		totalDiskSpace = static_cast<int64>(res.get().total);
+		const auto& value = res.value();
+		freeDiskSpace = static_cast<int64>(value.available);
+		totalDiskSpace = static_cast<int64>(value.total);
 	}
 	Util::SplitInt64(freeDiskSpace, &freeDiskSpaceHi, &freeDiskSpaceLo);
 	Util::SplitInt64(totalDiskSpace, &totalDiskSpaceHi, &totalDiskSpaceLo);
