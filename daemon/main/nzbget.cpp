@@ -320,8 +320,9 @@ void NZBGet::Init()
 		info("nzbget %s remote-mode", Util::VersionRevision());
 	}
 
+	const char* controlIp = !strcmp(g_Options->GetControlIp(), "0.0.0.0") ? "127.0.0.1" : g_Options->GetControlIp();
 	info("Using %s", g_Options->GetConfigFilename());
-	info("Access on %s:%i", g_Options->GetControlIp(), g_Options->GetControlPort());
+	info("Access on %s:%i", controlIp, g_Options->GetControlPort());
 
 	m_reloading = false;
 
