@@ -639,7 +639,6 @@ var Config = (new function($)
 	var $ConfigTabBadgeEmpty;
 	var $ConfigContent;
 	var $ConfigInfo;
-	var $ConfigStatus;
 	var $ConfigTitle;
 	var $ConfigTable;
 	var $ViewButton;
@@ -669,7 +668,6 @@ var Config = (new function($)
 		$ConfigTabBadgeEmpty = $('#ConfigTabBadgeEmpty');
 		$ConfigContent = $('#ConfigContent');
 		$ConfigInfo = $('#ConfigInfo');
-		$ConfigStatus = $('#ConfigStatus');
 		$ConfigTitle = $('#ConfigTitle');
 		$ViewButton = $('#Config_ViewButton');
 		$LeaveConfigDialog = $('#LeaveConfigDialog');
@@ -4281,12 +4279,14 @@ var SystemInfo = (new function($)
 	var $SysInfo_Arch;
 	var $SysInfo_PrivateIP;
 	var $SysInfo_PublicIP;
-	var $SysInfo_DiskSpace;
+	var $SysInfo_FreeDiskSpace;
 	var $SysInfo_TotalDiskSpace;
 	var $SysInfo_ArticleCache;
 	var $SysInfo_ToolsTable;
 	var $SysInfo_LibrariesTable;
 	var $SysInfo_NewsServersTable;
+
+	var _this = this;
 
 	this.init = function()
 	{
@@ -4298,12 +4298,13 @@ var SystemInfo = (new function($)
 		$SysInfo_Arch = $('#SysInfo_Arch');
 		$SysInfo_PrivateIP = $('#SysInfo_PrivateIP');
 		$SysInfo_PublicIP = $('#SysInfo_PublicIP');
-		$SysInfo_DiskSpace = $('#SysInfo_DiskSpace');
+		$SysInfo_FreeDiskSpace = $('#SysInfo_FreeDiskSpace');
 		$SysInfo_TotalDiskSpace = $('#SysInfo_TotalDiskSpace');
 		$SysInfo_ArticleCache = $('#SysInfo_ArticleCache');
 		$SysInfo_ToolsTable = $('#SysInfo_ToolsTable');
 		$SysInfo_LibrariesTable = $('#SysInfo_LibrariesTable');
 		$SysInfo_NewsServersTable = $('#SysInfo_NewsServersTable');
+		Status.addStatusSub(this);
 	}
 
 	this.loadSystemInfo = function()
@@ -4320,12 +4321,15 @@ var SystemInfo = (new function($)
 		);
 	}
 
+	this.update = function(status)
+	{
+		$SysInfo_Uptime.text(Util.formatTimeHMS(status['UpTimeSec']));
+		$SysInfo_FreeDiskSpace.text(Util.formatSizeMB(status['FreeDiskSpaceMB']));
+		$SysInfo_TotalDiskSpace.text(Util.formatSizeMB(status['TotalDiskSpaceMB']));
+	}
+
 	function render(sysInfo)
 	{
-		console.log(sysInfo);
-		console.log(Options)
-		console.log(Status.getStatus())
-
 		$SysInfo_ToolsTable.empty();
 		$SysInfo_LibrariesTable.empty();
 		$SysInfo_NewsServersTable.empty();
@@ -4335,12 +4339,10 @@ var SystemInfo = (new function($)
 		$SysInfo_PrivateIP.text(sysInfo['Network'].PrivateIP);
 		$SysInfo_PublicIP.text(sysInfo['Network'].PublicIP);
 		$SysInfo_AppVersion.text(Options.option('Version'));
-		$SysInfo_Uptime.text(Util.formatTimeHMS(Status.getStatus()['UpTimeSec']));
 		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
-		$SysInfo_DiskSpace.text(Util.formatSizeMB(Status.getStatus()['FreeDiskSpaceMB']));
-		$SysInfo_TotalDiskSpace.text(Util.formatSizeMB(Status.getStatus()['TotalDiskSpaceMB']));
 		$SysInfo_ArticleCache.text(Util.formatSizeMB(Options.option('ArticleCache')));
 
+		_this.update(Status.getStatus());
 		renderTools(sysInfo['Tools']);
 		renderLibraries(sysInfo['Libraries']);
 		renderNewsServers(Status.getStatus()['NewsServers'])
