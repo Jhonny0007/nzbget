@@ -408,7 +408,7 @@ namespace SystemInfo
 			std::string response(buffer, totalSize);
 			if (response.find("200 OK") == std::string::npos)
 			{
-				debug("Failed to get public and private IP: %s", buffer);
+				warn("Failed to get public and private IP: %s", buffer);
 				return network;
 			}
 
@@ -423,7 +423,7 @@ namespace SystemInfo
 		}
 		catch (const std::exception& e)
 		{
-			debug("Failed to get public and private IP: %s", e.what());
+			warn("Failed to get public and private IP: %s", e.what());
 		}
 
 		return network;
@@ -447,7 +447,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			debug("Failed to get CPU model. Couldn't read Windows Registry.");
+			warn("Failed to get CPU model. Couldn't read Windows Registry.");
 		}
 
 		if (Util::RegReadStr(
@@ -462,7 +462,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			debug("Failed to get CPU arch. Couldn't read Windows Registry.");
+			warn("Failed to get CPU arch. Couldn't read Windows Registry.");
 		}
 	}
 
@@ -501,7 +501,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			debug("Failed to get OS version. Couldn't read Windows Registry.");
+			warn("Failed to get OS version. Couldn't read Windows Registry.");
 		}
 
 		m_os.name = "Windows";
@@ -522,7 +522,7 @@ namespace SystemInfo
 		std::ifstream cpuinfo("/proc/cpuinfo");
 		if (!cpuinfo.is_open())
 		{
-			debug("Failed to read CPU model. Couldn't read '/proc/cpuinfo'.");
+			warn("Failed to read CPU model. Couldn't read '/proc/cpuinfo'.");
 			return;
 		}
 
@@ -537,7 +537,7 @@ namespace SystemInfo
 			}
 		}
 
-		debug("Failed to find CPU model.");
+		warn("Failed to find CPU model.");
 	}
 
 	void SystemInfo::InitOS()
@@ -545,7 +545,7 @@ namespace SystemInfo
 		std::ifstream osInfo("/etc/os-release");
 		if (!osInfo.is_open())
 		{
-			debug("Failed to get OS info. Couldn't read '/etc/os-release'.");
+			warn("Failed to get OS info. Couldn't read '/etc/os-release'.");
 			return;
 		}
 
@@ -585,7 +585,7 @@ namespace SystemInfo
 			}
 		}
 
-		debug("Failed to find OS info.");
+		warn("Failed to find OS info.");
 }
 #endif
 
@@ -601,7 +601,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			debug("Failed to get CPU model. Couldn't read 'hw.model'.");
+			warn("Failed to get CPU model. Couldn't read 'hw.model'.");
 		}
 
 		m_cpu.arch = GetCPUArch();
@@ -618,7 +618,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			debug("Failed to get OS name. Couldn't read 'kern.ostype'.");
+			warn("Failed to get OS name. Couldn't read 'kern.ostype'.");
 		}
 
 		len = BUFFER_SIZE;
@@ -630,7 +630,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			debug("Failed to get OS version. Failed to read 'kern.osrelease'.");
+			warn("Failed to get OS version. Failed to read 'kern.osrelease'.");
 		}
 	}
 #endif
@@ -647,7 +647,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			debug("Failed to get CPU model. Couldn't read 'machdep.cpu.brand_string'.");
+			warn("Failed to get CPU model. Couldn't read 'machdep.cpu.brand_string'.");
 		}
 
 		m_cpu.arch = GetCPUArch();
@@ -658,7 +658,7 @@ namespace SystemInfo
 		FILE* pipe = popen("sw_vers", "r");
 		if (!pipe)
 		{
-			debug("Failed to get OS info. Couldn't read 'sw_vers'.");
+			warn("Failed to get OS info. Couldn't read 'sw_vers'.");
 			return;
 		}
 
@@ -701,7 +701,7 @@ namespace SystemInfo
 		FILE* pipe = popen(cmd, "r");
 		if (!pipe)
 		{
-			debug("Failed to get CPU arch. Couldn't read 'uname -m'.");
+			warn("Failed to get CPU arch. Couldn't read 'uname -m'.");
 
 			return "";
 		}
@@ -719,7 +719,7 @@ namespace SystemInfo
 
 		pclose(pipe);
 
-		debug("Failed to find CPU arch.");
+		warn("Failed to find CPU arch.");
 
 		return "";
 	}
