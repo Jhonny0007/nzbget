@@ -92,6 +92,12 @@ var Options = (new function($)
 		return opt ? opt.Value : null;
 	}
 
+	this.getServerNameById = function(id)
+	{
+		var server = findOption(this.options, 'Server' + id + '.Name');
+		return server ? server.Value : '';
+	}
+
 	function initCategories()
 	{
 		_this.categories = [];
@@ -4280,6 +4286,7 @@ var SystemInfo = (new function($)
 	var $SysInfo_ArticleCache;
 	var $SysInfo_ToolsTable;
 	var $SysInfo_LibrariesTable;
+	var $SysInfo_NewsServersTable;
 
 	this.init = function()
 	{
@@ -4296,6 +4303,7 @@ var SystemInfo = (new function($)
 		$SysInfo_ArticleCache = $('#SysInfo_ArticleCache');
 		$SysInfo_ToolsTable = $('#SysInfo_ToolsTable');
 		$SysInfo_LibrariesTable = $('#SysInfo_LibrariesTable');
+		$SysInfo_NewsServersTable = $('#SysInfo_NewsServersTable');
 	}
 
 	this.loadSystemInfo = function()
@@ -4317,8 +4325,10 @@ var SystemInfo = (new function($)
 		console.log(sysInfo);
 		console.log(Options)
 		console.log(Status.getStatus())
+
 		$SysInfo_ToolsTable.empty();
 		$SysInfo_LibrariesTable.empty();
+		$SysInfo_NewsServersTable.empty();
 		$SysInfo_OS.text(sysInfo['OS'].Name + ' ' + sysInfo['OS'].Version);
 		$SysInfo_CPUModel.text(sysInfo['CPU'].Model);
 		$SysInfo_Arch.text(sysInfo['CPU'].Arch);
@@ -4330,7 +4340,15 @@ var SystemInfo = (new function($)
 		$SysInfo_DiskSpace.text(Util.formatSizeMB(Status.getStatus()['FreeDiskSpaceMB']));
 		$SysInfo_TotalDiskSpace.text(Util.formatSizeMB(Status.getStatus()['TotalDiskSpaceMB']));
 		$SysInfo_ArticleCache.text(Util.formatSizeMB(Options.option('ArticleCache')));
-		sysInfo['Tools'].forEach(function(tool)
+
+		renderTools(sysInfo['Tools']);
+		renderLibraries(sysInfo['Libraries']);
+		renderNewsServers(Status.getStatus()['NewsServers'])
+	}
+
+	function renderTools(tools)
+	{
+		tools.forEach(function(tool)
 			{
 				var tr = $('<tr>');
 				var tdName = $('<td>');
@@ -4345,7 +4363,11 @@ var SystemInfo = (new function($)
 				$SysInfo_ToolsTable.append(tr);
 			}
 		);
-		sysInfo['Libraries'].forEach(function(lib)
+	}
+
+	function renderLibraries(libs)
+	{
+		libs.forEach(function(lib)
 			{
 				var tr = $('<tr>');
 				var tdName = $('<td>');
@@ -4355,6 +4377,49 @@ var SystemInfo = (new function($)
 				tr.append(tdName);
 				tr.append(tdVersion);
 				$SysInfo_LibrariesTable.append(tr);
+			}
+		);
+	}
+
+	function renderNewsServers(newsServers)
+	{
+		newsServers.forEach(function(newsServer)
+			{
+				var serverName = Options.getServerNameById(newsServer.ID);
+				if (serverName)
+				{
+					var tr = $('<tr>');
+					var tdName = $('<td style="vertical-align: middle;">');
+					var tdActive = $('<td style="vertical-align: middle;">');
+					var tdTests = $('<td>');
+					var circle = $('<div>');
+					var testConnectionBtn = $('<button type="button" class="btn btn-default"><i class="material-icon" title="Test connection">cell_tower</i></button>');
+					testConnectionBtn.attr({ 'data-multiid': newsServer.ID });
+					testConnectionBtn.off('click').on('click', function()
+						{
+							Config.testConnection(this, "Server", newsServer.ID);
+						}
+					);
+
+					tdName.text(serverName);
+					if (newsServer.Active)
+					{
+						circle.addClass('green-circle');
+						circle.attr({ title: 'Active' });
+					}
+					else
+					{
+						circle.addClass('red-circle');
+						circle.attr({ title: 'Not active' });
+					}
+
+					tdActive.append(circle);
+					tdTests.append(testConnectionBtn);
+					tr.append(tdName);
+					tr.append(tdActive);
+					tr.append(tdTests);
+					$SysInfo_NewsServersTable.append(tr);
+				}
 			}
 		);
 	}
