@@ -4409,7 +4409,6 @@ var SystemInfo = (new function($)
 					var tdName = $('<td style="vertical-align: middle;">');
 					var tdActive = $('<td style="vertical-align: middle;">');
 					var tdTests = $('<td>');
-					var circle = $('<div>');
 					var testConnectionBtn = $('<button type="button" class="btn btn-default"><i class="material-icon" title="Test connection">cell_tower</i></button>');
 					testConnectionBtn.attr({ 'data-multiid': newsServer.ID });
 					testConnectionBtn.off('click').on('click', function()
@@ -4421,16 +4420,15 @@ var SystemInfo = (new function($)
 					tdName.text(serverName);
 					if (newsServer.Active)
 					{
-						circle.addClass('green-circle');
-						circle.attr({ title: 'Active' });
+						tdActive.text('Yes');
+						tdActive.css('color', '#468847');
 					}
 					else
 					{
-						circle.addClass('red-circle');
-						circle.attr({ title: 'Not active' });
+						tdActive.text('No');
+						tdActive.css('color', '#da4f49');
 					}
 
-					tdActive.append(circle);
 					tdTests.append(testConnectionBtn);
 					tr.append(tdName);
 					tr.append(tdActive);
