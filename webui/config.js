@@ -4333,19 +4333,29 @@ var SystemInfo = (new function($)
 		$SysInfo_ToolsTable.empty();
 		$SysInfo_LibrariesTable.empty();
 		$SysInfo_NewsServersTable.empty();
+
 		$SysInfo_OS.text(sysInfo['OS'].Name + ' ' + sysInfo['OS'].Version);
 		$SysInfo_CPUModel.text(sysInfo['CPU'].Model);
 		$SysInfo_Arch.text(sysInfo['CPU'].Arch);
 		$SysInfo_PrivateIP.text(sysInfo['Network'].PrivateIP);
 		$SysInfo_PublicIP.text(sysInfo['Network'].PublicIP);
-		$SysInfo_AppVersion.text(Options.option('Version'));
+
 		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
 		$SysInfo_ArticleCache.text(Util.formatSizeMB(Options.option('ArticleCache')));
 
 		_this.update(Status.getStatus());
+
+		renderAppVersion(Options.option('Version'));
 		renderTools(sysInfo['Tools']);
 		renderLibraries(sysInfo['Libraries']);
 		renderNewsServers(Status.getStatus()['NewsServers'])
+	}
+
+	function renderAppVersion(version)
+	{
+		$SysInfo_AppVersion.text(version);
+		var updateBtn = $('<button type="button" title="Check for Updates" class="btn btn-default" style="margin: 0 10px;" onclick="Config.checkUpdates()"><i class="material-icon">update</i></>');
+		$SysInfo_AppVersion.append(updateBtn);
 	}
 
 	function renderTools(tools)
