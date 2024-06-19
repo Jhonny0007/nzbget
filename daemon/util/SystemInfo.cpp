@@ -47,7 +47,8 @@ namespace SystemInfo
 
 	const size_t BUFFER_SIZE = 256;
 
-	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) {
+	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) 
+	{
 		// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
 		// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
 		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
@@ -58,7 +59,7 @@ namespace SystemInfo
 		}
 
 		return std::string("");
-		};
+	};
 
 	SystemInfo::SystemInfo()
 		: m_context{}

@@ -4322,8 +4322,7 @@ var SystemInfo = (new function($)
 	this.update = function(status)
 	{
 		$SysInfo_Uptime.text(Util.formatTimeHMS(status['UpTimeSec']));
-		$SysInfo_FreeDiskSpace.text(Util.formatSizeMB(status['FreeDiskSpaceMB']));
-		$SysInfo_TotalDiskSpace.text(Util.formatSizeMB(status['TotalDiskSpaceMB']));
+		renderDiskSpace(status['FreeDiskSpaceMB'], status['TotalDiskSpaceMB'])
 	}
 
 	function render(sysInfo)
@@ -4335,8 +4334,6 @@ var SystemInfo = (new function($)
 		$SysInfo_OS.text(sysInfo['OS'].Name + ' ' + sysInfo['OS'].Version);
 		$SysInfo_CPUModel.text(sysInfo['CPU'].Model);
 		$SysInfo_Arch.text(sysInfo['CPU'].Arch);
-		$SysInfo_IP.text(sysInfo['Network'].PrivateIP + ' / ' + sysInfo['Network'].PublicIP);
-
 		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
 		$SysInfo_ArticleCache.text(Util.formatSizeMB(Options.option('ArticleCache')));
 
@@ -4347,6 +4344,13 @@ var SystemInfo = (new function($)
 		renderTools(sysInfo['Tools']);
 		renderLibraries(sysInfo['Libraries']);
 		renderNewsServers(Status.getStatus()['NewsServers'])
+	}
+
+	function renderDiskSpace(free, total)
+	{
+		var percents = (free / total * 100).toFixed(1) + ' %';
+		$SysInfo_FreeDiskSpace.text(Util.formatSizeMB(free) + ' / ' + percents);
+		$SysInfo_TotalDiskSpace.text(Util.formatSizeMB(total));
 	}
 
 	function renderIP(network)
