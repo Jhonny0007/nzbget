@@ -4433,9 +4433,10 @@ var SystemInfo = (new function($)
 			var testConnectionIcon = $('<i class="material-icon" title="Test connection">cell_tower</i>');
 			testConnectionBtn.append(testConnectionIcon);
 			testConnectionBtn.attr({ 'data-multiid': server.id });
-			testConnectionBtn.off('click').on('click', function () {
-				Config.testConnection(this, "Server", server.id);
-			}
+			testConnectionBtn.on('click', function () 
+				{
+					Config.testConnection(this, "Server", server.id);
+				}
 			);
 
 			tdName.text(server.host + ' : ' + server.port + '(' + server.connections + ')');
