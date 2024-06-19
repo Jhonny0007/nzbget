@@ -4277,8 +4277,7 @@ var SystemInfo = (new function($)
 	var $SysInfo_ConfPath;
 	var $SysInfo_CPUModel;
 	var $SysInfo_Arch;
-	var $SysInfo_PrivateIP;
-	var $SysInfo_PublicIP;
+	var $SysInfo_IP;
 	var $SysInfo_FreeDiskSpace;
 	var $SysInfo_TotalDiskSpace;
 	var $SysInfo_ArticleCache;
@@ -4296,8 +4295,7 @@ var SystemInfo = (new function($)
 		$SysInfo_ConfPath = $('#SysInfo_ConfPath');
 		$SysInfo_CPUModel = $('#SysInfo_CPUModel');
 		$SysInfo_Arch = $('#SysInfo_Arch');
-		$SysInfo_PrivateIP = $('#SysInfo_PrivateIP');
-		$SysInfo_PublicIP = $('#SysInfo_PublicIP');
+		$SysInfo_IP = $('#SysInfo_IP');
 		$SysInfo_FreeDiskSpace = $('#SysInfo_FreeDiskSpace');
 		$SysInfo_TotalDiskSpace = $('#SysInfo_TotalDiskSpace');
 		$SysInfo_ArticleCache = $('#SysInfo_ArticleCache');
@@ -4337,8 +4335,7 @@ var SystemInfo = (new function($)
 		$SysInfo_OS.text(sysInfo['OS'].Name + ' ' + sysInfo['OS'].Version);
 		$SysInfo_CPUModel.text(sysInfo['CPU'].Model);
 		$SysInfo_Arch.text(sysInfo['CPU'].Arch);
-		$SysInfo_PrivateIP.text(sysInfo['Network'].PrivateIP);
-		$SysInfo_PublicIP.text(sysInfo['Network'].PublicIP);
+		$SysInfo_IP.text(sysInfo['Network'].PrivateIP + ' / ' + sysInfo['Network'].PublicIP);
 
 		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
 		$SysInfo_ArticleCache.text(Util.formatSizeMB(Options.option('ArticleCache')));
