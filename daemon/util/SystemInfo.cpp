@@ -20,7 +20,7 @@
 #include "nzbget.h"
 
 #include <regex>
-
+#include <boost/version.hpp>
 #include "SystemInfo.h"
 #include "Options.h"
 #include "FileSystem.h"
@@ -131,105 +131,6 @@ namespace SystemInfo
 			m_socket.close();
 		}
 	}
-
-	std::string ToJsonStr(const SystemInfo& sysInfo)
-	{
-		Json::JsonObject json;
-		Json::JsonObject osJson;
-		Json::JsonObject networkJson;
-		Json::JsonObject cpuJson;
-		Json::JsonArray toolsJson;
-		Json::JsonArray librariesJson;
-
-		const auto& os = sysInfo.GetOS();
-		const auto& network = sysInfo.GetNetwork();
-		const auto& cpu = sysInfo.GetCPU();
-		const auto& tools = sysInfo.GetTools();
-		const auto& libraries = sysInfo.GetLibraries();
-
-		osJson["Name"] = os.name;
-		osJson["Version"] = os.version;
-		networkJson["PublicIP"] = network.publicIP;
-		networkJson["PrivateIP"] = network.privateIP;
-		cpuJson["Model"] = cpu.model;
-		cpuJson["Arch"] = cpu.arch;
-
-		for (const auto& tool : tools)
-		{
-			Json::JsonObject toolJson;
-			toolJson["Name"] = tool.name;
-			toolJson["Version"] = tool.version;
-			toolJson["Path"] = tool.path;
-			toolsJson.push_back(std::move(toolJson));
-		}
-
-		for (const auto& library : libraries)
-		{
-			Json::JsonObject libraryJson;
-			libraryJson["Name"] = library.name;
-			libraryJson["Version"] = library.version;
-			librariesJson.push_back(std::move(libraryJson));
-		}
-
-		json["OS"] = std::move(osJson);
-		json["CPU"] = std::move(cpuJson);
-		json["Network"] = std::move(networkJson);
-		json["Tools"] = std::move(toolsJson);
-		json["Libraries"] = std::move(librariesJson);
-
-		return Json::Serialize(json);
-	}
-
-	std::string ToXmlStr(const SystemInfo& sysInfo)
-	{
-		xmlNodePtr rootNode = xmlNewNode(NULL, BAD_CAST "value");
-		xmlNodePtr structNode = xmlNewNode(NULL, BAD_CAST "struct");
-		xmlNodePtr osNode = xmlNewNode(NULL, BAD_CAST "OS");
-		xmlNodePtr networkNode = xmlNewNode(NULL, BAD_CAST "Network");
-		xmlNodePtr cpuNode = xmlNewNode(NULL, BAD_CAST "CPU");
-		xmlNodePtr toolsNode = xmlNewNode(NULL, BAD_CAST "Tools");
-		xmlNodePtr librariesNode = xmlNewNode(NULL, BAD_CAST "Libraries");
-
-		const auto& os = sysInfo.GetOS();
-		const auto& network = sysInfo.GetNetwork();
-		const auto& cpu = sysInfo.GetCPU();
-		const auto& tools = sysInfo.GetTools();
-		const auto& libraries = sysInfo.GetLibraries();
-
-		Xml::AddNewNode(osNode, "Name", "string", os.name.c_str());
-		Xml::AddNewNode(osNode, "Version", "string", os.name.c_str());
-		Xml::AddNewNode(networkNode, "PublicIP", "string", network.publicIP.c_str());
-		Xml::AddNewNode(networkNode, "PrivateIP", "string", network.privateIP.c_str());
-		Xml::AddNewNode(cpuNode, "Model", "string", cpu.model.c_str());
-		Xml::AddNewNode(cpuNode, "Arch", "string", cpu.arch.c_str());
-
-		for (const auto& tool : tools)
-		{
-			Xml::AddNewNode(toolsNode, "Name", "string", tool.name.c_str());
-			Xml::AddNewNode(toolsNode, "Version", "string", tool.version.c_str());
-			Xml::AddNewNode(toolsNode, "Path", "string", tool.path.c_str());
-		}
-
-		for (const auto& library : libraries)
-		{
-			Xml::AddNewNode(librariesNode, "Name", "string", library.name.c_str());
-			Xml::AddNewNode(librariesNode, "Version", "string", library.version.c_str());
-		}
-
-		xmlAddChild(structNode, osNode);
-		xmlAddChild(structNode, networkNode);
-		xmlAddChild(structNode, cpuNode);
-		xmlAddChild(structNode, toolsNode);
-		xmlAddChild(structNode, librariesNode);
-		xmlAddChild(rootNode, structNode);
-
-		std::string result = Xml::Serialize(rootNode);
-
-		xmlFreeNode(rootNode);
-
-		return result;
-	}
-
 	const std::vector<Library>& SystemInfo::GetLibraries() const
 	{
 		return m_libraries;
@@ -254,6 +155,10 @@ namespace SystemInfo
 
 #ifdef HAVE_LIBGNUTLS
 		m_libraries.push_back({ "GnuTLS", GNUTLS_VERSION });
+#endif
+
+#ifdef BOOST_LIB_VERSION
+		m_libraries.push_back({ "Boost", BOOST_LIB_VERSION });
 #endif
 	}
 
@@ -586,7 +491,7 @@ namespace SystemInfo
 		}
 
 		warn("Failed to find OS info.");
-}
+	}
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
@@ -724,5 +629,103 @@ namespace SystemInfo
 		return "";
 	}
 #endif
+
+	std::string ToJsonStr(const SystemInfo& sysInfo)
+	{
+		Json::JsonObject json;
+		Json::JsonObject osJson;
+		Json::JsonObject networkJson;
+		Json::JsonObject cpuJson;
+		Json::JsonArray toolsJson;
+		Json::JsonArray librariesJson;
+
+		const auto& os = sysInfo.GetOS();
+		const auto& network = sysInfo.GetNetwork();
+		const auto& cpu = sysInfo.GetCPU();
+		const auto& tools = sysInfo.GetTools();
+		const auto& libraries = sysInfo.GetLibraries();
+
+		osJson["Name"] = os.name;
+		osJson["Version"] = os.version;
+		networkJson["PublicIP"] = network.publicIP;
+		networkJson["PrivateIP"] = network.privateIP;
+		cpuJson["Model"] = cpu.model;
+		cpuJson["Arch"] = cpu.arch;
+
+		for (const auto& tool : tools)
+		{
+			Json::JsonObject toolJson;
+			toolJson["Name"] = tool.name;
+			toolJson["Version"] = tool.version;
+			toolJson["Path"] = tool.path;
+			toolsJson.push_back(std::move(toolJson));
+		}
+
+		for (const auto& library : libraries)
+		{
+			Json::JsonObject libraryJson;
+			libraryJson["Name"] = library.name;
+			libraryJson["Version"] = library.version;
+			librariesJson.push_back(std::move(libraryJson));
+		}
+
+		json["OS"] = std::move(osJson);
+		json["CPU"] = std::move(cpuJson);
+		json["Network"] = std::move(networkJson);
+		json["Tools"] = std::move(toolsJson);
+		json["Libraries"] = std::move(librariesJson);
+
+		return Json::Serialize(json);
+	}
+
+	std::string ToXmlStr(const SystemInfo& sysInfo)
+	{
+		xmlNodePtr rootNode = xmlNewNode(NULL, BAD_CAST "value");
+		xmlNodePtr structNode = xmlNewNode(NULL, BAD_CAST "struct");
+		xmlNodePtr osNode = xmlNewNode(NULL, BAD_CAST "OS");
+		xmlNodePtr networkNode = xmlNewNode(NULL, BAD_CAST "Network");
+		xmlNodePtr cpuNode = xmlNewNode(NULL, BAD_CAST "CPU");
+		xmlNodePtr toolsNode = xmlNewNode(NULL, BAD_CAST "Tools");
+		xmlNodePtr librariesNode = xmlNewNode(NULL, BAD_CAST "Libraries");
+
+		const auto& os = sysInfo.GetOS();
+		const auto& network = sysInfo.GetNetwork();
+		const auto& cpu = sysInfo.GetCPU();
+		const auto& tools = sysInfo.GetTools();
+		const auto& libraries = sysInfo.GetLibraries();
+
+		Xml::AddNewNode(osNode, "Name", "string", os.name.c_str());
+		Xml::AddNewNode(osNode, "Version", "string", os.name.c_str());
+		Xml::AddNewNode(networkNode, "PublicIP", "string", network.publicIP.c_str());
+		Xml::AddNewNode(networkNode, "PrivateIP", "string", network.privateIP.c_str());
+		Xml::AddNewNode(cpuNode, "Model", "string", cpu.model.c_str());
+		Xml::AddNewNode(cpuNode, "Arch", "string", cpu.arch.c_str());
+
+		for (const auto& tool : tools)
+		{
+			Xml::AddNewNode(toolsNode, "Name", "string", tool.name.c_str());
+			Xml::AddNewNode(toolsNode, "Version", "string", tool.version.c_str());
+			Xml::AddNewNode(toolsNode, "Path", "string", tool.path.c_str());
+		}
+
+		for (const auto& library : libraries)
+		{
+			Xml::AddNewNode(librariesNode, "Name", "string", library.name.c_str());
+			Xml::AddNewNode(librariesNode, "Version", "string", library.version.c_str());
+		}
+
+		xmlAddChild(structNode, osNode);
+		xmlAddChild(structNode, networkNode);
+		xmlAddChild(structNode, cpuNode);
+		xmlAddChild(structNode, toolsNode);
+		xmlAddChild(structNode, librariesNode);
+		xmlAddChild(rootNode, structNode);
+
+		std::string result = Xml::Serialize(rootNode);
+
+		xmlFreeNode(rootNode);
+
+		return result;
+	}
 
 }
