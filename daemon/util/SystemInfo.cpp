@@ -47,19 +47,19 @@ namespace SystemInfo
 
 	const size_t BUFFER_SIZE = 256;
 
-	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line) 
-	{
-		// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-		// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
-		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
-		std::smatch match;
-		if (std::regex_search(line, match, pattern))
+	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line)
 		{
-			return match[0].str();
-		}
+			// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
+			// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
+			std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
+			std::smatch match;
+			if (std::regex_search(line, match, pattern))
+			{
+				return match[0].str();
+			}
 
-		return std::string("");
-	};
+			return std::string("");
+		};
 
 	SystemInfo::SystemInfo()
 		: m_context{}
@@ -367,6 +367,19 @@ namespace SystemInfo
 		return FileSystem::FileExists("/.dockerenv");
 	}
 
+	void SystemInfo::TrimQuotes(std::string& str) const
+	{
+		if (str.front() == '"')
+		{
+			str = str.substr(1);
+		}
+
+		if (str.back() == '"')
+		{
+			str = str.substr(0, str.size() - 1);
+		}
+	}
+
 	void SystemInfo::InitCPU()
 	{
 		m_cpu.arch = GetCPUArch();
@@ -409,10 +422,13 @@ namespace SystemInfo
 				return;
 			}
 
+			// e.g NAME="Debian GNU/Linux"
 			if (m_os.name.empty() && line.find("NAME=") == 0)
 			{
 				m_os.name = line.substr(line.find("=") + 1);
+
 				Util::Trim(m_os.name);
+				TrimQuotes(m_os.name);
 
 				if (IsRunningInDocker())
 				{
@@ -422,13 +438,18 @@ namespace SystemInfo
 				continue;
 			}
 
+			// e.g VERSION_ID="12"
 			if (m_os.version.empty() && line.find("VERSION_ID=") == 0)
 			{
 				m_os.version = line.substr(line.find("=") + 1);
+
 				Util::Trim(m_os.version);
+				TrimQuotes(m_os.version);
+
 				continue;
 			}
 
+			// e.g. BUILD_ID=rolling
 			if (m_os.version.empty() && line.find("BUILD_ID=") == 0)
 			{
 				m_os.version = line.substr(line.find("=") + 1);
@@ -479,7 +500,7 @@ namespace SystemInfo
 		{
 			m_os.version = buffer;
 			Util::Trim(m_os.version);
-		}
+}
 		else
 		{
 			warn("Failed to get OS version. Failed to read 'kern.osrelease'.");
@@ -574,7 +595,7 @@ namespace SystemInfo
 		warn("Failed to find CPU arch.");
 
 		return "";
-	}
+}
 #endif
 
 	std::string ToJsonStr(const SystemInfo& sysInfo)

@@ -93,6 +93,10 @@ namespace SystemInfo
 		bool IsRunningInDocker() const;
 #endif
 
+#ifdef __linux__
+		void TrimQuotes(std::string& str) const;
+#endif
+
 #ifdef WIN32
 		const long m_win11BuildVersion = 22000;
 		const long m_win10BuildVersion = 10240;
