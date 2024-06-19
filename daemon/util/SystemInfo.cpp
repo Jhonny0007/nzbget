@@ -431,7 +431,7 @@ namespace SystemInfo
 
 			if (m_os.version.empty() && line.find("BUILD_ID=") == 0)
 			{
-				m_os.version = line.substr(line.find("="));
+				m_os.version = line.substr(line.find("=") + 1);
 				Util::Trim(m_os.version);
 				continue;
 			}

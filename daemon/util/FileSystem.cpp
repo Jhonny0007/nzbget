@@ -697,9 +697,9 @@ boost::optional<FileSystem::DiskState> FileSystem::GetDiskState(const char* path
 	}
 #else
 	struct statvfs diskdata;
-	if (statvfs(path, &diskdata) == 0)
+	if (!statvfs(path, &diskdata))
 	{
-		size_t available = diskdata.f_bfree * diskdata.f_frsize;
+		size_t available = diskdata.f_bavail * diskdata.f_frsize;
 		size_t total = diskdata.f_blocks * diskdata.f_frsize;
 		return FileSystem::DiskState{ available, total };
 	}

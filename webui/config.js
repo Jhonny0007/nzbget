@@ -4339,12 +4339,11 @@ var SystemInfo = (new function($)
 	this.update = function(status)
 	{
 		$SysInfo_Uptime.text(Util.formatTimeHMS(status['UpTimeSec']));
-		renderDiskSpace(status['FreeDiskSpaceMB'], status['TotalDiskSpaceMB'])
+		renderDiskSpace(+status['FreeDiskSpaceMB'], +status['TotalDiskSpaceMB'])
 	}
 
 	function render(sysInfo)
 	{
-		console.log(Options)
 		$SysInfo_ToolsTable.empty();
 		$SysInfo_LibrariesTable.empty();
 		$SysInfo_NewsServersTable.empty();
@@ -4353,7 +4352,7 @@ var SystemInfo = (new function($)
 		$SysInfo_CPUModel.text(sysInfo['CPU'].Model);
 		$SysInfo_Arch.text(sysInfo['CPU'].Arch);
 		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
-		$SysInfo_ArticleCache.text(Util.formatSizeMB(Options.option('ArticleCache')));
+		$SysInfo_ArticleCache.text(Util.formatSizeMB(+Options.option('ArticleCache')));
 
 		_this.update(Status.getStatus());
 
@@ -4441,11 +4440,13 @@ var SystemInfo = (new function($)
 
 			tdName.text(server.host + ' : ' + server.port + '(' + server.connections + ')');
 			tdName.attr({ title: server.name });
-			if (newsServer.Active) {
+			if (newsServer.Active) 
+			{
 				tdActive.text('Yes');
 				tdActive.css('color', '#468847');
 			}
-			else {
+			else 
+			{
 				tdActive.text('No');
 				tdActive.css('color', '#da4f49');
 			}
