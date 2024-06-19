@@ -78,7 +78,10 @@ namespace SystemInfo
 		void InitOS();
 		void InitLibsVersions();
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
-		std::string GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parser) const;
+		std::string GetUnpackerVersion(
+			const std::string& path,
+			const char* marker,
+			const UnpackerVersionParser& parser) const;
 
 		mutable boost::asio::io_context m_context;
 		mutable boost::asio::ip::tcp::resolver m_resolver;

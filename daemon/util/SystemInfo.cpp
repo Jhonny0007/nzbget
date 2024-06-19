@@ -149,7 +149,7 @@ namespace SystemInfo
 		}
 
 		char buffer[BUFFER_SIZE];
-		if (!feof(pipe) && fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
+		if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 		{
 			// e.g. Python 3.12.3
 			std::string version = buffer;
@@ -170,7 +170,7 @@ namespace SystemInfo
 			return python;
 		}
 
-		if (!feof(pipe) && fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
+		if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 		{
 			python.path = buffer;
 			Util::Trim(python.path);
@@ -217,7 +217,10 @@ namespace SystemInfo
 		return path.substr(0, path.find(" "));
 	}
 
-	std::string SystemInfo::GetUnpackerVersion(const std::string& path, const char* marker, const UnpackerVersionParser& parseVersion) const
+	std::string SystemInfo::GetUnpackerVersion(
+		const std::string& path,
+		const char* marker,
+		const UnpackerVersionParser& parseVersion) const
 	{
 		FILE* pipe = popen(path.c_str(), "r");
 		if (!pipe)
@@ -248,7 +251,8 @@ namespace SystemInfo
 	{
 		Network network{};
 
-		try {
+		try
+		{
 			asio::connect(m_socket, m_resolver.resolve("ip.nzbget.com", "http"));
 
 			std::string request = "GET / HTTP/1.1\r\nHost: ip.nzbget.com\r\n\r\n";
@@ -500,7 +504,7 @@ namespace SystemInfo
 		{
 			m_os.version = buffer;
 			Util::Trim(m_os.version);
-}
+		}
 		else
 		{
 			warn("Failed to get OS version. Failed to read 'kern.osrelease'.");
@@ -595,7 +599,7 @@ namespace SystemInfo
 		warn("Failed to find CPU arch.");
 
 		return "";
-}
+	}
 #endif
 
 	std::string ToJsonStr(const SystemInfo& sysInfo)

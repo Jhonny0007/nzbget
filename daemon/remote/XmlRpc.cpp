@@ -1419,7 +1419,7 @@ void StatusXmlCommand::Execute()
 	auto res = FileSystem::GetDiskState(g_Options->GetDestDir());
 	if (res.has_value())
 	{
-		const auto& value = res.value();
+		const auto& value = res.get();
 		freeDiskSpace = static_cast<int64>(value.available);
 		totalDiskSpace = static_cast<int64>(value.total);
 	}
