@@ -4342,10 +4342,18 @@ var SystemInfo = (new function($)
 
 		_this.update(Status.getStatus());
 
+		renderIP(sysInfo['Network']);
 		renderAppVersion(Options.option('Version'));
 		renderTools(sysInfo['Tools']);
 		renderLibraries(sysInfo['Libraries']);
 		renderNewsServers(Status.getStatus()['NewsServers'])
+	}
+
+	function renderIP(network)
+	{
+		var privateIP = network.PrivateIP ? network.PrivateIP : 'N/A';
+		var publicIP = network.PublicIP ? network.PublicIP : 'N/A';
+		$SysInfo_IP.text(privateIP + ' / ' + publicIP);
 	}
 
 	function renderAppVersion(version)
@@ -4364,8 +4372,8 @@ var SystemInfo = (new function($)
 				var tdVersion = $('<td>');
 				var tdPath = $('<td>');
 				tdName.text(tool.Name);
-				tdVersion.text(tool.Version);
-				tdPath.text(tool.Path);
+				tdVersion.text(tool.Version ? tool.Version : 'N/A');
+				tdPath.text(tool.Path ? tool.Path : 'Not found');
 				tr.append(tdName);
 				tr.append(tdVersion);
 				tr.append(tdPath);
