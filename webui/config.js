@@ -27,6 +27,15 @@
 
 /*** OPTIONS AND CONFIGS (FROM CONFIG FILES) **************************************/
 
+function Server()
+{
+	this.id = 0;
+	this.host = '';
+	this.name = '';
+	this.port = 0;
+	this.connections = 0;
+}
+
 var Options = (new function($)
 {
 	'use strict';
@@ -92,10 +101,18 @@ var Options = (new function($)
 		return opt ? opt.Value : null;
 	}
 
-	this.getServerNameById = function(id)
+	this.getServerById = function(id)
 	{
-		var server = findOption(this.options, 'Server' + id + '.Name');
-		return server ? server.Value : '';
+		var server = new Server();
+
+		server.id = id;
+		var serverId = 'Server' + id;
+		server.host = findOption(this.options, serverId + '.Host').Value;
+		server.name = findOption(this.options, serverId + '.Name').Value;
+		server.port = findOption(this.options, serverId + '.Port').Value;
+		server.connections = findOption(this.options, serverId + '.Connections').Value;
+
+		return server;
 	}
 
 	function initCategories()
@@ -4327,6 +4344,7 @@ var SystemInfo = (new function($)
 
 	function render(sysInfo)
 	{
+		console.log(Options)
 		$SysInfo_ToolsTable.empty();
 		$SysInfo_LibrariesTable.empty();
 		$SysInfo_NewsServersTable.empty();
@@ -4406,39 +4424,36 @@ var SystemInfo = (new function($)
 	{
 		newsServers.forEach(function(newsServer)
 			{
-				var serverName = Options.getServerNameById(newsServer.ID);
-				if (serverName)
-				{
-					var tr = $('<tr>');
-					var tdName = $('<td style="vertical-align: middle;">');
-					var tdActive = $('<td style="vertical-align: middle;">');
-					var tdTests = $('<td>');
-					var testConnectionBtn = $('<button type="button" class="btn btn-default"><i class="material-icon" title="Test connection">cell_tower</i></button>');
-					testConnectionBtn.attr({ 'data-multiid': newsServer.ID });
-					testConnectionBtn.off('click').on('click', function()
-						{
-							Config.testConnection(this, "Server", newsServer.ID);
-						}
-					);
+			var server = Options.getServerById(newsServer.ID);
+			var tr = $('<tr>');
+			var tdName = $('<td style="vertical-align: middle;">');
+			var tdActive = $('<td style="vertical-align: middle;">');
+			var tdTests = $('<td>');
+			var testConnectionBtn = $('<button type="button" class="btn btn-default"></>');
+			var testConnectionIcon = $('<i class="material-icon" title="Test connection">cell_tower</i>');
+			testConnectionBtn.append(testConnectionIcon);
+			testConnectionBtn.attr({ 'data-multiid': server.id });
+			testConnectionBtn.off('click').on('click', function () {
+				Config.testConnection(this, "Server", server.id);
+			}
+			);
 
-					tdName.text(serverName);
-					if (newsServer.Active)
-					{
-						tdActive.text('Yes');
-						tdActive.css('color', '#468847');
-					}
-					else
-					{
-						tdActive.text('No');
-						tdActive.css('color', '#da4f49');
-					}
+			tdName.text(server.host + ' : ' + server.port + '(' + server.connections + ')');
+			tdName.attr({ title: server.name });
+			if (newsServer.Active) {
+				tdActive.text('Yes');
+				tdActive.css('color', '#468847');
+			}
+			else {
+				tdActive.text('No');
+				tdActive.css('color', '#da4f49');
+			}
 
-					tdTests.append(testConnectionBtn);
-					tr.append(tdName);
-					tr.append(tdActive);
-					tr.append(tdTests);
-					$SysInfo_NewsServersTable.append(tr);
-				}
+			tdTests.append(testConnectionBtn);
+			tr.append(tdName);
+			tr.append(tdActive);
+			tr.append(tdTests);
+			$SysInfo_NewsServersTable.append(tr);
 			}
 		);
 	}
