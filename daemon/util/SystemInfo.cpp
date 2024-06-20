@@ -41,8 +41,10 @@ namespace SystemInfo
 
 #ifdef WIN32
 	const char* FIND_CMD = "where ";
+	const char* ERR_NULL_OUTPUT = " 2>nul";
 #else
 	const char* FIND_CMD = "which ";
+	const char* ERR_NULL_OUTPUT = " 2>null";
 #endif
 
 	const size_t BUFFER_SIZE = 256;
@@ -78,6 +80,7 @@ namespace SystemInfo
 			m_socket.close();
 		}
 	}
+
 	const std::vector<Library>& SystemInfo::GetLibraries() const
 	{
 		return m_libraries;
@@ -141,7 +144,7 @@ namespace SystemInfo
 			return python;
 		}
 
-		std::string cmd = result.get() + " --version";
+		std::string cmd = result.get() + " --version" + ERR_NULL_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -163,7 +166,7 @@ namespace SystemInfo
 
 		pclose(pipe);
 
-		cmd = FIND_CMD + result.get();
+		cmd = FIND_CMD + result.get() + ERR_NULL_OUTPUT;
 		pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -222,7 +225,7 @@ namespace SystemInfo
 		const char* marker,
 		const UnpackerVersionParser& parseVersion) const
 	{
-		FILE* pipe = popen(path.c_str(), "r");
+		FILE* pipe = popen((path + ERR_NULL_OUTPUT).c_str(), "r");
 		if (!pipe)
 		{
 			return "";
