@@ -56,6 +56,26 @@ void FileSystem::NormalizePathSeparators(char* path)
 	}
 }
 
+boost::optional<std::string> FileSystem::GetFileRealPath(const std::string& path)
+{
+	char buffer[256];
+
+#ifdef WIN32
+	DWORD len = GetFullPathName(path.c_str(), 256, buffer, nullptr);
+	if (len != 0)
+	{
+		return buffer;
+	}
+#else
+	if (realpath(path.c_str(), buffer) != nullptr)
+	{
+		return buffer;
+	}
+#endif
+
+	return boost::none;
+}
+
 #ifdef WIN32
 bool FileSystem::ForceDirectories(const char* path, CString& errmsg)
 {

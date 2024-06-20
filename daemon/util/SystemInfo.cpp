@@ -217,7 +217,15 @@ namespace SystemInfo
 		Util::Trim(path);
 
 		// getting the path itself without any keys
-		return path.substr(0, path.find(" "));
+		path = path.substr(0, path.find(" "));
+
+		auto result = FileSystem::GetFileRealPath(path);
+		if (result.has_value() && FileSystem::FileExists(result.get().c_str()))
+		{
+			return result.get();
+		}
+
+		return "";
 	}
 
 	std::string SystemInfo::GetUnpackerVersion(
