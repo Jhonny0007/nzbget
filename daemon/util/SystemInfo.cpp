@@ -21,6 +21,7 @@
 
 #include <regex>
 #include <boost/version.hpp>
+#include <boost/asio/ssl.hpp>
 #include "SystemInfo.h"
 #include "Options.h"
 #include "FileSystem.h"
@@ -37,7 +38,9 @@ namespace SystemInfo
 #include <ncurses/ncurses.h>
 #endif
 
-	using namespace boost;
+	namespace asio = boost::asio;
+	namespace ssl = boost::asio::ssl;
+	using tcp = boost::asio::ip::tcp;
 
 #ifdef WIN32
 	const char* FIND_CMD = "where ";
@@ -233,6 +236,11 @@ namespace SystemInfo
 		const char* marker,
 		const UnpackerVersionParser& parseVersion) const
 	{
+		if (path.empty())
+		{
+			return "";
+		}
+
 		FILE* pipe = popen((path + ERR_NULL_OUTPUT).c_str(), "r");
 		if (!pipe)
 		{
@@ -257,20 +265,55 @@ namespace SystemInfo
 
 		return version;
 	}
-
+	void handle_read(const boost::system::error_code& error,
+		size_t bytes_transferred,
+		std::string& response) {
+		if (!error) {
+			response.resize(bytes_transferred);
+			std::cout << "Response Payload:" << std::endl << response << std::endl;
+		}
+		else {
+			std::cerr << "Error reading response: " << error.message() << std::endl;
+		}
+	}
 	Network SystemInfo::GetNetwork() const
 	{
 		Network network{};
 
 		try
 		{
-			asio::connect(m_socket, m_resolver.resolve("ip.nzbget.com", "http"));
+			asio::io_context io_context;
+			asio::ip::tcp::resolver resolver(io_context);
+			auto endpoints = resolver.resolve("ip.nzbget.com", "443");
 
-			std::string request = "GET / HTTP/1.1\r\nHost: ip.nzbget.com\r\n\r\n";
-			asio::write(m_socket, asio::buffer(request));
+			// Create SSL context
+			ssl::context ctx{ ssl::context::tlsv13_client };
+			ctx.set_default_verify_paths();
+
+			// Connect to the server
+			ssl::stream<asio::ip::tcp::socket> stream(io_context, ctx);
+			asio::connect(stream.lowest_layer(), endpoints);
+
+			if (!SSL_set_tlsext_host_name(stream.native_handle(), "ip.nzbget.com"))
+			{
+				warn("Failed to configure SNI TLS extension.");
+				return network;
+			}
+
+			// Perform TLS handshake
+			stream.handshake(ssl::stream_base::handshake_type::client);
+
+			// Build HTTP request
+			std::string request = "GET / HTTP/1.1\r\n";
+			request += "Host: ip.nzbget.com\r\n";
+			request += "User-Agent:", "nzbget/24.2\r\n";
+			request += "Connection: close\r\n\r\n";
+
+			// Send the request
+			asio::write(stream, asio::buffer(request));
 
 			char buffer[1024];
-			size_t totalSize = m_socket.read_some(asio::buffer(buffer, 1024));
+			size_t totalSize = stream.read_some(asio::buffer(buffer, 1024));
 
 			std::string response(buffer, totalSize);
 			if (response.find("200 OK") == std::string::npos)
@@ -288,9 +331,10 @@ namespace SystemInfo
 				network.privateIP = m_socket.local_endpoint().address().to_string();
 			}
 		}
-		catch (const std::exception& e)
+		catch (const std::exception& e) 
 		{
 			warn("Failed to get public and private IP: %s", e.what());
+			return network;
 		}
 
 		return network;
