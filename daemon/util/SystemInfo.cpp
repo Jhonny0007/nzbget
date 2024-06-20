@@ -663,13 +663,13 @@ namespace SystemInfo
 
 	std::string ToXmlStr(const SystemInfo& sysInfo)
 	{
-		xmlNodePtr rootNode = xmlNewNode(NULL, BAD_CAST "value");
-		xmlNodePtr structNode = xmlNewNode(NULL, BAD_CAST "struct");
-		xmlNodePtr osNode = xmlNewNode(NULL, BAD_CAST "OS");
-		xmlNodePtr networkNode = xmlNewNode(NULL, BAD_CAST "Network");
-		xmlNodePtr cpuNode = xmlNewNode(NULL, BAD_CAST "CPU");
-		xmlNodePtr toolsNode = xmlNewNode(NULL, BAD_CAST "Tools");
-		xmlNodePtr librariesNode = xmlNewNode(NULL, BAD_CAST "Libraries");
+		xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "value");
+		xmlNodePtr structNode = xmlNewNode(nullptr, BAD_CAST "struct");
+		xmlNodePtr osNode = xmlNewNode(nullptr, BAD_CAST "OS");
+		xmlNodePtr networkNode = xmlNewNode(nullptr, BAD_CAST "Network");
+		xmlNodePtr cpuNode = xmlNewNode(nullptr, BAD_CAST "CPU");
+		xmlNodePtr toolsNode = xmlNewNode(nullptr, BAD_CAST "Tools");
+		xmlNodePtr librariesNode = xmlNewNode(nullptr, BAD_CAST "Libraries");
 
 		const auto& os = sysInfo.GetOS();
 		const auto& network = sysInfo.GetNetwork();
