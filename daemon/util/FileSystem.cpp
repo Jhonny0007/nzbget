@@ -713,7 +713,9 @@ boost::optional<FileSystem::DiskState> FileSystem::GetDiskState(const char* path
 
 	if (GetDiskFreeSpaceEx(path, &freeBytesAvailable, &totalNumberOfBytes, nullptr))
 	{
-		return FileSystem::DiskState{ freeBytesAvailable.QuadPart, totalNumberOfBytes.QuadPart };
+		size_t available = static_cast<size_t>(freeBytesAvailable.QuadPart);
+		size_t total = static_cast<size_t>(totalNumberOfBytes.QuadPart);
+		return FileSystem::DiskState{ available, total };
 	}
 #else
 	struct statvfs diskdata;
