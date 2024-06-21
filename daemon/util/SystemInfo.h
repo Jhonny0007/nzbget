@@ -21,10 +21,9 @@
 #define SYSTEM_INFO_H
 
 #include <string>
-#include <iostream>
-#include <boost/asio.hpp>
 #include "OSInfo.h"
 #include "CPUInfo.h"
+#include "NetworkInfo.h"
 
 namespace SystemInfo
 {
@@ -43,20 +42,13 @@ namespace SystemInfo
 		std::string path;
 	};
 
-	struct Network
-	{
-		std::string publicIP;
-		std::string privateIP;
-	};
-
-
 	class SystemInfo final
 	{
 	public:
 		SystemInfo();
-		~SystemInfo();
+		~SystemInfo() = default;
 		std::vector<Tool> GetTools() const;
-		Network GetNetwork() const;
+		NetworkInfo GetNetworkInfo() const;
 		const std::vector<Library>& GetLibraries() const;
 		const CPUInfo& GetCPUInfo() const;
 		const OSInfo& GetOSInfo() const;
@@ -71,10 +63,6 @@ namespace SystemInfo
 			const std::string& path,
 			const char* marker,
 			const UnpackerVersionParser& parser) const;
-
-		mutable boost::asio::io_context m_context;
-		mutable boost::asio::ip::tcp::resolver m_resolver;
-		mutable boost::asio::ip::tcp::socket m_socket;
 
 		CPUInfo m_cpu;
 		OSInfo m_os;

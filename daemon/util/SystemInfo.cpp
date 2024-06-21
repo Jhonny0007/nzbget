@@ -21,7 +21,7 @@
 
 #include <regex>
 #include <boost/version.hpp>
-#include <boost/asio/ssl.hpp>
+
 #include "SystemInfo.h"
 #include "Options.h"
 #include "FileSystem.h"
@@ -37,10 +37,6 @@ namespace SystemInfo
 #ifdef HAVE_NCURSES_NCURSES_H
 #include <ncurses/ncurses.h>
 #endif
-
-	namespace asio = boost::asio;
-	namespace ssl = boost::asio::ssl;
-	using tcp = boost::asio::ip::tcp;
 
 	const size_t BUFFER_SIZE = 256;
 
@@ -59,19 +55,8 @@ namespace SystemInfo
 		};
 
 	SystemInfo::SystemInfo()
-		: m_context{}
-		, m_resolver{ m_context }
-		, m_socket{ m_context }
 	{
 		InitLibVersions();
-	}
-
-	SystemInfo::~SystemInfo()
-	{
-		if (m_socket.is_open())
-		{
-			m_socket.close();
-		}
 	}
 
 	const std::vector<Library>& SystemInfo::GetLibraries() const
@@ -256,66 +241,9 @@ namespace SystemInfo
 		return version;
 	}
 
-	Network SystemInfo::GetNetwork() const
+	NetworkInfo SystemInfo::GetNetworkInfo() const
 	{
-		Network network{};
-
-		try
-		{
-			asio::io_context io_context;
-			asio::ip::tcp::resolver resolver(io_context);
-			auto endpoints = resolver.resolve("ip.nzbget.com", "443");
-
-			ssl::context ctx{ ssl::context::tlsv13_client };
-			ctx.set_default_verify_paths();
-
-			ssl::stream<asio::ip::tcp::socket> stream(io_context, ctx);
-			asio::connect(stream.lowest_layer(), endpoints);
-
-			if (!SSL_set_tlsext_host_name(stream.native_handle(), "ip.nzbget.com"))
-			{
-				warn("Failed to configure SNI TLS extension.");
-				return network;
-			}
-
-			stream.handshake(ssl::stream_base::handshake_type::client);
-
-			std::string request = "GET / HTTP/1.1\r\n";
-			request += "Host: ip.nzbget.com\r\n";
-			request += "User-Agent: nzbget/24.2\r\n";
-#ifndef DISABLE_GZIP
-			request += "Accept-Encoding: gzip\r\n";
-#endif
-			request += "Connection: close\r\n\r\n";
-
-			// Send the request
-			asio::write(stream, asio::buffer(request));
-
-			char buffer[1024];
-			size_t totalSize = stream.read_some(asio::buffer(buffer, 1024));
-
-			std::string response(buffer, totalSize);
-			if (response.find("200 OK") == std::string::npos)
-			{
-				warn("Failed to get public and private IP: %s", buffer);
-				return network;
-			}
-
-			size_t headersEndPos = response.find("\r\n\r\n");
-			if (headersEndPos != std::string::npos)
-			{
-				response = response.substr(headersEndPos);
-				Util::Trim(response);
-				network.publicIP = std::move(response);
-				network.privateIP = stream.lowest_layer().local_endpoint().address().to_string();
-			}
-		}
-		catch (const std::exception& e)
-		{
-			warn("Failed to get public and private IP: %s", e.what());
-		}
-
-		return network;
+		return ::SystemInfo::GetNetworkInfo();
 	}
 
 	std::string ToJsonStr(const SystemInfo& sysInfo)
@@ -328,7 +256,7 @@ namespace SystemInfo
 		Json::JsonArray librariesJson;
 
 		const auto& os = sysInfo.GetOSInfo();
-		const auto& network = sysInfo.GetNetwork();
+		const auto& network = sysInfo.GetNetworkInfo();
 		const auto& cpu = sysInfo.GetCPUInfo();
 		const auto& tools = sysInfo.GetTools();
 		const auto& libraries = sysInfo.GetLibraries();
@@ -377,7 +305,7 @@ namespace SystemInfo
 		xmlNodePtr librariesNode = xmlNewNode(nullptr, BAD_CAST "Libraries");
 
 		const auto& os = sysInfo.GetOSInfo();
-		const auto& network = sysInfo.GetNetwork();
+		const auto& network = sysInfo.GetNetworkInfo();
 		const auto& cpu = sysInfo.GetCPUInfo();
 		const auto& tools = sysInfo.GetTools();
 		const auto& libraries = sysInfo.GetLibraries();
