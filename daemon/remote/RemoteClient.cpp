@@ -48,7 +48,7 @@ void RemoteClient::perror(const char * msg)
 
 bool RemoteClient::InitConnection()
 {
-	const char* controlIp = !strcmp(g_Options->GetControlIp(), "0.0.0.0") ? "127.0.0.1" : g_Options->GetControlIp();
+	const char* controlIp = Util::NormalizeLocalHostIP(g_Options->GetControlIp());
 
 	// Create a connection to the server
 	m_connection = std::make_unique<Connection>(controlIp, g_Options->GetControlPort(), false);

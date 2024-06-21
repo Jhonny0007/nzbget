@@ -698,6 +698,11 @@ uint32 Util::HashBJ96(const char* buffer, int bufSize, uint32 initValue)
 	return (uint32)hash((uint8*)buffer, (uint32)bufSize, (uint32)initValue);
 }
 
+const char* Util::NormalizeLocalHostIP(const char* ip)
+{
+	return !strcmp(ip, "0.0.0.0") ? "127.0.0.1" : ip;
+}
+
 #ifdef WIN32
 bool Util::RegReadStr(HKEY keyRoot, const char* keyName, const char* valueName, char* buffer, int* bufLen)
 {

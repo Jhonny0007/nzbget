@@ -136,3 +136,10 @@ BOOST_AUTO_TEST_CASE(StrCaseCmpTest)
 	BOOST_CHECK(Util::StrCaseCmp("", ""));
 	BOOST_CHECK(Util::StrCaseCmp("3.14", "3.12") == false);
 }
+
+BOOST_AUTO_TEST_CASE(NormalizeLocalHostIPTest)
+{
+	BOOST_CHECK(std::string(Util::NormalizeLocalHostIP("0.0.0.0")) == "127.0.0.1");
+	BOOST_CHECK(std::string(Util::NormalizeLocalHostIP("127.0.0.1")) == "127.0.0.1");
+	BOOST_CHECK(std::string(Util::NormalizeLocalHostIP("192.168.0.1")) == "192.168.0.1");
+}

@@ -66,6 +66,8 @@ public:
 	/* Calculate Hash using Bob Jenkins (1996) algorithm */
 	static uint32 HashBJ96(const char* buffer, int bufSize, uint32 initValue);
 
+	static const char* NormalizeLocalHostIP(const char* ip);
+
 	static const char* NULL_OUTPUT;
 	static const char* ERR_NULL_OUTPUT;
 	static const char* FIND_CMD;

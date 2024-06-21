@@ -4365,7 +4365,7 @@ var SystemInfo = (new function($)
 
 	function renderDiskSpace(free, total)
 	{
-		var percents = total !== 0 ? (free / total * 100).toFixed(1) + ' %' : '0.0 %';
+		var percents = total !== 0 ? (free / total * 100).toFixed(1) + '%' : '0.0%';
 		$SysInfo_FreeDiskSpace.text(Util.formatSizeMB(free) + ' / ' + percents);
 		$SysInfo_TotalDiskSpace.text(Util.formatSizeMB(total));
 	}
