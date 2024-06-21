@@ -37,7 +37,7 @@ namespace SystemInfo
 		std::string m_version;
 
 #ifdef __linux__
-		std::string GetCPUArch() const;
+		bool IsRunningInDocker() const;
 		void TrimQuotes(std::string& str) const;
 #endif
 
