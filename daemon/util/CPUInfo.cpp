@@ -111,7 +111,7 @@ namespace SystemInfo
 #endif
 
 #if __BSD__
-	void SystemInfo::Init()
+	void CPUInfo::Init()
 	{
 		size_t len = BUFFER_SIZE;
 		char model[BUFFER_SIZE];
