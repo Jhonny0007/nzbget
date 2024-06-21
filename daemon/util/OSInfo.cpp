@@ -24,6 +24,7 @@
 #include "OSInfo.h"
 #include "Util.h"
 #include "Log.h"
+#include "FileSystem.h"
 
 namespace SystemInfo
 {
