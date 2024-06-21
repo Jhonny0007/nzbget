@@ -62,6 +62,12 @@ body {
 	max-width: 1024px;
 }
 
+.news-servers-table-container
+{
+	max-height: 190px;
+	overflow-y: auto;
+}
+
 /* EXTENSION MANAGER */
 .extension-manager__td {
 	vertical-align: middle !important;
