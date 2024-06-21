@@ -119,43 +119,43 @@ namespace SystemInfo
 		std::string line;
 		while (std::getline(osInfo, line))
 		{
-			if (!m_os.name.empty() && !m_os.version.empty())
+			if (!m_name.empty() && !m_version.empty())
 			{
 				return;
 			}
 
 			// e.g NAME="Debian GNU/Linux"
-			if (m_os.name.empty() && line.find("NAME=") == 0)
+			if (m_name.empty() && line.find("NAME=") == 0)
 			{
-				m_os.name = line.substr(line.find("=") + 1);
+				m_name = line.substr(line.find("=") + 1);
 
-				Util::Trim(m_os.name);
-				TrimQuotes(m_os.name);
+				Util::Trim(m_name);
+				TrimQuotes(m_name);
 
 				if (IsRunningInDocker())
 				{
-					m_os.name += " (Running in Docker)";
+					m_name += " (Running in Docker)";
 				}
 
 				continue;
 			}
 
 			// e.g VERSION_ID="12"
-			if (m_os.version.empty() && line.find("VERSION_ID=") == 0)
+			if (m_version.empty() && line.find("VERSION_ID=") == 0)
 			{
-				m_os.version = line.substr(line.find("=") + 1);
+				m_version = line.substr(line.find("=") + 1);
 
-				Util::Trim(m_os.version);
-				TrimQuotes(m_os.version);
+				Util::Trim(m_version);
+				TrimQuotes(m_version);
 
 				continue;
 			}
 
 			// e.g. BUILD_ID=rolling
-			if (m_os.version.empty() && line.find("BUILD_ID=") == 0)
+			if (m_version.empty() && line.find("BUILD_ID=") == 0)
 			{
-				m_os.version = line.substr(line.find("=") + 1);
-				Util::Trim(m_os.version);
+				m_version = line.substr(line.find("=") + 1);
+				Util::Trim(m_version);
 				continue;
 			}
 		}
@@ -191,8 +191,8 @@ namespace SystemInfo
 		if (pos != std::string::npos)
 		{
 			size_t endPos = result.find("\n", pos);
-			m_os.name = result.substr(pos + productName.size(), endPos - pos - productName.size());
-			Util::Trim(m_os.name);
+			m_name = result.substr(pos + productName.size(), endPos - pos - productName.size());
+			Util::Trim(m_name);
 		}
 
 		std::string productVersion = "ProductVersion:";
@@ -200,8 +200,8 @@ namespace SystemInfo
 		if (pos != std::string::npos)
 		{
 			size_t endPos = result.find("\n", pos);
-			m_os.version = result.substr(pos + productVersion.size(), endPos - pos - productVersion.size());
-			Util::Trim(m_os.version);
+			m_version = result.substr(pos + productVersion.size(), endPos - pos - productVersion.size());
+			Util::Trim(m_version);
 		}
 	}
 #endif
@@ -213,8 +213,8 @@ namespace SystemInfo
 		char buffer[len];
 		if (sysctlbyname("kern.ostype", &buffer, &len, nullptr, 0) == 0)
 		{
-			m_os.name = buffer;
-			Util::Trim(m_os.name);
+			m_name = buffer;
+			Util::Trim(m_name);
 		}
 		else
 		{
@@ -225,8 +225,8 @@ namespace SystemInfo
 
 		if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
 		{
-			m_os.version = buffer;
-			Util::Trim(m_os.version);
+			m_version = buffer;
+			Util::Trim(m_version);
 		}
 		else
 		{
@@ -234,15 +234,5 @@ namespace SystemInfo
 		}
 	}
 #endif
-
-	// std::string ToJsonStr(const OSInfo& osInfo)
-	// {
-
-	// }
-
-	// std::string ToXmlStr(const OSInfo& osInfo)
-	// {
-
-	// }
 
 }

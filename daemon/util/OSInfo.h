@@ -50,9 +50,6 @@ namespace SystemInfo
 #endif
 	};
 
-	std::string ToJsonStr(const OSInfo& osInfo);
-	std::string ToXmlStr(const OSInfo& osInfo);
-
 }
 
 #endif
