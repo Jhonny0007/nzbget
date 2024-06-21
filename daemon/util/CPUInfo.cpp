@@ -110,7 +110,7 @@ namespace SystemInfo
 	}
 #endif
 
-#if BSD
+#if __BSD__
 	void SystemInfo::Init()
 	{
 		size_t len = BUFFER_SIZE;

@@ -63,7 +63,7 @@ namespace SystemInfo
 		, m_resolver{ m_context }
 		, m_socket{ m_context }
 	{
-		InitLibsVersions();
+		InitLibVersions();
 	}
 
 	SystemInfo::~SystemInfo()
@@ -79,7 +79,7 @@ namespace SystemInfo
 		return m_libraries;
 	}
 
-	void SystemInfo::InitLibsVersions()
+	void SystemInfo::InitLibVersions()
 	{
 		m_libraries.reserve(4);
 		m_libraries.push_back({ "LibXML2", LIBXML_DOTTED_VERSION });

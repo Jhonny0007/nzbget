@@ -65,7 +65,7 @@ namespace SystemInfo
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
-		void InitLibsVersions();
+		void InitLibVersions();
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(
 			const std::string& path,
