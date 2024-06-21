@@ -62,6 +62,17 @@ body {
 	max-width: 1024px;
 }
 
+.table-fixed
+{
+	table-layout: fixed;
+}
+
+.table-fixed td 
+{
+	vertical-align: middle;
+	overflow: auto;
+}
+
 .news-servers-table-container
 {
 	max-height: 190px;

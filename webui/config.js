@@ -4428,8 +4428,8 @@ var SystemInfo = (new function($)
 			{
 			var server = Options.getServerById(newsServer.ID);
 			var tr = $('<tr>');
-			var tdName = $('<td style="vertical-align: middle;">');
-			var tdActive = $('<td style="vertical-align: middle;">');
+			var tdName = $('<td>');
+			var tdActive = $('<td>');
 			var tdTests = $('<td>');
 			var testConnectionBtn = $('<button type="button" title="Test connection" class="btn btn-default"></>');
 			var testConnectionIcon = $('<i class="material-icon">cell_tower</i>');
