@@ -338,7 +338,7 @@ namespace ExtensionLoader
 			auto result = Util::StrToNum(val);
 			if (result.has_value())
 			{
-				return ManifestFile::SelectOption(result.value());
+				return ManifestFile::SelectOption(result.get());
 			}
 
 			return ManifestFile::SelectOption(val);

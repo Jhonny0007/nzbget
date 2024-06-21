@@ -42,14 +42,6 @@ namespace SystemInfo
 	namespace ssl = boost::asio::ssl;
 	using tcp = boost::asio::ip::tcp;
 
-#ifdef WIN32
-	const char* FIND_CMD = "where ";
-	const char* ERR_NULL_OUTPUT = " 2>nul";
-#else
-	const char* FIND_CMD = "which ";
-	const char* ERR_NULL_OUTPUT = " 2>null";
-#endif
-
 	const size_t BUFFER_SIZE = 256;
 
 	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line)
@@ -147,7 +139,7 @@ namespace SystemInfo
 			return python;
 		}
 
-		std::string cmd = result.get() + " --version" + ERR_NULL_OUTPUT;
+		std::string cmd = result.get() + " --version" + Util::ERR_NULL_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -169,7 +161,7 @@ namespace SystemInfo
 
 		pclose(pipe);
 
-		cmd = FIND_CMD + result.get() + ERR_NULL_OUTPUT;
+		cmd = Util::FIND_CMD + result.get() + Util::ERR_NULL_OUTPUT;
 		pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -241,7 +233,7 @@ namespace SystemInfo
 			return "";
 		}
 
-		FILE* pipe = popen((path + ERR_NULL_OUTPUT).c_str(), "r");
+		FILE* pipe = popen((path + Util::ERR_NULL_OUTPUT).c_str(), "r");
 		if (!pipe)
 		{
 			return "";
@@ -265,17 +257,7 @@ namespace SystemInfo
 
 		return version;
 	}
-	void handle_read(const boost::system::error_code& error,
-		size_t bytes_transferred,
-		std::string& response) {
-		if (!error) {
-			response.resize(bytes_transferred);
-			std::cout << "Response Payload:" << std::endl << response << std::endl;
-		}
-		else {
-			std::cerr << "Error reading response: " << error.message() << std::endl;
-		}
-	}
+
 	Network SystemInfo::GetNetwork() const
 	{
 		Network network{};
@@ -286,11 +268,9 @@ namespace SystemInfo
 			asio::ip::tcp::resolver resolver(io_context);
 			auto endpoints = resolver.resolve("ip.nzbget.com", "443");
 
-			// Create SSL context
 			ssl::context ctx{ ssl::context::tlsv13_client };
 			ctx.set_default_verify_paths();
 
-			// Connect to the server
 			ssl::stream<asio::ip::tcp::socket> stream(io_context, ctx);
 			asio::connect(stream.lowest_layer(), endpoints);
 
@@ -300,13 +280,14 @@ namespace SystemInfo
 				return network;
 			}
 
-			// Perform TLS handshake
 			stream.handshake(ssl::stream_base::handshake_type::client);
 
-			// Build HTTP request
 			std::string request = "GET / HTTP/1.1\r\n";
 			request += "Host: ip.nzbget.com\r\n";
 			request += "User-Agent:", "nzbget/24.2\r\n";
+#ifndef DISABLE_GZIP
+			request += "Accept-Encoding: gzip\r\n";
+#endif
 			request += "Connection: close\r\n\r\n";
 
 			// Send the request
@@ -328,13 +309,12 @@ namespace SystemInfo
 				response = response.substr(headersEndPos);
 				Util::Trim(response);
 				network.publicIP = std::move(response);
-				network.privateIP = m_socket.local_endpoint().address().to_string();
+				network.privateIP = stream.lowest_layer().local_endpoint().address().to_string();
 			}
 		}
-		catch (const std::exception& e) 
+		catch (const std::exception& e)
 		{
 			warn("Failed to get public and private IP: %s", e.what());
-			return network;
 		}
 
 		return network;

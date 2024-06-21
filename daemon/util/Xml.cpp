@@ -42,10 +42,10 @@ namespace Xml {
 
 	void AddNewNode(xmlNodePtr rootNode, const char* name, const char* type, const char* value)
 	{
-		xmlNodePtr memberNode = xmlNewNode(NULL, BAD_CAST "member");
-		xmlNodePtr valueNode = xmlNewNode(NULL, BAD_CAST "value");
-		xmlNewChild(memberNode, NULL, BAD_CAST "name", BAD_CAST name);
-		xmlNewChild(valueNode, NULL, BAD_CAST type, BAD_CAST value);
+		xmlNodePtr memberNode = xmlNewNode(nullptr, BAD_CAST "member");
+		xmlNodePtr valueNode = xmlNewNode(nullptr, BAD_CAST "value");
+		xmlNewChild(memberNode, nullptr, BAD_CAST "name", BAD_CAST name);
+		xmlNewChild(valueNode, nullptr, BAD_CAST type, BAD_CAST value);
 		xmlAddChild(memberNode, valueNode);
 		xmlAddChild(rootNode, memberNode);
 	}

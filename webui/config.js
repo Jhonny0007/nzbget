@@ -4438,7 +4438,7 @@ var SystemInfo = (new function($)
 				}
 			);
 
-			tdName.text(server.host + ' : ' + server.port + '(' + server.connections + ')');
+			tdName.text(server.host + ':' + server.port + '(' + server.connections + ')');
 			tdName.attr({ title: server.name });
 			if (newsServer.Active) 
 			{

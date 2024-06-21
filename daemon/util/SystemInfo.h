@@ -111,6 +111,7 @@ namespace SystemInfo
 
 	std::string ToJsonStr(const SystemInfo& sysInfo);
 	std::string ToXmlStr(const SystemInfo& sysInfo);
+
 }
 
 extern SystemInfo::SystemInfo* g_SystemInfo;
