@@ -24,16 +24,11 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include "OSInfo.h"
+#include "CPUInfo.h"
 
 namespace SystemInfo
 {
 	using UnpackerVersionParser = std::function<std::string(const std::string&)>;
-
-	struct CPU
-	{
-		std::string model;
-		std::string arch;
-	};
 
 	struct Library
 	{
@@ -63,14 +58,13 @@ namespace SystemInfo
 		std::vector<Tool> GetTools() const;
 		Network GetNetwork() const;
 		const std::vector<Library>& GetLibraries() const;
-		const CPU& GetCPU() const;
+		const CPUInfo& GetCPUInfo() const;
 		const OSInfo& GetOSInfo() const;
 
 	private:
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
-		void InitCPU();
 		void InitLibsVersions();
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(
@@ -82,22 +76,13 @@ namespace SystemInfo
 		mutable boost::asio::ip::tcp::resolver m_resolver;
 		mutable boost::asio::ip::tcp::socket m_socket;
 
-		CPU m_cpu;
+		CPUInfo m_cpu;
 		OSInfo m_os;
 		std::vector<Library> m_libraries;
-
-#ifndef WIN32
-		std::string GetCPUArch() const;
-#endif
-
-#ifdef __linux__
-#endif
-
 	};
 
 	std::string ToJsonStr(const SystemInfo& sysInfo);
 	std::string ToXmlStr(const SystemInfo& sysInfo);
-
 }
 
 extern SystemInfo::SystemInfo* g_SystemInfo;

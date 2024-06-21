@@ -20,7 +20,6 @@
 
 #include "nzbget.h"
 
-#include <string>
 #include "OSInfo.h"
 #include "Util.h"
 #include "Log.h"

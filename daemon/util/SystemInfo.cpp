@@ -63,7 +63,6 @@ namespace SystemInfo
 		, m_resolver{ m_context }
 		, m_socket{ m_context }
 	{
-		InitCPU();
 		InitLibsVersions();
 	}
 
@@ -106,7 +105,7 @@ namespace SystemInfo
 #endif
 	}
 
-	const CPU& SystemInfo::GetCPU() const
+	const CPUInfo& SystemInfo::GetCPUInfo() const
 	{
 		return m_cpu;
 	}
@@ -319,143 +318,6 @@ namespace SystemInfo
 		return network;
 	}
 
-#ifdef WIN32
-	void SystemInfo::InitCPU()
-	{
-		int len = BUFFER_SIZE;
-		char cpuModelBuffer[BUFFER_SIZE];
-		char cpuArchBuffer[BUFFER_SIZE];
-		if (Util::RegReadStr(
-			HKEY_LOCAL_MACHINE,
-			"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
-			"ProcessorNameString",
-			cpuModelBuffer,
-			&len))
-		{
-			m_cpu.model = cpuModelBuffer;
-			Util::Trim(m_cpu.model);
-		}
-		else
-		{
-			warn("Failed to get CPU model. Couldn't read Windows Registry.");
-		}
-
-		if (Util::RegReadStr(
-			HKEY_LOCAL_MACHINE,
-			"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
-			"PROCESSOR_ARCHITECTURE",
-			cpuArchBuffer,
-			&len))
-		{
-			m_cpu.arch = cpuArchBuffer;
-			Util::Trim(m_cpu.arch);
-		}
-		else
-		{
-			warn("Failed to get CPU arch. Couldn't read Windows Registry.");
-		}
-	}
-#endif
-
-#ifdef __linux__
-	void SystemInfo::InitCPU()
-	{
-		m_cpu.arch = GetCPUArch();
-
-		std::ifstream cpuinfo("/proc/cpuinfo");
-		if (!cpuinfo.is_open())
-		{
-			warn("Failed to read CPU model. Couldn't read '/proc/cpuinfo'.");
-			return;
-		}
-
-		std::string line;
-		while (std::getline(cpuinfo, line))
-		{
-			if (line.find("model name") != std::string::npos)
-			{
-				m_cpu.model = line.substr(line.find(":") + 2);
-				Util::Trim(m_cpu.model);
-				return;
-			}
-		}
-
-		warn("Failed to find CPU model.");
-	}
-
-	
-#endif
-
-#if defined(__unix__) && !defined(__linux__)
-	void SystemInfo::InitCPU()
-	{
-		size_t len = BUFFER_SIZE;
-		char cpuModel[BUFFER_SIZE];
-		if (sysctlbyname("hw.model", &cpuModel, &len, nullptr, 0) == 0)
-		{
-			m_cpu.model = cpuModel;
-			Util::Trim(m_cpu.model);
-		}
-		else
-		{
-			warn("Failed to get CPU model. Couldn't read 'hw.model'.");
-		}
-
-		m_cpu.arch = GetCPUArch();
-	}
-
-#endif
-
-#ifdef __APPLE__
-	void SystemInfo::InitCPU()
-	{
-		size_t len = BUFFER_SIZE;
-		char buffer[BUFFER_SIZE];
-		if (sysctlbyname("machdep.cpu.brand_string", &buffer, &len, nullptr, 0) == 0)
-		{
-			m_cpu.model = buffer;
-			Util::Trim(m_cpu.model);
-		}
-		else
-		{
-			warn("Failed to get CPU model. Couldn't read 'machdep.cpu.brand_string'.");
-		}
-
-		m_cpu.arch = GetCPUArch();
-	}
-#endif
-
-#ifndef WIN32
-	std::string SystemInfo::GetCPUArch() const
-	{
-		const char* cmd = "uname -m";
-		FILE* pipe = popen(cmd, "r");
-		if (!pipe)
-		{
-			warn("Failed to get CPU arch. Couldn't read 'uname -m'.");
-
-			return "";
-		}
-
-		char buffer[BUFFER_SIZE];
-		while (!feof(pipe))
-		{
-			if (fgets(buffer, BUFFER_SIZE, pipe))
-			{
-				pclose(pipe);
-				Util::Trim(buffer);
-				return buffer;
-			}
-		}
-
-		pclose(pipe);
-
-		warn("Failed to find CPU arch.");
-
-		return "";
-	}
-#endif
-
 	std::string ToJsonStr(const SystemInfo& sysInfo)
 	{
 		Json::JsonObject json;
@@ -467,7 +329,7 @@ namespace SystemInfo
 
 		const auto& os = sysInfo.GetOSInfo();
 		const auto& network = sysInfo.GetNetwork();
-		const auto& cpu = sysInfo.GetCPU();
+		const auto& cpu = sysInfo.GetCPUInfo();
 		const auto& tools = sysInfo.GetTools();
 		const auto& libraries = sysInfo.GetLibraries();
 
@@ -475,8 +337,8 @@ namespace SystemInfo
 		osJson["Version"] = os.GetVersion();
 		networkJson["PublicIP"] = network.publicIP;
 		networkJson["PrivateIP"] = network.privateIP;
-		cpuJson["Model"] = cpu.model;
-		cpuJson["Arch"] = cpu.arch;
+		cpuJson["Model"] = cpu.GetModel();
+		cpuJson["Arch"] = cpu.GetArch();
 
 		for (const auto& tool : tools)
 		{
@@ -516,7 +378,7 @@ namespace SystemInfo
 
 		const auto& os = sysInfo.GetOSInfo();
 		const auto& network = sysInfo.GetNetwork();
-		const auto& cpu = sysInfo.GetCPU();
+		const auto& cpu = sysInfo.GetCPUInfo();
 		const auto& tools = sysInfo.GetTools();
 		const auto& libraries = sysInfo.GetLibraries();
 
@@ -524,8 +386,8 @@ namespace SystemInfo
 		Xml::AddNewNode(osNode, "Version", "string", os.GetVersion().c_str());
 		Xml::AddNewNode(networkNode, "PublicIP", "string", network.publicIP.c_str());
 		Xml::AddNewNode(networkNode, "PrivateIP", "string", network.privateIP.c_str());
-		Xml::AddNewNode(cpuNode, "Model", "string", cpu.model.c_str());
-		Xml::AddNewNode(cpuNode, "Arch", "string", cpu.arch.c_str());
+		Xml::AddNewNode(cpuNode, "Model", "string", cpu.GetModel().c_str());
+		Xml::AddNewNode(cpuNode, "Arch", "string", cpu.GetArch().c_str());
 
 		for (const auto& tool : tools)
 		{
