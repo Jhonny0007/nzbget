@@ -358,25 +358,6 @@ namespace SystemInfo
 #endif
 
 #ifdef __linux__
-#include <fstream>
-	bool SystemInfo::IsRunningInDocker() const
-	{
-		return FileSystem::FileExists("/.dockerenv");
-	}
-
-	void SystemInfo::TrimQuotes(std::string& str) const
-	{
-		if (str.front() == '"')
-		{
-			str = str.substr(1);
-		}
-
-		if (str.back() == '"')
-		{
-			str = str.substr(0, str.size() - 1);
-		}
-	}
-
 	void SystemInfo::InitCPU()
 	{
 		m_cpu.arch = GetCPUArch();

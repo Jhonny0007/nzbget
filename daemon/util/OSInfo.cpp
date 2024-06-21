@@ -88,6 +88,7 @@ namespace SystemInfo
 #endif	
 
 #ifdef __linux__
+#include <fstream>
 	bool OSInfo::IsRunningInDocker() const
 	{
 		return FileSystem::FileExists("/.dockerenv");
@@ -160,7 +161,7 @@ namespace SystemInfo
 		}
 
 		warn("Failed to find OS info.");
-	}
+}
 #endif
 
 #ifdef __APPLE__
