@@ -283,7 +283,7 @@ namespace SystemInfo
 
 			std::string request = "GET / HTTP/1.1\r\n";
 			request += "Host: ip.nzbget.com\r\n";
-			request += "User-Agent:", "nzbget/24.2\r\n";
+			request += "User-Agent: nzbget/24.2\r\n";
 #ifndef DISABLE_GZIP
 			request += "Accept-Encoding: gzip\r\n";
 #endif

@@ -107,7 +107,7 @@ namespace SystemInfo
 		}
 	}
 
-	void OSInfo::InitOS()
+	void OSInfo::Init()
 	{
 		std::ifstream osInfo("/etc/os-release");
 		if (!osInfo.is_open())
@@ -165,7 +165,7 @@ namespace SystemInfo
 #endif
 
 #ifdef __APPLE__
-	void OSInfo::InitOS()
+	void OSInfo::Init()
 	{
 		FILE* pipe = popen("sw_vers", "r");
 		if (!pipe)
@@ -207,7 +207,7 @@ namespace SystemInfo
 #endif
 
 #if __BSD__
-	void OSInfo::InitOS()
+	void OSInfo::Init()
 	{
 		size_t len = BUFFER_SIZE;
 		char buffer[len];
