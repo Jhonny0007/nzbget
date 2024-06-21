@@ -69,7 +69,7 @@ public:
 	static const char* NormalizeLocalHostIP(const char* ip);
 
 	static const char* NULL_OUTPUT;
-	static const char* ERR_NULL_OUTPUT;
+	static const char* NULL_ERR_OUTPUT;
 	static const char* FIND_CMD;
 
 #ifdef WIN32

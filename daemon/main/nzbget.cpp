@@ -101,6 +101,7 @@ int g_ArgumentCount;
 char* (*g_EnvironmentVariables)[] = nullptr;
 char* (*g_Arguments)[] = nullptr;
 
+
 /*
  * Main entry point
  */
@@ -117,6 +118,7 @@ int main(int argc, char *argv[], char *argp[])
 		);
 #endif
 #endif
+
 	Util::Init();
 	YEncode::init();
 

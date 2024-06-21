@@ -38,7 +38,7 @@ namespace SystemInfo
 #include <ncurses/ncurses.h>
 #endif
 
-	const size_t BUFFER_SIZE = 256;
+	const size_t BUFFER_SIZE = 512;
 
 	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line)
 		{
@@ -122,7 +122,7 @@ namespace SystemInfo
 			return python;
 		}
 
-		std::string cmd = result.get() + " --version" + Util::ERR_NULL_OUTPUT;
+		std::string cmd = result.get() + " --version" + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -144,7 +144,7 @@ namespace SystemInfo
 
 		pclose(pipe);
 
-		cmd = Util::FIND_CMD + result.get() + Util::ERR_NULL_OUTPUT;
+		cmd = Util::FIND_CMD + result.get() + Util::NULL_ERR_OUTPUT;
 		pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -216,7 +216,7 @@ namespace SystemInfo
 			return "";
 		}
 
-		FILE* pipe = popen((path + Util::ERR_NULL_OUTPUT).c_str(), "r");
+		FILE* pipe = popen((path + Util::NULL_ERR_OUTPUT).c_str(), "r");
 		if (!pipe)
 		{
 			return "";

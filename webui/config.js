@@ -4360,7 +4360,7 @@ var SystemInfo = (new function($)
 		renderAppVersion(Options.option('Version'));
 		renderTools(sysInfo['Tools']);
 		renderLibraries(sysInfo['Libraries']);
-		renderNewsServers(Status.getStatus()['NewsServers'])
+		renderNewsServers(Status.getStatus()['NewsServers']);
 	}
 
 	function renderDiskSpace(free, total)
@@ -4380,7 +4380,10 @@ var SystemInfo = (new function($)
 	function renderAppVersion(version)
 	{
 		$SysInfo_AppVersion.text(version);
-		var updateBtn = $('<button type="button" title="Check for Updates" class="btn btn-default" style="margin: 0 10px;" onclick="Config.checkUpdates()"><i class="material-icon">update</i></>');
+		var updateIcon = $('<i class="material-icon">update</i>');
+		var updateBtn = $('<button type="button" title="Check for Updates" class="btn btn-default" style="margin: 0 10px;"></>');
+		updateBtn.on('click', function() { Config.checkUpdates(); });
+		updateBtn.append(updateIcon);
 		$SysInfo_AppVersion.append(updateBtn);
 	}
 
@@ -4428,8 +4431,8 @@ var SystemInfo = (new function($)
 			var tdName = $('<td style="vertical-align: middle;">');
 			var tdActive = $('<td style="vertical-align: middle;">');
 			var tdTests = $('<td>');
-			var testConnectionBtn = $('<button type="button" class="btn btn-default"></>');
-			var testConnectionIcon = $('<i class="material-icon" title="Test connection">cell_tower</i>');
+			var testConnectionBtn = $('<button type="button" title="Test connection" class="btn btn-default"></>');
+			var testConnectionIcon = $('<i class="material-icon">cell_tower</i>');
 			testConnectionBtn.append(testConnectionIcon);
 			testConnectionBtn.attr({ 'data-multiid': server.id });
 			testConnectionBtn.on('click', function () 
