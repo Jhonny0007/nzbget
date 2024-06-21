@@ -171,6 +171,8 @@ compiled */
 #include <sys/sysctl.h>
 #endif
 
+#define __BSD__ (__FreeBSD__ || __NetBSD__ || __OpenBSD__ || __DragonFly__)
+
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
 #endif

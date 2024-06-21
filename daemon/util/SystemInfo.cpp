@@ -64,7 +64,6 @@ namespace SystemInfo
 		, m_socket{ m_context }
 	{
 		InitCPU();
-		InitOS();
 		InitLibsVersions();
 	}
 
@@ -112,7 +111,7 @@ namespace SystemInfo
 		return m_cpu;
 	}
 
-	const OS& SystemInfo::GetOS() const
+	const OSInfo& SystemInfo::GetOSInfo() const
 	{
 		return m_os;
 	}
@@ -356,47 +355,6 @@ namespace SystemInfo
 			warn("Failed to get CPU arch. Couldn't read Windows Registry.");
 		}
 	}
-
-	void SystemInfo::InitOS()
-	{
-		int len = BUFFER_SIZE;
-		char buffer[BUFFER_SIZE];
-		if (Util::RegReadStr(
-			HKEY_LOCAL_MACHINE,
-			"SOFTWARE\\MICROSOFT\\Windows NT\\CurrentVersion",
-			"CurrentBuild",
-			buffer,
-			&len))
-		{
-			long buildNum = std::atol(buffer);
-			if (buildNum == 0)
-			{
-				m_os.version = "";
-			}
-			else if (buildNum >= m_win11BuildVersion)
-			{
-				m_os.version = "11";
-			}
-			else if (buildNum >= m_win10BuildVersion)
-			{
-				m_os.version = "10";
-			}
-			else if (buildNum >= m_win8BuildVersion)
-			{
-				m_os.version = "8";
-			}
-			else if (buildNum >= m_winXPBuildVersion)
-			{
-				m_os.version = "XP";
-			}
-		}
-		else
-		{
-			warn("Failed to get OS version. Couldn't read Windows Registry.");
-		}
-
-		m_os.name = "Windows";
-	}
 #endif
 
 #ifdef __linux__
@@ -444,61 +402,7 @@ namespace SystemInfo
 		warn("Failed to find CPU model.");
 	}
 
-	void SystemInfo::InitOS()
-	{
-		std::ifstream osInfo("/etc/os-release");
-		if (!osInfo.is_open())
-		{
-			warn("Failed to get OS info. Couldn't read '/etc/os-release'.");
-			return;
-		}
-
-		std::string line;
-		while (std::getline(osInfo, line))
-		{
-			if (!m_os.name.empty() && !m_os.version.empty())
-			{
-				return;
-			}
-
-			// e.g NAME="Debian GNU/Linux"
-			if (m_os.name.empty() && line.find("NAME=") == 0)
-			{
-				m_os.name = line.substr(line.find("=") + 1);
-
-				Util::Trim(m_os.name);
-				TrimQuotes(m_os.name);
-
-				if (IsRunningInDocker())
-				{
-					m_os.name += " (Running in Docker)";
-				}
-
-				continue;
-			}
-
-			// e.g VERSION_ID="12"
-			if (m_os.version.empty() && line.find("VERSION_ID=") == 0)
-			{
-				m_os.version = line.substr(line.find("=") + 1);
-
-				Util::Trim(m_os.version);
-				TrimQuotes(m_os.version);
-
-				continue;
-			}
-
-			// e.g. BUILD_ID=rolling
-			if (m_os.version.empty() && line.find("BUILD_ID=") == 0)
-			{
-				m_os.version = line.substr(line.find("=") + 1);
-				Util::Trim(m_os.version);
-				continue;
-			}
-		}
-
-		warn("Failed to find OS info.");
-	}
+	
 #endif
 
 #if defined(__unix__) && !defined(__linux__)
@@ -519,32 +423,6 @@ namespace SystemInfo
 		m_cpu.arch = GetCPUArch();
 	}
 
-	void SystemInfo::InitOS()
-	{
-		size_t len = BUFFER_SIZE;
-		char buffer[len];
-		if (sysctlbyname("kern.ostype", &buffer, &len, nullptr, 0) == 0)
-		{
-			m_os.name = buffer;
-			Util::Trim(m_os.name);
-		}
-		else
-		{
-			warn("Failed to get OS name. Couldn't read 'kern.ostype'.");
-		}
-
-		len = BUFFER_SIZE;
-
-		if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
-		{
-			m_os.version = buffer;
-			Util::Trim(m_os.version);
-		}
-		else
-		{
-			warn("Failed to get OS version. Failed to read 'kern.osrelease'.");
-		}
-	}
 #endif
 
 #ifdef __APPLE__
@@ -563,46 +441,6 @@ namespace SystemInfo
 		}
 
 		m_cpu.arch = GetCPUArch();
-	}
-
-	void SystemInfo::InitOS()
-	{
-		FILE* pipe = popen("sw_vers", "r");
-		if (!pipe)
-		{
-			warn("Failed to get OS info. Couldn't read 'sw_vers'.");
-			return;
-		}
-
-		char buffer[BUFFER_SIZE];
-		std::string result = "";
-		while (!feof(pipe))
-		{
-			if (fgets(buffer, sizeof(buffer), pipe))
-			{
-				result += buffer;
-			}
-		}
-
-		pclose(pipe);
-
-		std::string productName = "ProductName:";
-		size_t pos = result.find(productName);
-		if (pos != std::string::npos)
-		{
-			size_t endPos = result.find("\n", pos);
-			m_os.name = result.substr(pos + productName.size(), endPos - pos - productName.size());
-			Util::Trim(m_os.name);
-		}
-
-		std::string productVersion = "ProductVersion:";
-		pos = result.find(productVersion);
-		if (pos != std::string::npos)
-		{
-			size_t endPos = result.find("\n", pos);
-			m_os.version = result.substr(pos + productVersion.size(), endPos - pos - productVersion.size());
-			Util::Trim(m_os.version);
-		}
 	}
 #endif
 
@@ -646,14 +484,14 @@ namespace SystemInfo
 		Json::JsonArray toolsJson;
 		Json::JsonArray librariesJson;
 
-		const auto& os = sysInfo.GetOS();
+		const auto& os = sysInfo.GetOSInfo();
 		const auto& network = sysInfo.GetNetwork();
 		const auto& cpu = sysInfo.GetCPU();
 		const auto& tools = sysInfo.GetTools();
 		const auto& libraries = sysInfo.GetLibraries();
 
-		osJson["Name"] = os.name;
-		osJson["Version"] = os.version;
+		osJson["Name"] = os.GetName();
+		osJson["Version"] = os.GetVersion();
 		networkJson["PublicIP"] = network.publicIP;
 		networkJson["PrivateIP"] = network.privateIP;
 		cpuJson["Model"] = cpu.model;
@@ -695,14 +533,14 @@ namespace SystemInfo
 		xmlNodePtr toolsNode = xmlNewNode(nullptr, BAD_CAST "Tools");
 		xmlNodePtr librariesNode = xmlNewNode(nullptr, BAD_CAST "Libraries");
 
-		const auto& os = sysInfo.GetOS();
+		const auto& os = sysInfo.GetOSInfo();
 		const auto& network = sysInfo.GetNetwork();
 		const auto& cpu = sysInfo.GetCPU();
 		const auto& tools = sysInfo.GetTools();
 		const auto& libraries = sysInfo.GetLibraries();
 
-		Xml::AddNewNode(osNode, "Name", "string", os.name.c_str());
-		Xml::AddNewNode(osNode, "Version", "string", os.name.c_str());
+		Xml::AddNewNode(osNode, "Name", "string", os.GetName().c_str());
+		Xml::AddNewNode(osNode, "Version", "string", os.GetVersion().c_str());
 		Xml::AddNewNode(networkNode, "PublicIP", "string", network.publicIP.c_str());
 		Xml::AddNewNode(networkNode, "PrivateIP", "string", network.privateIP.c_str());
 		Xml::AddNewNode(cpuNode, "Model", "string", cpu.model.c_str());

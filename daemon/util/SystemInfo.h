@@ -23,6 +23,7 @@
 #include <string>
 #include <iostream>
 #include <boost/asio.hpp>
+#include "OSInfo.h"
 
 namespace SystemInfo
 {
@@ -53,11 +54,6 @@ namespace SystemInfo
 		std::string privateIP;
 	};
 
-	struct OS
-	{
-		std::string name;
-		std::string version;
-	};
 
 	class SystemInfo final
 	{
@@ -68,14 +64,13 @@ namespace SystemInfo
 		Network GetNetwork() const;
 		const std::vector<Library>& GetLibraries() const;
 		const CPU& GetCPU() const;
-		const OS& GetOS() const;
+		const OSInfo& GetOSInfo() const;
 
 	private:
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
 		void InitCPU();
-		void InitOS();
 		void InitLibsVersions();
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(
@@ -88,25 +83,16 @@ namespace SystemInfo
 		mutable boost::asio::ip::tcp::socket m_socket;
 
 		CPU m_cpu;
-		OS m_os;
+		OSInfo m_os;
 		std::vector<Library> m_libraries;
 
 #ifndef WIN32
 		std::string GetCPUArch() const;
-		bool IsRunningInDocker() const;
 #endif
 
 #ifdef __linux__
-		void TrimQuotes(std::string& str) const;
 #endif
 
-#ifdef WIN32
-		const long m_win11BuildVersion = 22000;
-		const long m_win10BuildVersion = 10240;
-		const long m_win8BuildVersion = 9200;
-		const long m_win7BuildVersion = 7600;
-		const long m_winXPBuildVersion = 2600;
-#endif
 	};
 
 	std::string ToJsonStr(const SystemInfo& sysInfo);
