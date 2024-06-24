@@ -58,11 +58,9 @@ namespace SystemInfo
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
 		void InitLibVersions();
+		std::string ParseUnpackerVersion(const std::string& line) const;
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
-		std::string GetUnpackerVersion(
-			const std::string& path,
-			const char* marker,
-			const UnpackerVersionParser& parser) const;
+		std::string GetUnpackerVersion(const std::string& path, const char* marker) const;
 
 		CPUInfo m_cpu;
 		OSInfo m_os;

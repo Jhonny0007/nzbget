@@ -40,20 +40,6 @@ namespace SystemInfo
 
 	const size_t BUFFER_SIZE = 512;
 
-	UnpackerVersionParser UnpackerVersionParserFunc = [](const std::string& line)
-		{
-			// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-			// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
-			std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
-			std::smatch match;
-			if (std::regex_search(line, match, pattern))
-			{
-				return match[0].str();
-			}
-
-			return std::string("");
-		};
-
 	SystemInfo::SystemInfo()
 	{
 		InitLibVersions();
@@ -110,6 +96,19 @@ namespace SystemInfo
 
 		return tools;
 	}
+	std::string SystemInfo::ParseUnpackerVersion(const std::string& line) const
+	{
+		// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
+		// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
+		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
+		std::smatch match;
+		if (std::regex_search(line, match, pattern))
+		{
+			return match[0].str();
+		}
+
+		return std::string("");
+	};
 
 	Tool SystemInfo::GetPython() const
 	{
@@ -168,7 +167,7 @@ namespace SystemInfo
 
 		tool.name = "UnRAR";
 		tool.path = GetUnpackerPath(g_Options->GetUnrarCmd());
-		tool.version = GetUnpackerVersion(tool.path, "UNRAR", UnpackerVersionParserFunc);
+		tool.version = GetUnpackerVersion(tool.path, "UNRAR");
 
 		return tool;
 	}
@@ -179,7 +178,7 @@ namespace SystemInfo
 
 		tool.name = "7-Zip";
 		tool.path = GetUnpackerPath(g_Options->GetSevenZipCmd());
-		tool.version = GetUnpackerVersion(tool.path, tool.name.c_str(), UnpackerVersionParserFunc);
+		tool.version = GetUnpackerVersion(tool.path, tool.name.c_str());
 
 		return tool;
 	}
@@ -208,8 +207,7 @@ namespace SystemInfo
 
 	std::string SystemInfo::GetUnpackerVersion(
 		const std::string& path,
-		const char* marker,
-		const UnpackerVersionParser& parseVersion) const
+		const char* marker) const
 	{
 		if (path.empty())
 		{
@@ -230,7 +228,7 @@ namespace SystemInfo
 			{
 				if (strstr(buffer, marker))
 				{
-					version = parseVersion(buffer);
+					version = ParseUnpackerVersion(buffer);
 					break;
 				}
 			}
