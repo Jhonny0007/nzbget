@@ -2,6 +2,7 @@ set(SRC
 	${CMAKE_SOURCE_DIR}/daemon/connect/Connection.cpp
 	${CMAKE_SOURCE_DIR}/daemon/connect/TlsSocket.cpp
 	${CMAKE_SOURCE_DIR}/daemon/connect/WebDownloader.cpp
+	${CMAKE_SOURCE_DIR}/daemon/connect/HttpClient.cpp
 
 	${CMAKE_SOURCE_DIR}/daemon/extension/CommandScript.cpp
 	${CMAKE_SOURCE_DIR}/daemon/extension/FeedScript.cpp
