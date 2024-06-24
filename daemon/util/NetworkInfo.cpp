@@ -20,8 +20,6 @@
 
 #include "nzbget.h"
 
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
 #include "NetworkInfo.h"
 #include "HttpClient.h"
 #include "Util.h"
