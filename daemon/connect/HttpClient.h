@@ -63,15 +63,11 @@ namespace HttpClient
 		unsigned ReadStatusCode(Socket& socket, boost::asio::streambuf& buf);
 		Headers ReadHeaders(Socket& socket, boost::asio::streambuf& buf);
 		std::string ReadBody(Socket& socket, boost::asio::streambuf& buf);
+		Socket GetSocket();
 
 #ifndef DISABLE_TLS
-		Socket GetSocket();
-
 		void DoHandshake(Socket& socket, const std::string& host);
-
-		boost::asio::ssl::context m_sslContext;
-#else
-		Socket GetSocket();
+		boost::asio::ssl::context m_sslContext;;
 #endif
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
