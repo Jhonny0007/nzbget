@@ -32,7 +32,7 @@ namespace SystemInfo
 	Network GetNetwork()
 	{
 		Network network{};
-#ifdef HAVE_OPENSSL
+
 		try
 		{
 			auto httpClient = std::make_unique<HttpClient::HttpClient>();
@@ -48,9 +48,6 @@ namespace SystemInfo
 			warn("Failed to get public and private IP: %s", e.what());
 		}
 
-#else
-		warn("Failed to get public and private IP. NZBGet was built without OpenSSL.");
-#endif
 		return network;
 	}
 }

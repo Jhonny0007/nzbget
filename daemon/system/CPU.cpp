@@ -106,7 +106,7 @@ namespace SystemInfo
 			}
 		}
 
-		warn("Failed to find CPU model.");
+		warn("Failed to get CPU model.");
 	}
 #endif
 
@@ -174,7 +174,7 @@ namespace SystemInfo
 
 		pclose(pipe);
 
-		warn("Failed to find CPU arch.");
+		warn("Failed to get CPU arch.");
 
 		return "";
 	}

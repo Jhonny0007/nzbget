@@ -49,7 +49,6 @@ namespace SystemInfo
 		const long m_winXPBuildVersion = 2600;
 #endif
 	};
-
 }
 
 #endif

@@ -22,7 +22,7 @@
 #include "nzbget.h"
 
 #include <sstream>
-
+#include <array>
 #include "Util.h"			
 #include "YEncode.h"
 
@@ -152,22 +152,7 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 	if (fileExt == ".py")
 	{
-		std::string cmd = std::string("python3 --version") + NULL_OUTPUT;
-		if (std::system(cmd.c_str()) == 0)
-		{
-			return std::string("python3");
-		}
-		cmd = std::string("python --version") + NULL_OUTPUT;
-		if (std::system(cmd.c_str()) == 0)
-		{
-			return std::string("python");
-		}
-		cmd = std::string("py --version") + NULL_OUTPUT;
-		if (std::system(cmd.c_str()) == 0)
-		{
-			return std::string("py");
-		}
-		return boost::none;
+		return FindPython();
 	}
 
 	if (fileExt == ".sh")
@@ -215,20 +200,15 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 boost::optional<std::string> Util::FindPython()
 {
-	std::string cmd = std::string("python3 --version") + NULL_OUTPUT;
-	if (std::system(cmd.c_str()) == 0)
+	std::array<std::string, 3> pythonExecutables{ "python3", "python", "py" }; 
+
+	for (const auto& executable : pythonExecutables) 
 	{
-		return std::string("python3");
-	}
-	cmd = std::string("python --version") + NULL_OUTPUT;
-	if (std::system(cmd.c_str()) == 0)
-	{
-		return std::string("python");
-	}
-	cmd = std::string("py --version") + NULL_OUTPUT;
-	if (std::system(cmd.c_str()) == 0)
-	{
-		return std::string("py");
+		std::string cmd = executable + " --version" + NULL_OUTPUT;
+		if (std::system(cmd.c_str()) == 0) 
+		{
+			return executable;
+		}
 	}
 	return boost::none;
 }

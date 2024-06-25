@@ -205,9 +205,7 @@ namespace SystemInfo
 		return "";
 	}
 
-	std::string SystemInfo::GetUnpackerVersion(
-		const std::string& path,
-		const char* marker) const
+	std::string SystemInfo::GetUnpackerVersion(const std::string& path, const char* marker) const
 	{
 		if (path.empty())
 		{

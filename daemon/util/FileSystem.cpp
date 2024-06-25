@@ -64,12 +64,12 @@ boost::optional<std::string> FileSystem::GetFileRealPath(const std::string& path
 	DWORD len = GetFullPathName(path.c_str(), 256, buffer, nullptr);
 	if (len != 0)
 	{
-		return boost::optional<std::string>{buffer};
+		return boost::optional<std::string>{ buffer };
 	}
 #else
 	if (realpath(path.c_str(), buffer) != nullptr)
 	{
-		return boost::optional<std::string>{buffer};
+		return boost::optional<std::string>{ buffer };
 	}
 #endif
 

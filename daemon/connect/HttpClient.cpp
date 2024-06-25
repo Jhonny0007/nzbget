@@ -20,8 +20,6 @@
 
 #include "nzbget.h"
 
-#ifdef HAVE_OPENSSL
-
 #include "HttpClient.h"
 #include "Util.h"
 
@@ -30,7 +28,7 @@ namespace HttpClient
 	namespace asio = boost::asio;
 	using tcp = boost::asio::ip::tcp;
 
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 	namespace ssl = boost::asio::ssl;
 #endif
 
@@ -38,7 +36,7 @@ namespace HttpClient
 		: m_context{}
 		, m_resolver{ m_context }
 	{
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 		m_sslContext.set_default_verify_paths();
 #endif
 	}
@@ -65,7 +63,7 @@ namespace HttpClient
 
 	std::string HttpClient::GetProtocol() const
 	{
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 		return "https";
 #else
 		return "http";
@@ -87,7 +85,7 @@ namespace HttpClient
 	void HttpClient::Connect(Socket& socket, const Endpoints& endpoints, const std::string& host)
 	{
 		asio::connect(socket.lowest_layer(), endpoints);
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 		DoHandshake(socket, host);
 #endif
 		SaveLocalIP(socket);
@@ -177,7 +175,7 @@ namespace HttpClient
 		m_localIP = socket.lowest_layer().local_endpoint().address().to_string();
 	}
 
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 	Socket HttpClient::GetSocket()
 	{
 		return ssl::stream<tcp::socket>{ m_context, m_sslContext };
@@ -200,5 +198,3 @@ namespace HttpClient
 #endif
 
 }
-
-#endif

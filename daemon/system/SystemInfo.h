@@ -27,8 +27,6 @@
 
 namespace SystemInfo
 {
-	using UnpackerVersionParser = std::function<std::string(const std::string&)>;
-
 	struct Library
 	{
 		std::string name;

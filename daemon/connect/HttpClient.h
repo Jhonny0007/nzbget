@@ -21,19 +21,17 @@
 #ifndef HTTP_CLIENT_H
 #define HTTP_CLIENT_H
 
-#ifdef HAVE_OPENSSL
-
 #include <string>
 #include <thread>
 #include <boost/asio.hpp>
 
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 #include <boost/asio/ssl.hpp>
 #endif
 
 namespace HttpClient
 {
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 	using Socket = boost::asio::ssl::stream<boost::asio::ip::tcp::socket>;
 #else
 	using Socket = boost::asio::ip::tcp::socket;
@@ -71,12 +69,11 @@ namespace HttpClient
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
 		std::string m_localIP;
-#ifndef DISABLE_TLS
+#ifndef DISABLE_TLS && HAVE_OPENSSL
 		void DoHandshake(Socket& socket, const std::string& host);
 		boost::asio::ssl::context m_sslContext{ boost::asio::ssl::context::tlsv13_client };
 #endif
 	};
 }
 
-#endif
 #endif
