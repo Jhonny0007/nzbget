@@ -122,9 +122,9 @@ namespace SystemInfo
 		}
 
 #ifdef WIN32
-		std::string cmd = "\"" + result.get() + "\"" + Util::NULL_ERR_OUTPUT;
+		std::string cmd = "\"" + result.get() + " --version" + "\"" + Util::NULL_ERR_OUTPUT;
 #else
-		std::string cmd = result.get() + Util::NULL_ERR_OUTPUT;
+		std::string cmd = result.get() " --version" + Util::NULL_ERR_OUTPUT;
 #endif
 
 		FILE* pipe = popen(cmd.c_str(), "r");
@@ -148,7 +148,7 @@ namespace SystemInfo
 
 		pclose(pipe);
 
-		cmd = FileSystem::GetFileRealPath(result.get()).get() + Util::NULL_ERR_OUTPUT;
+		cmd = Util::FIND_CMD + result.get() + Util::NULL_ERR_OUTPUT;
 		pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{

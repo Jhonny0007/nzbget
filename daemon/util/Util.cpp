@@ -105,17 +105,13 @@ int getopt(int argc, char *argv[], char *optstring)
 #endif
 
 #ifdef WIN32
-const char* Util::NULL_OUTPUT  = " >nul 2>&1";
-const char* Util::NULL_ERR_OUTPUT = " 2>nul";
+const char* Util::NULL_OUTPUT = " >null 2>$1";
+const char* Util::NULL_ERR_OUTPUT = " 2>null";
 const char* Util::FIND_CMD = "where ";
-#elif defined(__unix__)
-const char* Util::NULL_OUTPUT = " >/dev/null 2>&1";
+#else
+const char* Util::NULL_OUTPUT = " >/dev/null 2>$1";
 const char* Util::NULL_ERR_OUTPUT = " 2>null";
 const char* Util::FIND_CMD = "which ";
-#else // macOS
-const char* Util::NULL_OUTPUT = "";
-const char* Util::NULL_ERR_OUTPUT = "";
-const char* Util::FIND_CMD = "";
 #endif
 
 char Util::VersionRevisionBuf[100];
