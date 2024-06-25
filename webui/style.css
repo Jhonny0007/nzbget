@@ -67,7 +67,7 @@ body {
 	table-layout: fixed;
 }
 
-.table-fixed td 
+.table-fixed td, th 
 {
 	vertical-align: middle;
 	overflow: auto;
@@ -983,8 +983,8 @@ form {
 	margin-bottom: 0px;
 }
 
-.table-bordered th,
-.table-bordered td {
+.table-bordered::not(.table-fixed) th,
+.table-bordered::not(.table-fixed) td {
 	border-left: none;
 }
 

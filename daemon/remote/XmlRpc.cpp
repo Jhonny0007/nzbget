@@ -1336,7 +1336,7 @@ void StatusXmlCommand::Execute()
 		"\"FreeDiskSpaceMB\" : %i,\n"
 		"\"TotalDiskSpaceLo\" : %u,\n"
 		"\"TotalDiskSpaceHi\" : %u,\n"
-		"\"TotalDiskSpaceMB\" : %i,\n"
+		"\"TotalDiskSpaceMB\" : %u,\n"
 		"\"ServerTime\" : %i,\n"
 		"\"ResumeTime\" : %i,\n"
 		"\"FeedActive\" : %s,\n"
@@ -1415,18 +1415,19 @@ void StatusXmlCommand::Execute()
 	uint32 freeDiskSpaceHi, freeDiskSpaceLo;
 	uint32 totalDiskSpaceHi, totalDiskSpaceLo;
 	int64 freeDiskSpace = 0;
-	int64 totalDiskSpace = 0;
+	size_t totalDiskSpace = 0;
 	auto res = FileSystem::GetDiskState(g_Options->GetDestDir());
 	if (res.has_value())
 	{
 		const auto& value = res.get();
 		freeDiskSpace = static_cast<int64>(value.available);
-		totalDiskSpace = static_cast<int64>(value.total);
+		totalDiskSpace = value.total;
+		
 	}
 	Util::SplitInt64(freeDiskSpace, &freeDiskSpaceHi, &freeDiskSpaceLo);
 	Util::SplitInt64(totalDiskSpace, &totalDiskSpaceHi, &totalDiskSpaceLo);
 	int freeDiskSpaceMB = static_cast<int>(freeDiskSpace / 1024 / 1024);
-	int totalDiskSpaceMB = static_cast<int>(totalDiskSpace / 1024 / 1024);
+	uint32 totalDiskSpaceMB = static_cast<uint32>(totalDiskSpace / 1024 / 1024);
 
 	int serverTime = (int)Util::CurrentTime();
 	int resumeTime = (int)g_WorkState->GetResumeTime();
