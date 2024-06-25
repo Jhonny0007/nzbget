@@ -17,40 +17,30 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef CPU_H
+#define CPU_H
 
-#include "nzbget.h"
-
-#include "NetworkInfo.h"
-#include "Util.h"
-#include "Log.h"
-#include "HttpClient.h"
+#include <string>
 
 namespace SystemInfo
 {
-	const char* IP_SERVICE = "ip.nzbget.com";
-
-	NetworkInfo GetNetworkInfo()
+	class CPU final
 	{
-		NetworkInfo network{};
-#ifdef HAVE_OPENSSL
-		try
-		{
-			auto httpClient = std::make_unique<HttpClient::HttpClient>();
-			auto result = httpClient->GET(IP_SERVICE).get();
-			if (result.statusCode == 200)
-			{
-				network.publicIP = std::move(result.body);
-				network.privateIP = httpClient->GetLocalIP();
-			}
-		}
-		catch (const std::exception& e)
-		{
-			warn("Failed to get public and private IP: %s", e.what());
-		}
+	public:
+		CPU();
+		const std::string& GetModel() const;
+		const std::string& GetArch() const;
 
-#else
-		warn("Failed to get public and private IP. NZBGet was built without TLS");
+	private:
+		void Init();
+
+#ifndef WIN32
+		std::string GetCPUArch() const;
 #endif
-		return network;
-	}
+
+		std::string m_model;
+		std::string m_arch;
+	};
 }
+
+#endif

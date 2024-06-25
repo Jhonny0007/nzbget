@@ -257,7 +257,7 @@ Util::StrToNum(const std::string& str)
 			return boost::none;
 		}
 
-		return { num };
+		return boost::optional<double>{ num };
 	}
 
 	return boost::none;

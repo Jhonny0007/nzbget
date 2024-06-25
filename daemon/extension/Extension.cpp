@@ -333,8 +333,8 @@ namespace Extension
 
 	std::string ToXmlStr(const Script& script)
 	{
-		xmlNodePtr rootNode = xmlNewNode(NULL, BAD_CAST "value");
-		xmlNodePtr structNode = xmlNewNode(NULL, BAD_CAST "struct");
+		xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "value");
+		xmlNodePtr structNode = xmlNewNode(nullptr, BAD_CAST "struct");
 
 		Xml::AddNewNode(structNode, "Entry", "string", script.GetEntry());
 		Xml::AddNewNode(structNode, "Location", "string", script.GetLocation());
@@ -357,19 +357,19 @@ namespace Extension
 		Xml::AddNewNode(structNode, "QueueEvents", "string", script.GetQueueEvents());
 		Xml::AddNewNode(structNode, "TaskTime", "string", script.GetTaskTime());
 
-		xmlNodePtr descriptionNode = xmlNewNode(NULL, BAD_CAST "Description");
+		xmlNodePtr descriptionNode = xmlNewNode(nullptr, BAD_CAST "Description");
 		for (const std::string& line : script.GetDescription())
 		{
 			Xml::AddNewNode(descriptionNode, "Value", "string", line.c_str());
 		}
 
-		xmlNodePtr requirementsNode = xmlNewNode(NULL, BAD_CAST "Requirements");
+		xmlNodePtr requirementsNode = xmlNewNode(nullptr, BAD_CAST "Requirements");
 		for (const std::string& line : script.GetRequirements())
 		{
 			Xml::AddNewNode(requirementsNode, "Value", "string", line.c_str());
 		}
 
-		xmlNodePtr commandsNode = xmlNewNode(NULL, BAD_CAST "Commands");
+		xmlNodePtr commandsNode = xmlNewNode(nullptr, BAD_CAST "Commands");
 		for (const ManifestFile::Command& command : script.GetCommands())
 		{
 			Xml::AddNewNode(commandsNode, "Name", "string", command.name.c_str());
@@ -379,7 +379,7 @@ namespace Extension
 			Xml::AddNewNode(commandsNode, "Section", "string", command.section.name.c_str());
 			Xml::AddNewNode(commandsNode, "Prefix", "string", command.section.prefix.c_str());
 
-			xmlNodePtr descriptionNode = xmlNewNode(NULL, BAD_CAST "Description");
+			xmlNodePtr descriptionNode = xmlNewNode(nullptr, BAD_CAST "Description");
 			for (const std::string& line : command.description)
 			{
 				Xml::AddNewNode(descriptionNode, "Value", "string", line.c_str());
@@ -387,7 +387,7 @@ namespace Extension
 			xmlAddChild(commandsNode, descriptionNode);
 		}
 
-		xmlNodePtr optionsNode = xmlNewNode(NULL, BAD_CAST "Options");
+		xmlNodePtr optionsNode = xmlNewNode(nullptr, BAD_CAST "Options");
 		for (const ManifestFile::Option& option : script.GetOptions())
 		{
 			Xml::AddNewNode(optionsNode, "Name", "string", option.name.c_str());
@@ -405,7 +405,7 @@ namespace Extension
 				Xml::AddNewNode(optionsNode, "Value", "number", std::to_string(*val).c_str());
 			}
 
-			xmlNodePtr selectNode = xmlNewNode(NULL, BAD_CAST "Select");
+			xmlNodePtr selectNode = xmlNewNode(nullptr, BAD_CAST "Select");
 			for (const auto& selectOption : option.select)
 			{
 				if (const std::string* val = boost::variant2::get_if<std::string>(&selectOption))
@@ -418,7 +418,7 @@ namespace Extension
 				}
 			}
 
-			xmlNodePtr descriptionNode = xmlNewNode(NULL, BAD_CAST "Description");
+			xmlNodePtr descriptionNode = xmlNewNode(nullptr, BAD_CAST "Description");
 			for (const std::string& line : option.description)
 			{
 				Xml::AddNewNode(descriptionNode, "Value", "string", line.c_str());

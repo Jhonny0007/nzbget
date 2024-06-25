@@ -17,39 +17,40 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OS_INFO_H
-#define OS_INFO_H
 
-#include <string>
+#include "nzbget.h"
+
+#include "Network.h"
+#include "Util.h"
+#include "Log.h"
+#include "HttpClient.h"
 
 namespace SystemInfo
 {
-	class OSInfo final
+	const char* IP_SERVICE = "ip.nzbget.com";
+
+	Network GetNetwork()
 	{
-	public:
-		OSInfo();
-		const std::string& GetName() const;
-		const std::string& GetVersion() const;
+		Network network{};
+#ifdef HAVE_OPENSSL
+		try
+		{
+			auto httpClient = std::make_unique<HttpClient::HttpClient>();
+			auto result = httpClient->GET(IP_SERVICE).get();
+			if (result.statusCode == 200)
+			{
+				network.publicIP = std::move(result.body);
+				network.privateIP = httpClient->GetLocalIP();
+			}
+		}
+		catch (const std::exception& e)
+		{
+			warn("Failed to get public and private IP: %s", e.what());
+		}
 
-	private:
-		void Init();
-		std::string m_name;
-		std::string m_version;
-
-#ifdef __linux__
-		bool IsRunningInDocker() const;
-		void TrimQuotes(std::string& str) const;
+#else
+		warn("Failed to get public and private IP. NZBGet was built without OpenSSL.");
 #endif
-
-#ifdef WIN32
-		const long m_win11BuildVersion = 22000;
-		const long m_win10BuildVersion = 10240;
-		const long m_win8BuildVersion = 9200;
-		const long m_win7BuildVersion = 7600;
-		const long m_winXPBuildVersion = 2600;
-#endif
-	};
-
+		return network;
+	}
 }
-
-#endif

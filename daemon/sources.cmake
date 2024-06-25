@@ -93,10 +93,11 @@ set(SRC
 	${CMAKE_SOURCE_DIR}/daemon/util/Util.cpp
 	${CMAKE_SOURCE_DIR}/daemon/util/Json.cpp
 	${CMAKE_SOURCE_DIR}/daemon/util/Xml.cpp
-	${CMAKE_SOURCE_DIR}/daemon/util/SystemInfo.cpp
-	${CMAKE_SOURCE_DIR}/daemon/util/OSInfo.cpp
-	${CMAKE_SOURCE_DIR}/daemon/util/CPUInfo.cpp
-	${CMAKE_SOURCE_DIR}/daemon/util/NetworkInfo.cpp
+
+	${CMAKE_SOURCE_DIR}/daemon/system/SystemInfo.cpp
+	${CMAKE_SOURCE_DIR}/daemon/system/OS.cpp
+	${CMAKE_SOURCE_DIR}/daemon/system/CPU.cpp
+	${CMAKE_SOURCE_DIR}/daemon/system/Network.cpp
 )
 
 set(WIN32_SRC

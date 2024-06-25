@@ -17,20 +17,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef NETWORK_INFO_H
-#define NETWORK_INFO_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
 #include <string>
 
 namespace SystemInfo
 {
-	struct NetworkInfo
+	struct Network
 	{
 		std::string publicIP;
 		std::string privateIP;
 	};
 
-	NetworkInfo GetNetworkInfo();
+	Network GetNetwork();
 }
 
 #endif

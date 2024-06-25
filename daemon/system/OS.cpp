@@ -20,7 +20,7 @@
 
 #include "nzbget.h"
 
-#include "OSInfo.h"
+#include "OS.h"
 #include "Util.h"
 #include "Log.h"
 #include "FileSystem.h"
@@ -29,23 +29,23 @@ namespace SystemInfo
 {
 	const int BUFFER_SIZE = 512;
 
-	OSInfo::OSInfo()
+	OS::OS()
 	{
 		Init();
 	}
 
-	const std::string& OSInfo::GetName() const
+	const std::string& OS::GetName() const
 	{
 		return m_name;
 	}
 
-	const std::string& OSInfo::GetVersion() const
+	const std::string& OS::GetVersion() const
 	{
 		return m_version;
 	}
 
 #ifdef WIN32
-	void OSInfo::Init()
+	void OS::Init()
 	{
 		int len = BUFFER_SIZE;
 		char buffer[BUFFER_SIZE];
@@ -89,12 +89,12 @@ namespace SystemInfo
 
 #ifdef __linux__
 #include <fstream>
-	bool OSInfo::IsRunningInDocker() const
+	bool OS::IsRunningInDocker() const
 	{
 		return FileSystem::FileExists("/.dockerenv");
 	}
 
-	void OSInfo::TrimQuotes(std::string& str) const
+	void OS::TrimQuotes(std::string& str) const
 	{
 		if (str.front() == '"')
 		{
@@ -107,7 +107,7 @@ namespace SystemInfo
 		}
 	}
 
-	void OSInfo::Init()
+	void OS::Init()
 	{
 		std::ifstream osInfo("/etc/os-release");
 		if (!osInfo.is_open())
@@ -160,12 +160,12 @@ namespace SystemInfo
 			}
 		}
 
-		warn("Failed to find OS info.");
+		warn("Failed to get OS info.");
 }
 #endif
 
 #ifdef __APPLE__
-	void OSInfo::Init()
+	void OS::Init()
 	{
 		FILE* pipe = popen("sw_vers", "r");
 		if (!pipe)
@@ -207,7 +207,7 @@ namespace SystemInfo
 #endif
 
 #if __BSD__
-	void OSInfo::Init()
+	void OS::Init()
 	{
 		size_t len = BUFFER_SIZE;
 		char buffer[len];

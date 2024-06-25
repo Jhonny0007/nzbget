@@ -76,12 +76,12 @@ namespace SystemInfo
 #endif
 	}
 
-	const CPUInfo& SystemInfo::GetCPUInfo() const
+	const CPU& SystemInfo::GetCPUInfo() const
 	{
 		return m_cpu;
 	}
 
-	const OSInfo& SystemInfo::GetOSInfo() const
+	const OS& SystemInfo::GetOSInfo() const
 	{
 		return m_os;
 	}
@@ -239,9 +239,9 @@ namespace SystemInfo
 		return version;
 	}
 
-	NetworkInfo SystemInfo::GetNetworkInfo() const
+	Network SystemInfo::GetNetworkInfo() const
 	{
-		return ::SystemInfo::GetNetworkInfo();
+		return GetNetwork();
 	}
 
 	std::string ToJsonStr(const SystemInfo& sysInfo)

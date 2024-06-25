@@ -20,7 +20,7 @@
 
 #include "nzbget.h"
 
-#include "CPUInfo.h"
+#include "CPU.h"
 #include "Util.h"
 #include "Log.h"
 #include "FileSystem.h"
@@ -29,23 +29,23 @@ namespace SystemInfo
 {
 	const int BUFFER_SIZE = 512;
 
-	CPUInfo::CPUInfo()
+	CPU::CPU()
 	{
 		Init();
 	}
 
-	const std::string& CPUInfo::GetModel() const
+	const std::string& CPU::GetModel() const
 	{
 		return m_model;
 	}
 
-	const std::string& CPUInfo::GetArch() const
+	const std::string& CPU::GetArch() const
 	{
 		return m_arch;
 	}
 
 #ifdef WIN32
-	void CPUInfo::Init()
+	void CPU::Init()
 	{
 		int len = BUFFER_SIZE;
 		char modelBuffer[BUFFER_SIZE];
@@ -84,7 +84,7 @@ namespace SystemInfo
 
 #ifdef __linux__
 #include <fstream>
-	void CPUInfo::Init()
+	void CPU::Init()
 	{
 		m_arch = GetCPUArch();
 
@@ -111,7 +111,7 @@ namespace SystemInfo
 #endif
 
 #if __BSD__
-	void CPUInfo::Init()
+	void CPU::Init()
 	{
 		size_t len = BUFFER_SIZE;
 		char model[BUFFER_SIZE];
@@ -131,7 +131,7 @@ namespace SystemInfo
 #endif
 
 #ifdef __APPLE__
-	void CPUInfo::Init()
+	void CPU::Init()
 	{
 		size_t len = BUFFER_SIZE;
 		char buffer[BUFFER_SIZE];
@@ -150,7 +150,7 @@ namespace SystemInfo
 #endif
 
 #ifndef WIN32
-	std::string CPUInfo::GetCPUArch() const
+	std::string CPU::GetCPUArch() const
 	{
 		const char* cmd = "uname -m";
 		FILE* pipe = popen(cmd, "r");

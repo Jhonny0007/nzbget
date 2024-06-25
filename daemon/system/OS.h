@@ -17,30 +17,39 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CPU_INFO_H
-#define CPU_INFO_H
+#ifndef OS_H
+#define OS_H
 
 #include <string>
 
 namespace SystemInfo
 {
-	class CPUInfo final
+	class OS final
 	{
 	public:
-		CPUInfo();
-		const std::string& GetModel() const;
-		const std::string& GetArch() const;
+		OS();
+		const std::string& GetName() const;
+		const std::string& GetVersion() const;
 
 	private:
 		void Init();
+		std::string m_name;
+		std::string m_version;
 
-#ifndef WIN32
-		std::string GetCPUArch() const;
+#ifdef __linux__
+		bool IsRunningInDocker() const;
+		void TrimQuotes(std::string& str) const;
 #endif
 
-		std::string m_model;
-		std::string m_arch;
+#ifdef WIN32
+		const long m_win11BuildVersion = 22000;
+		const long m_win10BuildVersion = 10240;
+		const long m_win8BuildVersion = 9200;
+		const long m_win7BuildVersion = 7600;
+		const long m_winXPBuildVersion = 2600;
+#endif
 	};
+
 }
 
 #endif

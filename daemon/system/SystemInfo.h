@@ -21,9 +21,9 @@
 #define SYSTEM_INFO_H
 
 #include <string>
-#include "OSInfo.h"
-#include "CPUInfo.h"
-#include "NetworkInfo.h"
+#include "OS.h"
+#include "CPU.h"
+#include "Network.h"
 
 namespace SystemInfo
 {
@@ -48,10 +48,10 @@ namespace SystemInfo
 		SystemInfo();
 		~SystemInfo() = default;
 		std::vector<Tool> GetTools() const;
-		NetworkInfo GetNetworkInfo() const;
+		Network GetNetworkInfo() const;
 		const std::vector<Library>& GetLibraries() const;
-		const CPUInfo& GetCPUInfo() const;
-		const OSInfo& GetOSInfo() const;
+		const CPU& GetCPUInfo() const;
+		const OS& GetOSInfo() const;
 
 	private:
 		Tool GetPython() const;
@@ -62,8 +62,8 @@ namespace SystemInfo
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(const std::string& path, const char* marker) const;
 
-		CPUInfo m_cpu;
-		OSInfo m_os;
+		CPU m_cpu;
+		OS m_os;
 		std::vector<Library> m_libraries;
 	};
 
