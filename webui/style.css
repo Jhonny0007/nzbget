@@ -984,8 +984,8 @@ form {
 	margin-bottom: 0px;
 }
 
-.table-bordered::not(.table-fixed) th,
-.table-bordered::not(.table-fixed) td {
+.table-bordered:not(.table-fixed) th,
+.table-bordered:not(.table-fixed) td {
 	border-left: none;
 }
 
