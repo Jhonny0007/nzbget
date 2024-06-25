@@ -20,6 +20,8 @@
 #ifndef HTTP_CLIENT_H
 #define HTTP_CLIENT_H
 
+#ifndef USE_GNUTLS
+
 #include <string>
 #include <thread>
 #include <boost/asio.hpp>
@@ -55,7 +57,7 @@ namespace HttpClient
 		HttpClient();
 		~HttpClient() = default;
 	private:
-		void Connect(Socket& socket, const Endpoints& endpoints);
+		void Connect(Socket& socket, const Endpoints& endpoints, const std::string& host);
 		void Write(Socket& socket, const std::string& method, const std::string& host);
 		Response MakeResponse(Socket& socket);
 		std::string GetHeaders(const std::string& method, const std::string& host) const;
@@ -65,15 +67,15 @@ namespace HttpClient
 		std::string ReadBody(Socket& socket, boost::asio::streambuf& buf);
 		Socket GetSocket();
 		std::string GetProtocol() const;
-
-#ifndef DISABLE_TLS
-		void DoHandshake(Socket& socket, const std::string& host);
-		boost::asio::ssl::context m_sslContext;;
-#endif
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
 		std::string m_localIP;
+#ifndef DISABLE_TLS
+		void DoHandshake(Socket& socket, const std::string& host);
+		boost::asio::ssl::context m_sslContext{ boost::asio::ssl::context::tlsv13_client };
+#endif
 	};
 }
 
+#endif
 #endif

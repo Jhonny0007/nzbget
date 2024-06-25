@@ -20,6 +20,8 @@
 
 #include "nzbget.h"
 
+#ifndef USE_GNUTLS
+
 #include "HttpClient.h"
 #include "Util.h"
 
@@ -37,7 +39,6 @@ namespace HttpClient
 		, m_resolver{ m_context }
 	{
 #ifndef DISABLE_TLS
-		m_sslContext{ ssl::context::tlsv13_client };
 		m_sslContext.set_default_verify_paths();
 #endif
 	}
@@ -54,7 +55,7 @@ namespace HttpClient
 				auto endpoints = m_resolver.resolve(host, GetProtocol());
 				auto socket = GetSocket();
 
-				Connect(socket, endpoints);
+				Connect(socket, endpoints, host);
 				Write(socket, "GET", host);
 
 				return MakeResponse(socket);
@@ -62,7 +63,7 @@ namespace HttpClient
 		);
 	}
 
-	std::string GetProtocol() const
+	std::string HttpClient::GetProtocol() const
 	{
 #ifndef DISABLE_TLS
 		return "https";
@@ -83,7 +84,7 @@ namespace HttpClient
 		return response;
 	}
 
-	void HttpClient::Connect(Socket& socket, const Endpoints& endpoints)
+	void HttpClient::Connect(Socket& socket, const Endpoints& endpoints, const std::string& host)
 	{
 		asio::connect(socket.lowest_layer(), endpoints);
 #ifndef DISABLE_TLS
@@ -179,8 +180,7 @@ namespace HttpClient
 #ifndef DISABLE_TLS
 	Socket HttpClient::GetSocket()
 	{
-		ssl::stream<tcp::socket> socket{ m_context, m_sslContext };
-		return socket;
+		return ssl::stream<tcp::socket>{ m_context, m_sslContext };
 	}
 
 	void HttpClient::DoHandshake(Socket& socket, const std::string& host)
@@ -195,9 +195,10 @@ namespace HttpClient
 #else
 	Socket HttpClient::GetSocket()
 	{
-		tcp::socket socket{ m_context };
-		return socket;
+		return tcp::socket{ m_context };
 	}
 #endif
 
 }
+
+#endif

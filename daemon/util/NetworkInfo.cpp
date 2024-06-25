@@ -21,10 +21,12 @@
 #include "nzbget.h"
 
 #include "NetworkInfo.h"
-#include "HttpClient.h"
 #include "Util.h"
 #include "Log.h"
 
+#ifndef USE_GNUTLS
+#include "HttpClient.h"
+#endif
 
 namespace SystemInfo
 {
@@ -33,19 +35,25 @@ namespace SystemInfo
 	NetworkInfo GetNetworkInfo()
 	{
 		NetworkInfo network{};
-
+#ifndef USE_GNUTLS
 		try
 		{
 			auto httpClient = std::make_unique<HttpClient::HttpClient>();
 			auto result = httpClient->GET(IP_SERVICE).get();
-			network.publicIP = std::move(result.body);
-			network.privateIP = httpClient->GetLocalIP();
+			if (result.statusCode == 200)
+			{
+				network.publicIP = std::move(result.body);
+				network.privateIP = httpClient->GetLocalIP();
+			}
 		}
 		catch (const std::exception& e)
 		{
 			warn("Failed to get public and private IP: %s", e.what());
 		}
 
+#else
+		warn("Failed to get public and private IP. NZBGet was built without TLS");
+#endif
 		return network;
 	}
 }
