@@ -112,20 +112,20 @@ namespace SystemInfo
 
 	Tool SystemInfo::GetPython() const
 	{
-		Tool python;
+		Tool tool;
 
-		python.name = "Python";
+		tool.name = "Python";
 		auto result = Util::FindPython();
 		if (!result.has_value())
 		{
-			return python;
+			return tool;
 		}
 
 		std::string cmd = result.get() + " --version" + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
-			return python;
+			return tool;
 		}
 
 		char buffer[BUFFER_SIZE];
@@ -137,7 +137,7 @@ namespace SystemInfo
 			size_t pos = version.find(" ");
 			if (pos != std::string::npos)
 			{
-				python.version = version.substr(pos + 1);
+				tool.version = version.substr(pos + 1);
 			}
 		}
 
@@ -147,18 +147,18 @@ namespace SystemInfo
 		pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
-			return python;
+			return tool;
 		}
 
 		if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
 		{
-			python.path = buffer;
-			Util::Trim(python.path);
+			tool.path = buffer;
+			Util::Trim(tool.path);
 		}
 
 		pclose(pipe);
 
-		return python;
+		return tool;
 	}
 
 	Tool SystemInfo::GetUnrar() const
@@ -208,7 +208,13 @@ namespace SystemInfo
 			return "";
 		}
 
-		FILE* pipe = popen((path + Util::NULL_ERR_OUTPUT).c_str(), "r");
+#ifdef WIN32
+		std::string cmd = "\"" + path + "\"" + Util::NULL_ERR_OUTPUT;
+#else
+		std::string cmd = path + Util::NULL_ERR_OUTPUT;
+#endif
+
+		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
 			return "";
