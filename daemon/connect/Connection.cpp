@@ -544,7 +544,7 @@ bool Connection::Recv(char * buffer, int size)
 		int received = recv(m_socket, bufPtr, NeedBytes, 0);
 		// Did the recv succeed?
 		if (received <= 0)
-		{			
+		{
 			ReportError("Could not receive data on socket from %s", m_host, true);
 			return false;
 		}
