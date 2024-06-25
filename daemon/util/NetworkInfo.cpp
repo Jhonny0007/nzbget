@@ -37,8 +37,9 @@ namespace SystemInfo
 		try
 		{
 			auto httpClient = std::make_unique<HttpClient::HttpClient>();
-			auto resp = httpClient->GET(IP_SERVICE, "https").get();
-			network.publicIP = std::move(resp.body);
+			auto result = httpClient->GET(IP_SERVICE).get();
+			network.publicIP = std::move(result.body);
+			network.privateIP = httpClient->GetLocalIP();
 		}
 		catch (const std::exception& e)
 		{

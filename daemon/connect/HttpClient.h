@@ -49,14 +49,17 @@ namespace HttpClient
 			unsigned statusCode;
 		};
 
-		std::future<Response> GET(const std::string& host, const std::string& service);
+		std::future<Response> GET(const std::string& host);
+		const std::string GetLocalIP() const;
 
 		HttpClient();
 		~HttpClient() = default;
 	private:
 		void Connect(Socket& socket, const Endpoints& endpoints);
 		void Write(Socket& socket, const std::string& method, const std::string& host);
+		Response MakeResponse(Socket& socket);
 		std::string GetHeaders(const std::string& method, const std::string& host) const;
+		void SaveLocalIP(Socket& socket);
 		unsigned ReadStatusCode(Socket& socket, boost::asio::streambuf& buf);
 		Headers ReadHeaders(Socket& socket, boost::asio::streambuf& buf);
 		std::string ReadBody(Socket& socket, boost::asio::streambuf& buf);
@@ -72,7 +75,7 @@ namespace HttpClient
 #endif
 		boost::asio::io_context m_context;
 		boost::asio::ip::tcp::resolver m_resolver;
-
+		std::string m_localIP;
 	};
 }
 

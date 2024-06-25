@@ -20,7 +20,6 @@
 
 #include "nzbget.h"
 
-
 #include "HttpClient.h"
 #include "Util.h"
 
@@ -45,11 +44,20 @@ namespace HttpClient
 #endif
 	}
 
-	std::future<HttpClient::Response> HttpClient::GET(const std::string& host, const std::string& service)
+	const std::string HttpClient::GetLocalIP() const
+	{
+		return m_localIP;
+	}
+
+	std::future<HttpClient::Response> HttpClient::GET(const std::string& host)
 	{
 		return std::async(std::launch::async, [&]
 			{
-				auto endpoints = m_resolver.resolve(host, service);
+#ifndef DISABLE_TLS
+				auto endpoints = m_resolver.resolve(host, "https");
+#else
+				auto endpoints = m_resolver.resolve(host, "http");
+#endif
 
 				auto socket = GetSocket();
 
@@ -61,21 +69,27 @@ namespace HttpClient
 
 				Write(socket, "GET", host);
 
-				Response response;
-
-				asio::streambuf buf;
-				response.statusCode = ReadStatusCode(socket, buf);
-				response.headers = ReadHeaders(socket, buf);
-				response.body = ReadBody(socket, buf);
-
-				return response;
+				return MakeResponse(socket);
 			}
 		);
+	}
+
+	HttpClient::Response HttpClient::MakeResponse(Socket& socket)
+	{
+		HttpClient::Response response;
+
+		asio::streambuf buf;
+		response.statusCode = ReadStatusCode(socket, buf);
+		response.headers = ReadHeaders(socket, buf);
+		response.body = ReadBody(socket, buf);
+
+		return response;
 	}
 
 	void HttpClient::Connect(Socket& socket, const Endpoints& endpoints)
 	{
 		asio::connect(socket.lowest_layer(), endpoints);
+		SaveLocalIP(socket);
 	}
 
 	void HttpClient::Write(Socket& socket, const std::string& method, const std::string& host)
@@ -157,10 +171,16 @@ namespace HttpClient
 		return headers;
 	}
 
+	void HttpClient::SaveLocalIP(Socket& socket)
+	{
+		m_localIP = socket.lowest_layer().local_endpoint().address().to_string();
+	}
+
 #ifndef DISABLE_TLS
 	Socket HttpClient::GetSocket()
 	{
-		return ssl::stream<tcp::socket>{ m_context, m_sslContext };
+		ssl::stream<tcp::socket> socket{ m_context, m_sslContext };
+		return socket;
 	}
 
 	void HttpClient::DoHandshake(Socket& socket, const std::string& host)
@@ -175,7 +195,8 @@ namespace HttpClient
 #else
 	Socket HttpClient::GetSocket()
 	{
-		return tcp::socket{ m_context };
+		tcp::socket socket{ m_context };
+		return socket;
 	}
 #endif
 
