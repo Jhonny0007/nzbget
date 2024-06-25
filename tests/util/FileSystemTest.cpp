@@ -37,3 +37,10 @@ BOOST_AUTO_TEST_CASE(FileSystemTest)
 	BOOST_CHECK(!strcmp(FileSystem::MakeCanonicalPath("\\\\server\\Program Files\\NZBGet\\scripts\\email\\..\\..\\"), "\\\\server\\Program Files\\NZBGet\\"));
 }
 #endif
+
+BOOST_AUTO_TEST_CASE(ExtractFilePathTest)
+{
+	BOOST_CHECK(FileSystem::ExtractFilePath("C:\\Program Files\\NZBGet\\unrar.exe") == "C:\\Program Files\\NZBGet\\unrar.exe");
+	BOOST_CHECK(FileSystem::ExtractFilePath("C:\\Program Files\\NZBGet\\unrar.exe -ai") == "C:\\Program Files\\NZBGet\\unrar.exe");
+	BOOST_CHECK(FileSystem::ExtractFilePath("") == "");
+}

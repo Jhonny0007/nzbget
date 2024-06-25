@@ -22,6 +22,7 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+#include <string_view>
 #include <boost/optional.hpp>
 #include "NString.h"
 #include "Options.h"
@@ -53,6 +54,7 @@ public:
 	static bool FileExists(const char* filename);
 	static bool DirectoryExists(const char* dirFilename);
 	static bool CreateDirectory(const char* dirFilename);
+	static std::string ExtractFilePath(std::string_view path);
 
 	/* Delete empty directory */
 	static bool RemoveDirectory(const char* dirFilename);

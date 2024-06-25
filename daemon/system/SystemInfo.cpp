@@ -190,11 +190,7 @@ namespace SystemInfo
 			return "";
 		}
 
-		std::string path = unpackerCmd;
-		Util::Trim(path);
-
-		// getting the path itself without any keys
-		path = path.substr(0, path.find(" "));
+		std::string path = FileSystem::ExtractFilePath(unpackerCmd);
 
 		auto result = FileSystem::GetFileRealPath(path);
 		if (result.has_value() && FileSystem::FileExists(result.get().c_str()))

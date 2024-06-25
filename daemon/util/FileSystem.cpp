@@ -615,6 +615,33 @@ bool FileSystem::RemoveDirectory(const char* dirFilename)
 #endif
 }
 
+std::string FileSystem::ExtractFilePath(std::string_view path)
+{
+	if (path.empty())
+	{
+		return std::string(path);
+	}
+
+	std::string result;
+
+	size_t lastSeparatorPos = path.find_last_of(PATH_SEPARATOR);
+	if (lastSeparatorPos != std::string::npos)
+	{
+		size_t possibleKeysPos = path.find(" ", lastSeparatorPos);
+
+		if (possibleKeysPos != std::string::npos)
+		{
+			result = path.substr(0, possibleKeysPos);
+		}
+		else
+		{
+			result = path;
+		}
+	}
+
+	return result;
+}
+
 /* Delete directory which is empty or contains only hidden files or directories (whose names start with dot) */
 bool FileSystem::DeleteDirectory(const char* dirFilename)
 {
