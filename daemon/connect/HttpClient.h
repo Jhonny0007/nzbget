@@ -39,16 +39,16 @@ namespace HttpClient
 	using Headers = std::unordered_map<std::string, std::string>;
 	using Endpoints = boost::asio::ip::basic_resolver_results<boost::asio::ip::tcp>;
 
+	struct Response
+	{
+		Headers headers;
+		std::string body;
+		unsigned statusCode;
+	};
+
 	class HttpClient final
 	{
 	public:
-		struct Response
-		{
-			Headers headers;
-			std::string body;
-			unsigned statusCode;
-		};
-
 		std::future<Response> GET(const std::string& host);
 		const std::string GetLocalIP() const;
 
@@ -64,6 +64,7 @@ namespace HttpClient
 		Headers ReadHeaders(Socket& socket, boost::asio::streambuf& buf);
 		std::string ReadBody(Socket& socket, boost::asio::streambuf& buf);
 		Socket GetSocket();
+		std::string GetProtocol() const;
 
 #ifndef DISABLE_TLS
 		void DoHandshake(Socket& socket, const std::string& host);

@@ -35,11 +35,9 @@ namespace HttpClient
 	HttpClient::HttpClient()
 		: m_context{}
 		, m_resolver{ m_context }
-#ifndef DISABLE_TLS
-		, m_sslContext{ ssl::context::tlsv13_client }
-#endif
 	{
 #ifndef DISABLE_TLS
+		m_sslContext{ ssl::context::tlsv13_client };
 		m_sslContext.set_default_verify_paths();
 #endif
 	}
@@ -49,24 +47,14 @@ namespace HttpClient
 		return m_localIP;
 	}
 
-	std::future<HttpClient::Response> HttpClient::GET(const std::string& host)
+	std::future<Response> HttpClient::GET(const std::string& host)
 	{
 		return std::async(std::launch::async, [&]
 			{
-#ifndef DISABLE_TLS
-				auto endpoints = m_resolver.resolve(host, "https");
-#else
-				auto endpoints = m_resolver.resolve(host, "http");
-#endif
-
+				auto endpoints = m_resolver.resolve(host, GetProtocol());
 				auto socket = GetSocket();
 
 				Connect(socket, endpoints);
-
-#ifndef DISABLE_TLS
-				DoHandshake(socket, host);
-#endif
-
 				Write(socket, "GET", host);
 
 				return MakeResponse(socket);
@@ -74,9 +62,18 @@ namespace HttpClient
 		);
 	}
 
-	HttpClient::Response HttpClient::MakeResponse(Socket& socket)
+	std::string GetProtocol() const
 	{
-		HttpClient::Response response;
+#ifndef DISABLE_TLS
+		return "https";
+#else
+		return "http";
+#endif
+	}
+
+	Response HttpClient::MakeResponse(Socket& socket)
+	{
+		Response response;
 
 		asio::streambuf buf;
 		response.statusCode = ReadStatusCode(socket, buf);
@@ -89,6 +86,9 @@ namespace HttpClient
 	void HttpClient::Connect(Socket& socket, const Endpoints& endpoints)
 	{
 		asio::connect(socket.lowest_layer(), endpoints);
+#ifndef DISABLE_TLS
+		DoHandshake(socket, host);
+#endif
 		SaveLocalIP(socket);
 	}
 
