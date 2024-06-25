@@ -124,7 +124,7 @@ namespace SystemInfo
 #ifdef WIN32
 		std::string cmd = "\"" + result.get() + " --version" + "\"" + Util::NULL_ERR_OUTPUT;
 #else
-		std::string cmd = result.get() " --version" + Util::NULL_ERR_OUTPUT;
+		std::string cmd = result.get() + " --version" + Util::NULL_ERR_OUTPUT;
 #endif
 
 		FILE* pipe = popen(cmd.c_str(), "r");
