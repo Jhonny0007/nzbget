@@ -138,7 +138,7 @@ namespace SystemInfo
 		if (sysctlbyname("machdep.cpu.brand_string", &buffer, &len, nullptr, 0) == 0)
 		{
 			m_model = buffer;
-			Util::Trim(m_cpu.model);
+			Util::Trim(m_model);
 		}
 		else
 		{
