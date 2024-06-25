@@ -20,7 +20,7 @@
 
 #include "nzbget.h"
 
-#ifndef USE_GNUTLS
+#ifdef HAVE_OPENSSL
 
 #include "HttpClient.h"
 #include "Util.h"

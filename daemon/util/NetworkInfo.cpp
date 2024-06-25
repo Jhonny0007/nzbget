@@ -23,10 +23,7 @@
 #include "NetworkInfo.h"
 #include "Util.h"
 #include "Log.h"
-
-#ifndef USE_GNUTLS
 #include "HttpClient.h"
-#endif
 
 namespace SystemInfo
 {
@@ -35,7 +32,7 @@ namespace SystemInfo
 	NetworkInfo GetNetworkInfo()
 	{
 		NetworkInfo network{};
-#ifndef USE_GNUTLS
+#ifdef HAVE_OPENSSL
 		try
 		{
 			auto httpClient = std::make_unique<HttpClient::HttpClient>();

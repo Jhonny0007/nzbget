@@ -17,10 +17,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #ifndef HTTP_CLIENT_H
 #define HTTP_CLIENT_H
 
-#ifndef USE_GNUTLS
+#ifdef HAVE_OPENSSL
 
 #include <string>
 #include <thread>
