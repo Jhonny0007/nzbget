@@ -461,17 +461,6 @@ void NZBGet::BootConfig()
 	m_scriptConfig->InitOptions();
 
 	m_extensionManager->LoadExtensions();
-
-	warn(g_SystemInfo->GetCPUInfo().GetArch().c_str());
-	warn(g_SystemInfo->GetCPUInfo().GetModel().c_str());
-	warn(g_SystemInfo->GetNetworkInfo().privateIP.c_str());
-	warn(g_SystemInfo->GetNetworkInfo().publicIP.c_str());
-	for(auto& t : g_SystemInfo->GetTools())
-	{
-		warn(t.name.c_str());
-		warn(t.path.c_str());
-		warn(t.version.c_str());
-	}
 }
 
 void NZBGet::Cleanup()
