@@ -71,6 +71,7 @@ body {
 {
 	vertical-align: middle;
 	overflow: auto;
+	white-space: nowrap;
 }
 
 .news-servers-table-container
