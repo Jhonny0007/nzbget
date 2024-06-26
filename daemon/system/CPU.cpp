@@ -106,13 +106,13 @@ namespace SystemInfo
 			}
 		}
 
-		std::string cmd = std::string("lscpu | grep \"Model name\"") + Util::ERR_NULL_OUTPUT;
+		std::string cmd = std::string("lscpu | grep \"Model name\"") + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
 			warn("Failed to get CPU model. Couldn't read 'lscpu'.");
 
-			return "";
+			return;
 		}
 
 		char buffer[BUFFER_SIZE];
@@ -121,7 +121,7 @@ namespace SystemInfo
 			if (fgets(buffer, BUFFER_SIZE, pipe))
 			{
 				pclose(pipe);
-				m_model = line.substr(line.find(":") + 1);
+				m_model = std::string(buffer).substr(line.find(":") + 1);
 				Util::Trim(m_model);
 				return;
 			}
@@ -175,7 +175,7 @@ namespace SystemInfo
 #ifndef WIN32
 	std::string CPU::GetCPUArch() const
 	{
-		std::string cmd = std::string("uname -m") + Util::ERR_NULL_OUTPUT;
+		std::string cmd = std::string("uname -m") + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{

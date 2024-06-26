@@ -160,12 +160,12 @@ namespace SystemInfo
 			return;
 		}
 
-		std::string cmd = std::string("uname -o") + Util::ERR_NULL_OUTPUT;
+		std::string cmd = std::string("uname -o") + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
 			warn("Failed to get OS name. Couldn't read 'uname -o'.");
-			return "";
+			return;
 		}
 
 		char buffer[BUFFER_SIZE];
@@ -184,7 +184,7 @@ namespace SystemInfo
 #ifdef __APPLE__
 	void OS::Init()
 	{
-		std::string cmd = std::string("sw_vers") + Util::ERR_NULL_OUTPUT;
+		std::string cmd = std::string("sw_vers") + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
