@@ -111,64 +111,81 @@ namespace SystemInfo
 	void OS::Init()
 	{
 		std::ifstream osInfo("/etc/os-release");
-		if (!osInfo.is_open())
+		if (osInfo.is_open())
 		{
-			warn("Failed to get OS info. Couldn't read '/etc/os-release'.");
+			std::string line;
+			while (std::getline(osInfo, line))
+			{
+				if (!m_name.empty() && !m_version.empty())
+				{
+					return;
+				}
+
+				// e.g NAME="Debian GNU/Linux"
+				if (m_name.empty() && line.find("NAME=") == 0)
+				{
+					m_name = line.substr(line.find("=") + 1);
+
+					Util::Trim(m_name);
+					TrimQuotes(m_name);
+
+					if (IsRunningInDocker())
+					{
+						m_name += " (Running in Docker)";
+					}
+
+					continue;
+				}
+
+				// e.g VERSION_ID="12"
+				if (m_version.empty() && line.find("VERSION_ID=") == 0)
+				{
+					m_version = line.substr(line.find("=") + 1);
+
+					Util::Trim(m_version);
+					TrimQuotes(m_version);
+
+					continue;
+				}
+
+				// e.g. BUILD_ID=rolling
+				if (m_version.empty() && line.find("BUILD_ID=") == 0)
+				{
+					m_version = line.substr(line.find("=") + 1);
+					Util::Trim(m_version);
+					continue;
+				}
+			}
+
 			return;
 		}
 
-		std::string line;
-		while (std::getline(osInfo, line))
+		std::string cmd = std::string("uname -o") + Util::ERR_NULL_OUTPUT;
+		FILE* pipe = popen(cmd.c_str(), "r");
+		if (!pipe)
 		{
-			if (!m_name.empty() && !m_version.empty())
-			{
-				return;
-			}
+			warn("Failed to get OS name. Couldn't read 'uname -o'.");
+			return "";
+		}
 
-			// e.g NAME="Debian GNU/Linux"
-			if (m_name.empty() && line.find("NAME=") == 0)
-			{
-				m_name = line.substr(line.find("=") + 1);
-
-				Util::Trim(m_name);
-				TrimQuotes(m_name);
-
-				if (IsRunningInDocker())
-				{
-					m_name += " (Running in Docker)";
-				}
-
-				continue;
-			}
-
-			// e.g VERSION_ID="12"
-			if (m_version.empty() && line.find("VERSION_ID=") == 0)
-			{
-				m_version = line.substr(line.find("=") + 1);
-
-				Util::Trim(m_version);
-				TrimQuotes(m_version);
-
-				continue;
-			}
-
-			// e.g. BUILD_ID=rolling
-			if (m_version.empty() && line.find("BUILD_ID=") == 0)
-			{
-				m_version = line.substr(line.find("=") + 1);
-				Util::Trim(m_version);
-				continue;
-			}
+		char buffer[BUFFER_SIZE];
+		if (fgets(buffer, BUFFER_SIZE, pipe))
+		{
+			pclose(pipe);
+			m_name = buffer;
+			Util::Trim(m_name);
+			return;
 		}
 
 		warn("Failed to get OS info.");
-}
+	}
 #endif
 
 #ifdef __APPLE__
 	void OS::Init()
 	{
-		FILE* pipe = popen("sw_vers", "r");
+		std::string cmd = std::string("sw_vers") + Util::ERR_NULL_OUTPUT;
+		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
 			warn("Failed to get OS info. Couldn't read 'sw_vers'.");

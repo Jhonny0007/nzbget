@@ -91,20 +91,43 @@ namespace SystemInfo
 		std::ifstream cpuinfo("/proc/cpuinfo");
 		if (!cpuinfo.is_open())
 		{
-			warn("Failed to read CPU model. Couldn't read '/proc/cpuinfo'.");
-			return;
+			std::string line;
+			while (std::getline(cpuinfo, line))
+			{
+				if (line.find("model name") != std::string::npos ||
+					line.find("Processor") != std::string::npos ||
+					line.find("cpu model") != std::string::npos ||
+					line.find("cpu") != std::string::npos)
+				{
+					m_model = line.substr(line.find(":") + 1);
+					Util::Trim(m_model);
+					return;
+				}
+			}
 		}
 
-		std::string line;
-		while (std::getline(cpuinfo, line))
+		std::string cmd = std::string("lscpu | grep \"Model name\"") + Util::ERR_NULL_OUTPUT;
+		FILE* pipe = popen(cmd.c_str(), "r");
+		if (!pipe)
 		{
-			if (line.find("model name") != std::string::npos)
+			warn("Failed to get CPU model. Couldn't read 'lscpu'.");
+
+			return "";
+		}
+
+		char buffer[BUFFER_SIZE];
+		while (!feof(pipe))
+		{
+			if (fgets(buffer, BUFFER_SIZE, pipe))
 			{
-				m_model = line.substr(line.find(":") + 2);
+				pclose(pipe);
+				m_model = line.substr(line.find(":") + 1);
 				Util::Trim(m_model);
 				return;
 			}
 		}
+
+		pclose(pipe);
 
 		warn("Failed to get CPU model.");
 	}
@@ -152,8 +175,8 @@ namespace SystemInfo
 #ifndef WIN32
 	std::string CPU::GetCPUArch() const
 	{
-		const char* cmd = "uname -m";
-		FILE* pipe = popen(cmd, "r");
+		std::string cmd = std::string("uname -m") + Util::ERR_NULL_OUTPUT;
+		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
 			warn("Failed to get CPU arch. Couldn't read 'uname -m'.");
@@ -162,14 +185,11 @@ namespace SystemInfo
 		}
 
 		char buffer[BUFFER_SIZE];
-		while (!feof(pipe))
+		if (fgets(buffer, BUFFER_SIZE, pipe))
 		{
-			if (fgets(buffer, BUFFER_SIZE, pipe))
-			{
-				pclose(pipe);
-				Util::Trim(buffer);
-				return buffer;
-			}
+			pclose(pipe);
+			Util::Trim(buffer);
+			return buffer;
 		}
 
 		pclose(pipe);
