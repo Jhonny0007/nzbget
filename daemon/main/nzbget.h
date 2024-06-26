@@ -219,6 +219,7 @@ compiled */
 #include <shared_mutex>
 #include <condition_variable>
 #include <chrono>
+#include <optional>
 
 #include <libxml/parser.h>
 #include <libxml/xmlreader.h>

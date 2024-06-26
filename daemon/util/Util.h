@@ -22,7 +22,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <boost/optional.hpp>
+#include <optional>
 #include "NString.h"
 
 #ifdef WIN32
@@ -35,9 +35,9 @@ class Util
 {
 public:
 	static bool MatchFileExt(const char* filename, const char* extensionList, const char* listSeparator);
-	static boost::optional<std::string> 
+	static std::optional<std::string> 
 	FindExecutorProgram(const std::string& filename, const std::string& customPath);
-	static boost::optional<std::string> FindPython();
+	static std::optional<std::string> FindPython();
 
 	/*
 	* Split command line into arguments.
@@ -48,7 +48,7 @@ public:
 
 	static int64 JoinInt64(uint32 Hi, uint32 Lo);
 	static void SplitInt64(int64 Int64, uint32* Hi, uint32* Lo);
-	static boost::optional<double> StrToNum(const std::string& str);
+	static std::optional<double> StrToNum(const std::string& str);
 
 	static void TrimRight(char* str);
 	static void TrimRight(std::string& str);
@@ -67,6 +67,8 @@ public:
 	static uint32 HashBJ96(const char* buffer, int bufSize, uint32 initValue);
 
 	static const char* NormalizeLocalHostIP(const char* ip);
+
+	static std::unique_ptr<FILE, std::function<void(FILE*)>> MakePipe(const std::string& cmd);
 
 	static const char* NULL_OUTPUT;
 	static const char* NULL_ERR_OUTPUT;

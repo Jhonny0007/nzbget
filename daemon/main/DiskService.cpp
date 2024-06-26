@@ -69,7 +69,7 @@ void DiskService::CheckDiskSpace()
 	auto res = FileSystem::GetDiskState(g_Options->GetDestDir());
 	if (res.has_value() && g_Options->GetDiskSpace() >= 0)
 	{
-		const auto& value = res.get();
+		const auto& value = res.value();
 		if (value.available / 1024 / 1024 < static_cast<size_t>(g_Options->GetDiskSpace()))
 		{
 			warn("Low disk space on %s. Pausing download", g_Options->GetDestDir());
@@ -82,7 +82,7 @@ void DiskService::CheckDiskSpace()
 		res = FileSystem::GetDiskState(g_Options->GetInterDir());
 		if (res.has_value() && g_Options->GetDiskSpace() >= 0)
 		{
-			const auto& value = res.get();
+			const auto& value = res.value();
 			if (value.available / 1024 / 1024 < static_cast<size_t>(g_Options->GetDiskSpace()))
 			{
 				warn("Low disk space on %s. Pausing download", g_Options->GetInterDir());

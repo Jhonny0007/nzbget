@@ -115,54 +115,58 @@ namespace SystemInfo
 		Tool tool;
 
 		tool.name = "Python";
+
 		auto result = Util::FindPython();
 		if (!result.has_value())
 		{
+			warn("Failed to find Python.");
 			return tool;
 		}
 
-		std::string cmd = FileSystem::EscapePathForShell(result.get()) + " --version";
+		std::string cmd = Util::FIND_CMD + result.value();
 #ifndef __APPLE__ 
 		cmd += Util::NULL_ERR_OUTPUT;
 #endif
-		FILE* pipe = popen(cmd.c_str(), "r");
-		if (!pipe)
-		{
-			return tool;
-		}
 
 		char buffer[BUFFER_SIZE];
-		if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
+
 		{
-			// e.g. Python 3.12.3
-			std::string version = buffer;
-			Util::Trim(version);
-			size_t pos = version.find(" ");
-			if (pos != std::string::npos)
+			auto pipe = Util::MakePipe(cmd);
+			if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
 			{
-				tool.version = version.substr(pos + 1);
+				tool.path = buffer;
+				Util::Trim(tool.path);
+			}
+			else
+			{
+				warn("Failed to find Python.");
+				return tool;
 			}
 		}
 
-		pclose(pipe);
-
-		cmd = Util::FIND_CMD + result.get();
+		cmd = FileSystem::EscapePathForShell(result.value()) + " --version";
 #ifndef __APPLE__ 
 		cmd += Util::NULL_ERR_OUTPUT;
 #endif
-		pipe = popen(cmd.c_str(), "r");
-		if (!pipe)
 		{
-			return tool;
+			auto pipe = Util::MakePipe(cmd);
+			if (pipe && fgets(buffer, sizeof(buffer), pipe.get()))
+			{
+				// e.g. Python 3.12.3
+				std::string version{ buffer };
+				Util::Trim(version);
+				size_t pos = version.find(" ");
+				if (pos != std::string::npos)
+				{
+					tool.version = version.substr(pos + 1);
+				}
+			}
+			else
+			{
+				warn("Failed to get Python version.");
+				return tool;
+			}
 		}
-
-		if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
-		{
-			tool.path = buffer;
-			Util::Trim(tool.path);
-		}
-
-		pclose(pipe);
 
 		return tool;
 	}
@@ -199,9 +203,9 @@ namespace SystemInfo
 		std::string path = FileSystem::ExtractFilePath(unpackerCmd);
 
 		auto result = FileSystem::GetFileRealPath(path);
-		if (result.has_value() && FileSystem::FileExists(result.get().c_str()))
+		if (result.has_value() && FileSystem::FileExists(result.value().c_str()))
 		{
-			return result.get();
+			return result.value();
 		}
 
 		return "";
@@ -218,7 +222,8 @@ namespace SystemInfo
 #ifndef __APPLE__ 
 		cmd += Util::NULL_ERR_OUTPUT;
 #endif
-		FILE* pipe = popen(cmd.c_str(), "r");
+
+		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
 			return "";
@@ -226,9 +231,9 @@ namespace SystemInfo
 
 		std::string version;
 		char buffer[BUFFER_SIZE];
-		while (!feof(pipe))
+		while (!feof(pipe.get()))
 		{
-			if (fgets(buffer, BUFFER_SIZE, pipe) != nullptr)
+			if (fgets(buffer, BUFFER_SIZE, pipe.get()) != nullptr)
 			{
 				if (strstr(buffer, marker))
 				{
@@ -237,8 +242,6 @@ namespace SystemInfo
 				}
 			}
 		}
-
-		pclose(pipe);
 
 		return version;
 	}

@@ -56,7 +56,7 @@ void FileSystem::NormalizePathSeparators(char* path)
 	}
 }
 
-boost::optional<std::string> FileSystem::GetFileRealPath(const std::string& path)
+std::optional<std::string> FileSystem::GetFileRealPath(const std::string& path)
 {
 	char buffer[256];
 
@@ -64,16 +64,16 @@ boost::optional<std::string> FileSystem::GetFileRealPath(const std::string& path
 	DWORD len = GetFullPathName(path.c_str(), 256, buffer, nullptr);
 	if (len != 0)
 	{
-		return boost::optional<std::string>{ buffer };
+		return std::optional<std::string>{ buffer };
 	}
 #else
 	if (realpath(path.c_str(), buffer) != nullptr)
 	{
-		return boost::optional<std::string>{ buffer };
+		return std::optional<std::string>{ buffer };
 	}
 #endif
 
-	return boost::none;
+	return std::nullopt;
 }
 
 #ifdef WIN32
@@ -736,7 +736,7 @@ int64 FileSystem::FileSize(const char* filename)
 #endif
 }
 
-boost::optional<FileSystem::DiskState> FileSystem::GetDiskState(const char* path)
+std::optional<FileSystem::DiskState> FileSystem::GetDiskState(const char* path)
 {
 #ifdef WIN32
 	ULARGE_INTEGER freeBytesAvailable;
@@ -757,7 +757,7 @@ boost::optional<FileSystem::DiskState> FileSystem::GetDiskState(const char* path
 		return FileSystem::DiskState{ available, total };
 	}
 #endif
-	return boost::none;
+	return std::nullopt;
 }
 
 bool FileSystem::RenameBak(const char* filename, const char* bakPart, bool removeOldExtension, CString& newName)

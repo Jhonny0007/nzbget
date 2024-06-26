@@ -161,7 +161,7 @@ namespace SystemInfo
 		}
 
 		std::string cmd = std::string("uname -o") + Util::NULL_ERR_OUTPUT;
-		FILE* pipe = popen(cmd.c_str(), "r");
+		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
 			warn("Failed to get OS name. Couldn't read 'uname -o'.");
@@ -169,9 +169,8 @@ namespace SystemInfo
 		}
 
 		char buffer[BUFFER_SIZE];
-		if (fgets(buffer, BUFFER_SIZE, pipe))
+		if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 		{
-			pclose(pipe);
 			m_name = buffer;
 			Util::Trim(m_name);
 			return;
@@ -185,7 +184,7 @@ namespace SystemInfo
 	void OS::Init()
 	{
 		std::string cmd = std::string("sw_vers") + Util::NULL_ERR_OUTPUT;
-		FILE* pipe = popen(cmd.c_str(), "r");
+		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
 			warn("Failed to get OS info. Couldn't read 'sw_vers'.");
@@ -194,15 +193,13 @@ namespace SystemInfo
 
 		char buffer[BUFFER_SIZE];
 		std::string result = "";
-		while (!feof(pipe))
+		while (!feof(pipe.get()))
 		{
-			if (fgets(buffer, sizeof(buffer), pipe))
+			if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 			{
 				result += buffer;
 			}
-		}
-
-		pclose(pipe);
+		};
 
 		std::string productName = "ProductName:";
 		size_t pos = result.find(productName);

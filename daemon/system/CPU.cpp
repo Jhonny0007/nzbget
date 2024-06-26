@@ -107,7 +107,7 @@ namespace SystemInfo
 		}
 
 		std::string cmd = std::string("lscpu | grep \"Model name\"") + Util::NULL_ERR_OUTPUT;
-		FILE* pipe = popen(cmd.c_str(), "r");
+		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
 			warn("Failed to get CPU model. Couldn't read 'lscpu'.");
@@ -116,19 +116,16 @@ namespace SystemInfo
 		}
 
 		char buffer[BUFFER_SIZE];
-		while (!feof(pipe))
+		while (!feof(pipe.get()))
 		{
 			if (fgets(buffer, BUFFER_SIZE, pipe))
 			{
-				pclose(pipe);
 				m_model = buffer;
 				m_model = m_model.substr(m_model.find(":") + 1);
 				Util::Trim(m_model);
 				return;
 			}
 		}
-
-		pclose(pipe);
 
 		warn("Failed to get CPU model.");
 	}
@@ -177,7 +174,7 @@ namespace SystemInfo
 	std::string CPU::GetCPUArch() const
 	{
 		std::string cmd = std::string("uname -m") + Util::NULL_ERR_OUTPUT;
-		FILE* pipe = popen(cmd.c_str(), "r");
+		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
 			warn("Failed to get CPU arch. Couldn't read 'uname -m'.");
@@ -186,14 +183,11 @@ namespace SystemInfo
 		}
 
 		char buffer[BUFFER_SIZE];
-		if (fgets(buffer, BUFFER_SIZE, pipe))
+		if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 		{
-			pclose(pipe);
 			Util::Trim(buffer);
 			return buffer;
 		}
-
-		pclose(pipe);
 
 		warn("Failed to get CPU arch.");
 

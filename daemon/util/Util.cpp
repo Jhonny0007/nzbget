@@ -123,7 +123,7 @@ void Util::Init()
 	CurrentTicks();
 }
 
-boost::optional<std::string> 
+std::optional<std::string> 
 Util::FindExecutorProgram(const std::string& filename, const std::string& customPath)
 {
 	size_t idx = filename.find_last_of(".");
@@ -167,7 +167,7 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 		{
 			return std::string("sh");
 		}
-		return boost::none;
+		return std::nullopt;
 	}
 
 	if (fileExt == ".js")
@@ -177,7 +177,7 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 		{
 			return std::string("node");
 		}
-		return boost::none;
+		return std::nullopt;
 	}
 
 	if (fileExt == ".cmd" || fileExt == ".bat")
@@ -187,7 +187,7 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 		{
 			return filename;
 		}
-		return boost::none;
+		return std::nullopt;
 	}
 
 	if (fileExt == ".exe")
@@ -198,7 +198,7 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 	return filename;
 }
 
-boost::optional<std::string> Util::FindPython()
+std::optional<std::string> Util::FindPython()
 {
 	std::array<std::string, 3> pythonExecutables{ "python3", "python", "py" }; 
 
@@ -210,7 +210,7 @@ boost::optional<std::string> Util::FindPython()
 			return executable;
 		}
 	}
-	return boost::none;
+	return std::nullopt;
 }
  
 int64 Util::JoinInt64(uint32 Hi, uint32 Lo)
@@ -224,7 +224,7 @@ void Util::SplitInt64(int64 Int64, uint32* Hi, uint32* Lo)
 	*Lo = (uint32)(Int64 & 0xFFFFFFFF);
 }
 
-boost::optional<double> 
+std::optional<double> 
 Util::StrToNum(const std::string& str)
 {
 	std::istringstream ss(str);
@@ -234,13 +234,13 @@ Util::StrToNum(const std::string& str)
 	{
 		if (!ss.eof()) 
 		{
-			return boost::none;
+			return std::nullopt;
 		}
 
-		return boost::optional<double>{ num };
+		return std::optional<double>{ num };
 	}
 
-	return boost::none;
+	return std::nullopt;
 }
 
 /* Base64 decryption is taken from
@@ -680,6 +680,18 @@ uint32 Util::HashBJ96(const char* buffer, int bufSize, uint32 initValue)
 const char* Util::NormalizeLocalHostIP(const char* ip)
 {
 	return !strcmp(ip, "0.0.0.0") ? "127.0.0.1" : ip;
+}
+
+std::unique_ptr<FILE, std::function<void(FILE*)>> Util::MakePipe(const std::string& cmd)
+{
+	return std::unique_ptr<FILE, std::function<void(FILE*)>>(popen(cmd.c_str(), "r"), [](FILE* pipe)
+		{
+			if (pipe)
+			{
+				std::ignore = pclose(pipe);
+			}
+		}
+	);
 }
 
 #ifdef WIN32
