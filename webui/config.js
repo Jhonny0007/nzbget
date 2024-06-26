@@ -4348,9 +4348,17 @@ var SystemInfo = (new function($)
 		$SysInfo_LibrariesTable.empty();
 		$SysInfo_NewsServersTable.empty();
 
-		$SysInfo_OS.text(sysInfo['OS'].Name + ' ' + sysInfo['OS'].Version);
-		$SysInfo_CPUModel.text(sysInfo['CPU'].Model);
-		$SysInfo_Arch.text(sysInfo['CPU'].Arch);
+		if (sysInfo['OS'].Name)
+		{
+			$SysInfo_OS.text(sysInfo['OS'].Name + ' ' + sysInfo['OS'].Version);
+		}
+		else
+		{
+			$SysInfo_OS.text('N/A');
+		}
+		
+		$SysInfo_CPUModel.text(sysInfo['CPU'].Model || 'N/A');
+		$SysInfo_Arch.text(sysInfo['CPU'].Arch || 'N/A');
 		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
 		$SysInfo_ArticleCache.text(Util.formatSizeMB(+Options.option('ArticleCache')));
 
