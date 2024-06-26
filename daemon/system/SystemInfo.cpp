@@ -121,12 +121,7 @@ namespace SystemInfo
 			return tool;
 		}
 
-#ifdef WIN32
-		std::string cmd = "\"" + result.get() + " --version" + "\"" + Util::NULL_ERR_OUTPUT;
-#else
-		std::string cmd = result.get() + " --version" + Util::NULL_ERR_OUTPUT;
-#endif
-
+		std::string cmd = FileSystem::EscapePathForShell(result.get()) + " --version" + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -213,12 +208,7 @@ namespace SystemInfo
 			return "";
 		}
 
-#ifdef WIN32
-		std::string cmd = "\"" + path + "\"" + Util::NULL_ERR_OUTPUT;
-#else
-		std::string cmd = path + Util::NULL_ERR_OUTPUT;
-#endif
-
+		std::string cmd = FileSystem::EscapePathForShell(path) + Util::NULL_ERR_OUTPUT;
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{

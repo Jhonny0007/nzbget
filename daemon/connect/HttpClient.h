@@ -54,6 +54,8 @@ namespace HttpClient
 		const std::string GetLocalIP() const;
 
 		HttpClient();
+		HttpClient(const HttpClient&) = delete;
+		HttpClient operator=(const HttpClient&) = delete;
 		~HttpClient() = default;
 	private:
 		void Connect(Socket& socket, const Endpoints& endpoints, const std::string& host);

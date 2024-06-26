@@ -60,7 +60,7 @@ namespace SystemInfo
 			if (buildNum == 0)
 			{
 				m_version = "";
-				warn("Get invalid OS version.");
+				warn("Get invalid OS version: %li", buildNum);
 			}
 			else if (buildNum >= m_win11BuildVersion)
 			{

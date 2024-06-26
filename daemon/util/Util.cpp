@@ -105,12 +105,12 @@ int getopt(int argc, char *argv[], char *optstring)
 #endif
 
 #ifdef WIN32
-const char* Util::NULL_OUTPUT = " >null 2>$1";
-const char* Util::NULL_ERR_OUTPUT = " 2>null";
+const char* Util::NULL_OUTPUT = " >nul 2>nul";
+const char* Util::NULL_ERR_OUTPUT = " 2>nul";
 const char* Util::FIND_CMD = "where ";
 #else
 const char* Util::NULL_OUTPUT = " > /dev/null 2> /dev/null";
-const char* Util::NULL_ERR_OUTPUT = " 2>null";
+const char* Util::NULL_ERR_OUTPUT = " 2> null";
 const char* Util::FIND_CMD = "which ";
 #endif
 

@@ -636,6 +636,16 @@ std::string FileSystem::ExtractFilePath(const std::string& path)
 	return path;
 }
 
+std::string FileSystem::EscapePathForShell(const std::string& path)
+{
+	if (path.empty())
+	{
+		return path;
+	}
+
+	return "\"" + path + "\"";
+}
+
 /* Delete directory which is empty or contains only hidden files or directories (whose names start with dot) */
 bool FileSystem::DeleteDirectory(const char* dirFilename)
 {

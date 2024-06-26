@@ -103,7 +103,7 @@ namespace HttpClient
 
 		if (ec != asio::error::eof)
 		{
-			throw std::runtime_error("Failed to get the response body: " + ec.message());
+			throw std::runtime_error("Failed to read the response body: " + ec.message());
 		}
 
 		auto bodyBuf = buf.data();
