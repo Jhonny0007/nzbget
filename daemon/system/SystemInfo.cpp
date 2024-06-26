@@ -301,8 +301,8 @@ namespace SystemInfo
 		xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "value");
 		xmlNodePtr structNode = xmlNewNode(nullptr, BAD_CAST "struct");
 		xmlNodePtr osNode = xmlNewNode(nullptr, BAD_CAST "OS");
-		xmlNodePtr networkNode = xmlNewNode(nullptr, BAD_CAST "Network");
 		xmlNodePtr cpuNode = xmlNewNode(nullptr, BAD_CAST "CPU");
+		xmlNodePtr networkNode = xmlNewNode(nullptr, BAD_CAST "Network");
 		xmlNodePtr toolsNode = xmlNewNode(nullptr, BAD_CAST "Tools");
 		xmlNodePtr librariesNode = xmlNewNode(nullptr, BAD_CAST "Libraries");
 
@@ -333,8 +333,8 @@ namespace SystemInfo
 		}
 
 		xmlAddChild(structNode, osNode);
-		xmlAddChild(structNode, networkNode);
 		xmlAddChild(structNode, cpuNode);
+		xmlAddChild(structNode, networkNode);
 		xmlAddChild(structNode, toolsNode);
 		xmlAddChild(structNode, librariesNode);
 		xmlAddChild(rootNode, structNode);
