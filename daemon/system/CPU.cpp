@@ -121,7 +121,8 @@ namespace SystemInfo
 			if (fgets(buffer, BUFFER_SIZE, pipe))
 			{
 				pclose(pipe);
-				m_model = std::string(buffer).substr(line.find(":") + 1);
+				m_model = buffer;
+				m_model = m_model.substr(m_model.find(":") + 1);
 				Util::Trim(m_model);
 				return;
 			}
