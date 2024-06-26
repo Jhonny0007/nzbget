@@ -322,12 +322,14 @@ void NZBGet::Init()
 		info("nzbget %s remote-mode", Util::VersionRevision());
 	}
 
-	info("Using %s", g_Options->GetConfigFilename());
-	info("NZBGet runs on %s:%i", g_Options->GetControlIp(), g_Options->GetControlPort());
+	info("using %s", g_Options->GetConfigFilename());
+	info("nzbget runs on %s:%i", g_Options->GetControlIp(), g_Options->GetControlPort());
 
-	info("OS: %s %s", g_SystemInfo->GetOSInfo().GetName().c_str(), g_SystemInfo->GetOSInfo().GetVersion().c_str());
-	info("CPU: %s", g_SystemInfo->GetCPUInfo().GetModel().c_str());
-	info("Arch: %s", g_SystemInfo->GetCPUInfo().GetArch().c_str());
+	debug("OS: %s %s",
+		g_SystemInfo->GetOSInfo().GetName().c_str(),
+		g_SystemInfo->GetOSInfo().GetVersion().c_str());
+	debug("CPU: %s", g_SystemInfo->GetCPUInfo().GetModel().c_str());
+	debug("Arch: %s", g_SystemInfo->GetCPUInfo().GetArch().c_str());
 
 	m_reloading = false;
 
