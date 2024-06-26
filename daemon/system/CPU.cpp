@@ -118,7 +118,7 @@ namespace SystemInfo
 		char buffer[BUFFER_SIZE];
 		while (!feof(pipe.get()))
 		{
-			if (fgets(buffer, BUFFER_SIZE, pipe))
+			if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 			{
 				m_model = buffer;
 				m_model = m_model.substr(m_model.find(":") + 1);
