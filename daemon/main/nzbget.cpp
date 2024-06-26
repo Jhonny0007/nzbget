@@ -326,12 +326,12 @@ void NZBGet::Init()
 	info("Using %s", g_Options->GetConfigFilename());
 	info("Access on %s:%i", controlIp, g_Options->GetControlPort());
 
-	info(g_SystemInfo->GetOSInfo().GetName());
-	info(g_SystemInfo->GetOSInfo().GetVersion());
-	info(g_SystemInfo->GetCPUInfo().GetArch());
-	info(g_SystemInfo->GetCPUInfo().GetModel());
-	info(g_SystemInfo->GetNetworkInfo().publicIP);
-	info(g_SystemInfo->GetNetworkInfo().privateIP);
+	info(g_SystemInfo->GetOSInfo().GetName().c_str());
+	info(g_SystemInfo->GetOSInfo().GetVersion().c_str());
+	info(g_SystemInfo->GetCPUInfo().GetArch().c_str());
+	info(g_SystemInfo->GetCPUInfo().GetModel().c_str());
+	info(g_SystemInfo->GetNetworkInfo().publicIP.c_str());
+	info(g_SystemInfo->GetNetworkInfo().privateIP.c_str());
 
 	m_reloading = false;
 
