@@ -121,7 +121,10 @@ namespace SystemInfo
 			return tool;
 		}
 
-		std::string cmd = FileSystem::EscapePathForShell(result.get()) + " --version" + Util::NULL_ERR_OUTPUT;
+		std::string cmd = FileSystem::EscapePathForShell(result.get()) + " --version";
+#ifndef __APPLE__ 
+		cmd += Util::NULL_ERR_OUTPUT;
+#endif
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -143,7 +146,10 @@ namespace SystemInfo
 
 		pclose(pipe);
 
-		cmd = Util::FIND_CMD + result.get() + Util::NULL_ERR_OUTPUT;
+		cmd = Util::FIND_CMD + result.get();
+#ifndef __APPLE__ 
+		cmd += Util::NULL_ERR_OUTPUT;
+#endif
 		pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
@@ -208,7 +214,10 @@ namespace SystemInfo
 			return "";
 		}
 
-		std::string cmd = FileSystem::EscapePathForShell(path) + Util::NULL_ERR_OUTPUT;
+		std::string cmd = FileSystem::EscapePathForShell(path);
+#ifndef __APPLE__ 
+		cmd += Util::NULL_ERR_OUTPUT;
+#endif
 		FILE* pipe = popen(cmd.c_str(), "r");
 		if (!pipe)
 		{
