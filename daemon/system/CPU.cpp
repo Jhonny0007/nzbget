@@ -149,8 +149,7 @@ namespace SystemInfo
 		{
 			if (line.find("model name") != std::string::npos ||
 				line.find("Processor") != std::string::npos ||
-				line.find("cpu model") != std::string::npos ||
-				line.find("cpu ") != std::string::npos)
+				line.find("cpu model") != std::string::npos)
 			{
 				line = line.substr(line.find(":") + 1);
 				Util::Trim(line);
