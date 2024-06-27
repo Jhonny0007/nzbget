@@ -176,7 +176,7 @@ namespace SystemInfo
 			if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 			{
 				std::string model{ buffer };
-				model = model.substr(m_model.Get(":") + 1);
+				model = model.substr(m_model.find(":") + 1);
 				Util::Trim(model);
 				return model;
 			}
