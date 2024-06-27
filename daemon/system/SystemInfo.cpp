@@ -195,9 +195,6 @@ namespace SystemInfo
 		}
 
 		std::string cmd = FileSystem::EscapePathForShell(path);
-#ifndef __APPLE__ 
-		cmd += Util::NULL_ERR_OUTPUT;
-#endif
 
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
@@ -231,9 +228,6 @@ namespace SystemInfo
 		}
 
 		std::string cmd = Util::FIND_CMD + result.value();
-#ifndef __APPLE__ 
-		cmd += Util::NULL_ERR_OUTPUT;
-#endif
 
 		char buffer[BUFFER_SIZE];
 		auto pipe = Util::MakePipe(cmd);

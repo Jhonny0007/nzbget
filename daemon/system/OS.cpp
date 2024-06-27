@@ -27,7 +27,7 @@
 
 namespace SystemInfo
 {
-	const int BUFFER_SIZE = 512;
+	const int BUFFER_SIZE = 256;
 
 	OS::OS()
 	{
@@ -160,7 +160,7 @@ namespace SystemInfo
 			return;
 		}
 
-		std::string cmd = std::string("uname -o") + Util::NULL_ERR_OUTPUT;
+		std::string cmd = std::string("uname -o");
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
@@ -183,7 +183,7 @@ namespace SystemInfo
 #ifdef __APPLE__
 	void OS::Init()
 	{
-		std::string cmd = std::string("sw_vers") + Util::NULL_ERR_OUTPUT;
+		std::string cmd = std::string("sw_vers");
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{

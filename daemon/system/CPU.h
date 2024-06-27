@@ -21,6 +21,7 @@
 #define CPU_H
 
 #include <string>
+#include <optional>
 
 namespace SystemInfo
 {
@@ -33,9 +34,12 @@ namespace SystemInfo
 
 	private:
 		void Init();
+		std::optional<std::string> GetCPUArch() const;
+		std::optional<std::string> GetCPUModel() const;
 
 #ifndef WIN32
-		std::string GetCPUArch() const;
+		std::optional<std::string> GetCPUModelFromCPUInfo() const;
+		std::optional<std::string> GetCPUModelFromLSCPU() const;
 #endif
 
 		std::string m_model;

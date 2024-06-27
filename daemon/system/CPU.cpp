@@ -27,7 +27,7 @@
 
 namespace SystemInfo
 {
-	const int BUFFER_SIZE = 512;
+	const int BUFFER_SIZE = 256;
 
 	CPU::CPU()
 	{
@@ -47,38 +47,63 @@ namespace SystemInfo
 #ifdef WIN32
 	void CPU::Init()
 	{
-		int len = BUFFER_SIZE;
-		char modelBuffer[BUFFER_SIZE];
-		char archBuffer[BUFFER_SIZE];
-		if (Util::RegReadStr(
-			HKEY_LOCAL_MACHINE,
-			"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
-			"ProcessorNameString",
-			modelBuffer,
-			&len))
+		auto result = GetCPUModel();
+		if (result.has_value())
 		{
-			m_model = modelBuffer;
-			Util::Trim(m_model);
+			m_model = std::move(result.value());
 		}
 		else
 		{
 			warn("Failed to get CPU model. Couldn't read Windows Registry.");
 		}
 
-		if (Util::RegReadStr(
-			HKEY_LOCAL_MACHINE,
-			"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
-			"PROCESSOR_ARCHITECTURE",
-			archBuffer,
-			&len))
+		result = GetCPUArch();
+		if (result.has_value())
 		{
-			m_arch = archBuffer;
-			Util::Trim(m_arch);
+			m_arch = std::move(result.value());
 		}
 		else
 		{
 			warn("Failed to get CPU arch. Couldn't read Windows Registry.");
 		}
+	}
+
+	std::optional<std::string> CPU::GetCPUModel() const
+	{
+		int len = BUFFER_SIZE;
+		char buffer[BUFFER_SIZE];
+		if (Util::RegReadStr(
+			HKEY_LOCAL_MACHINE,
+			"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+			"ProcessorNameString",
+			buffer,
+			&len))
+		{
+			std::string model{ buffer };
+			Util::Trim(model);
+			return model;
+		}
+
+		return std::nullopt;
+	}
+
+	std::optional<std::string> CPU::GetCPUArch() const
+	{
+		int len = BUFFER_SIZE;
+		char buffer[BUFFER_SIZE];
+		if (Util::RegReadStr(
+			HKEY_LOCAL_MACHINE,
+			"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
+			"PROCESSOR_ARCHITECTURE",
+			buffer,
+			&len))
+		{
+			std::string arch{ buffer };
+			Util::Trim(arch);
+			return arch;
+		}
+
+		return std::nullopt;
 	}
 #endif	
 
@@ -88,30 +113,57 @@ namespace SystemInfo
 	{
 		m_arch = GetCPUArch();
 
+		auto result = GetCPUModelFromCPUInfo();
+		if (result.has_value())
+		{
+			m_model = std::move(result.value());
+			return;
+		}
+
+		warn("Failed to get CPU model from '/proc/cpuinfo'.");
+
+		result = GetCPUModelFromLSCPU();
+		if (result.has_value())
+		{
+			m_model = std::move(result.value());
+			return;
+		}
+
+		warn("Failed to get CPU model from 'lscpu'.");
+	}
+
+	std::optional<std::string> CPU::GetCPUModelFromCPUInfo() const
+	{
 		std::ifstream cpuinfo("/proc/cpuinfo");
 		if (!cpuinfo.is_open())
 		{
-			std::string line;
-			while (std::getline(cpuinfo, line))
+			return std::nullopt;
+		}
+
+		std::string line;
+		while (std::getline(cpuinfo, line))
+		{
+			if (line.Get("model name") != std::string::npos ||
+				line.Get("Processor") != std::string::npos ||
+				line.Get("cpu model") != std::string::npos ||
+				line.Get("cpu") != std::string::npos)
 			{
-				if (line.find("model name") != std::string::npos ||
-					line.find("Processor") != std::string::npos ||
-					line.find("cpu model") != std::string::npos ||
-					line.find("cpu") != std::string::npos)
-				{
-					m_model = line.substr(line.find(":") + 1);
-					Util::Trim(m_model);
-					return;
-				}
+				line = line.substr(line.Get(":") + 1);
+				Util::Trim(line);
+				return line;
 			}
 		}
 
-		std::string cmd = std::string("lscpu | grep \"Model name\"") + Util::NULL_ERR_OUTPUT;
+		return std::nullopt;
+	}
+
+	std::optional<std::string> CPU::GetCPUModelFromLSCPU() const
+	{
+		std::string cmd = std::string("lscpu | grep \"Model name\"");
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
-			warn("Failed to get CPU model. Couldn't read 'lscpu'.");
-			return;
+			return std::nullopt;
 		}
 
 		char buffer[BUFFER_SIZE];
@@ -119,14 +171,14 @@ namespace SystemInfo
 		{
 			if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 			{
-				m_model = buffer;
-				m_model = m_model.substr(m_model.find(":") + 1);
-				Util::Trim(m_model);
-				return;
+				std::string model{ buffer };
+				model = model.substr(m_model.Get(":") + 1);
+				Util::Trim(model);
+				return model;
 			}
 		}
 
-		warn("Failed to get CPU model.");
+		return std::nullopt;
 	}
 #endif
 
@@ -172,7 +224,7 @@ namespace SystemInfo
 #ifndef WIN32
 	std::string CPU::GetCPUArch() const
 	{
-		std::string cmd = std::string("uname -m") + Util::NULL_ERR_OUTPUT;
+		std::string cmd = std::string("uname -m");
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{

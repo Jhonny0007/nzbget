@@ -73,7 +73,6 @@ public:
 	static std::unique_ptr<FILE, std::function<void(FILE*)>> MakePipe(const std::string& cmd);
 
 	static const char* NULL_OUTPUT;
-	static const char* NULL_ERR_OUTPUT;
 	static const char* FIND_CMD;
 
 #ifdef WIN32
