@@ -54,7 +54,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get CPU model. Couldn't read Windows Registry.");
+			warn("Failed to get CPU model. Couldn't read Windows Registry");
 		}
 
 		result = GetCPUArch();
@@ -64,7 +64,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get CPU arch. Couldn't read Windows Registry.");
+			warn("Failed to get CPU arch. Couldn't read Windows Registry");
 		}
 	}
 
@@ -124,7 +124,7 @@ namespace SystemInfo
 			return;
 		}
 
-		warn("Failed to get CPU model from '/proc/cpuinfo'.");
+		warn("Failed to get CPU model from '/proc/cpuinfo'");
 
 		result = GetCPUModelFromLSCPU();
 		if (result.has_value())
@@ -133,7 +133,7 @@ namespace SystemInfo
 			return;
 		}
 
-		warn("Failed to get CPU model from 'lscpu'.");
+		warn("Failed to get CPU model from 'lscpu'");
 	}
 
 	std::optional<std::string> CPU::GetCPUModelFromCPUInfo() const
@@ -194,7 +194,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get CPU model. Couldn't read 'hw.model'.");
+			warn("Failed to get CPU model. Couldn't read 'hw.model'");
 		}
 
 		auto result = GetCPUArch();
@@ -218,7 +218,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get CPU model. Couldn't read 'machdep.cpu.brand_string'.");
+			warn("Failed to get CPU model. Couldn't read 'machdep.cpu.brand_string'");
 		}
 
 		auto result = GetCPUArch();
@@ -236,7 +236,7 @@ namespace SystemInfo
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
-			warn("Failed to get CPU arch. Couldn't read 'uname -m'.");
+			warn("Failed to get CPU arch. Couldn't read 'uname -m'");
 
 			return std::nullopt;
 		}
@@ -249,7 +249,7 @@ namespace SystemInfo
 			return arch;
 		}
 
-		warn("Failed to get CPU arch.");
+		warn("Failed to get CPU arch");
 
 		return std::nullopt;
 	}

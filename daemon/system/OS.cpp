@@ -81,7 +81,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get OS version. Couldn't read Windows Registry.");
+			warn("Failed to get OS version. Couldn't read Windows Registry");
 		}
 
 		m_name = "Windows";
@@ -164,7 +164,7 @@ namespace SystemInfo
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
-			warn("Failed to get OS name. Couldn't read 'uname -o'.");
+			warn("Failed to get OS name. Couldn't read 'uname -o'");
 			return;
 		}
 
@@ -176,7 +176,7 @@ namespace SystemInfo
 			return;
 		}
 
-		warn("Failed to get OS info.");
+		warn("Failed to get OS info");
 	}
 #endif
 
@@ -187,7 +187,7 @@ namespace SystemInfo
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
-			warn("Failed to get OS info. Couldn't read 'sw_vers'.");
+			warn("Failed to get OS info. Couldn't read 'sw_vers'");
 			return;
 		}
 
@@ -211,7 +211,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get OS name. Couldn't find 'ProductName'.");
+			warn("Failed to get OS name. Couldn't find 'ProductName'");
 		}
 
 		std::string productVersion = "ProductVersion:";
@@ -224,7 +224,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get OS version. Couldn't find 'ProductVersion'.");
+			warn("Failed to get OS version. Couldn't find 'ProductVersion'");
 		}
 	}
 #endif
@@ -241,7 +241,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get OS name. Couldn't read 'kern.ostype'.");
+			warn("Failed to get OS name. Couldn't read 'kern.ostype'");
 		}
 
 		len = BUFFER_SIZE;
@@ -253,7 +253,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get OS version. Couldn't to read 'kern.osrelease'.");
+			warn("Failed to get OS version. Couldn't to read 'kern.osrelease'");
 		}
 	}
 #endif

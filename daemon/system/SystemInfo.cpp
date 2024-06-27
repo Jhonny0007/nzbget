@@ -118,7 +118,7 @@ namespace SystemInfo
 			}
 			else
 			{
-				warn("Failed to find Python: '%s' doesn't exist.", result.value().c_str());
+				warn("Failed to find Python: '%s' doesn't exist", result.value().c_str());
 				return tool;
 			}
 		}
@@ -127,7 +127,7 @@ namespace SystemInfo
 			result = FindPython();
 			if (!result.has_value())
 			{
-				warn("Failed to find Python.");
+				warn("Failed to find Python");
 				return tool;
 			}
 
@@ -138,7 +138,7 @@ namespace SystemInfo
 		result = GetPythonVersion(tool.path);
 		if (!result.has_value())
 		{
-			warn("Failed to get Python version.");
+			warn("Failed to get Python version");
 			return tool;
 		}
 
