@@ -171,15 +171,12 @@ namespace SystemInfo
 		}
 
 		char buffer[BUFFER_SIZE];
-		while (!feof(pipe.get()))
+		if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 		{
-			if (fgets(buffer, BUFFER_SIZE, pipe.get()))
-			{
-				std::string model{ buffer };
-				model = model.substr(m_model.find(":") + 1);
-				Util::Trim(model);
-				return model;
-			}
+			std::string model{ buffer };
+			model = model.substr(m_model.find(":") + 1);
+			Util::Trim(model);
+			return model;
 		}
 
 		return std::nullopt;
@@ -256,6 +253,6 @@ namespace SystemInfo
 		warn("Failed to get CPU arch.");
 
 		return std::nullopt;
-}
+	}
 #endif
 }
