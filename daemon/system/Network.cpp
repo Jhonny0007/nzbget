@@ -27,7 +27,7 @@
 
 namespace SystemInfo
 {
-	const char* IP_SERVICE = "ip.nzbget.com";
+	static const char* IP_SERVICE = "ip.nzbget.com";
 
 	Network GetNetwork()
 	{

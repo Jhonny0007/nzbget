@@ -27,7 +27,7 @@
 
 namespace SystemInfo
 {
-	const int BUFFER_SIZE = 256;
+	static const int BUFFER_SIZE = 256;
 
 	OS::OS()
 	{

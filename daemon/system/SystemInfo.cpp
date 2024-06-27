@@ -38,7 +38,7 @@ namespace SystemInfo
 #include <ncurses/ncurses.h>
 #endif
 
-	const size_t BUFFER_SIZE = 512;
+	static const size_t BUFFER_SIZE = 512;
 
 	SystemInfo::SystemInfo()
 	{

@@ -27,7 +27,7 @@
 
 namespace SystemInfo
 {
-	const int BUFFER_SIZE = 256;
+	static const int BUFFER_SIZE = 256;
 
 	CPU::CPU()
 	{
@@ -143,12 +143,12 @@ namespace SystemInfo
 		std::string line;
 		while (std::getline(cpuinfo, line))
 		{
-			if (line.Get("model name") != std::string::npos ||
-				line.Get("Processor") != std::string::npos ||
-				line.Get("cpu model") != std::string::npos ||
-				line.Get("cpu") != std::string::npos)
+			if (line.find("model name") != std::string::npos ||
+				line.find("Processor") != std::string::npos ||
+				line.find("cpu model") != std::string::npos ||
+				line.find("cpu") != std::string::npos)
 			{
-				line = line.substr(line.Get(":") + 1);
+				line = line.substr(line.find(":") + 1);
 				Util::Trim(line);
 				return line;
 			}
@@ -159,7 +159,7 @@ namespace SystemInfo
 
 	std::optional<std::string> CPU::GetCPUModelFromLSCPU() const
 	{
-		std::string cmd = std::string("lscpu | grep \"Model name\"");
+		std::string cmd = "lscpu | grep \"Model name\"";
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
@@ -224,7 +224,7 @@ namespace SystemInfo
 #ifndef WIN32
 	std::string CPU::GetCPUArch() const
 	{
-		std::string cmd = std::string("uname -m");
+		std::string cmd = "uname -m";
 		auto pipe = Util::MakePipe(cmd);
 		if (!pipe)
 		{
