@@ -2766,7 +2766,7 @@ void LoadExtensionsXmlCommand::Execute()
 		const auto& error = g_ExtensionManager->LoadExtensions();
 		if (error)
 		{
-			BuildErrorResponse(3, error.get().c_str());
+			BuildErrorResponse(3, error.value().c_str());
 			return;
 		}	
 	}
@@ -2832,7 +2832,7 @@ void DownloadExtensionXmlCommand::Execute()
 	const auto error = g_ExtensionManager->InstallExtension(filename, scriptDir);
 	if (error)
 	{
-		BuildErrorResponse(3, error.get().c_str());
+		BuildErrorResponse(3, error.value().c_str());
 		return;
 	}
 
@@ -2869,7 +2869,7 @@ void UpdateExtensionXmlCommand::Execute()
 	const auto error = g_ExtensionManager->UpdateExtension(filename, extName);
 	if (error)
 	{
-		BuildErrorResponse(3, error.get().c_str());
+		BuildErrorResponse(3, error.value().c_str());
 		return;
 	}
 
@@ -2889,7 +2889,7 @@ void DeleteExtensionXmlCommand::Execute()
 	const auto error = g_ExtensionManager->DeleteExtension(extName);
 	if (error)
 	{
-		BuildErrorResponse(2, error.get().c_str());
+		BuildErrorResponse(2, error.value().c_str());
 		return;
 	}
 
