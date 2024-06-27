@@ -134,20 +134,10 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 
 	const std::string fileExt = filename.substr(idx);
 
-	Tokenizer tok(customPath.c_str(), ",;");
-	while (char* shellover = tok.Next())
+	auto res = FindShellOverriddenExecutor(fileExt, customPath);
+	if (res.has_value())
 	{
-		char* shellcmd = strchr(shellover, '=');
-		if (shellcmd)
-		{
-			*shellcmd = '\0';
-			shellcmd++;
-
-			if (fileExt == shellover)
-			{
-				return std::string(shellcmd);
-			}
-		}
+		return res;
 	}
 
 	if (fileExt == ".py")
@@ -196,6 +186,33 @@ Util::FindExecutorProgram(const std::string& filename, const std::string& custom
 	}
 
 	return filename;
+}
+
+std::optional<std::string>
+Util::FindShellOverriddenExecutor(const std::string& fileExt, const std::string& customPath)
+{
+	if (fileExt.empty() || customPath.empty())
+	{
+		return std::nullopt;
+	}
+
+	Tokenizer tok(customPath.c_str(), ",;");
+	while (char* shellover = tok.Next())
+	{
+		char* shellcmd = strchr(shellover, '=');
+		if (shellcmd)
+		{
+			*shellcmd = '\0';
+			shellcmd++;
+
+			if (fileExt == shellover)
+			{
+				return std::string(shellcmd);
+			}
+		}
+	}
+
+	return std::nullopt;
 }
 
 std::optional<std::string> Util::FindPython()
@@ -684,7 +701,8 @@ const char* Util::NormalizeLocalHostIP(const char* ip)
 
 std::unique_ptr<FILE, std::function<void(FILE*)>> Util::MakePipe(const std::string& cmd)
 {
-	return std::unique_ptr<FILE, std::function<void(FILE*)>>(popen(cmd.c_str(), "r"), [](FILE* pipe)
+	FILE* pipe = popen(cmd.c_str(), "r");
+	return std::unique_ptr<FILE, std::function<void(FILE*)>>(pipe, [](FILE* pipe)
 		{
 			if (pipe)
 			{

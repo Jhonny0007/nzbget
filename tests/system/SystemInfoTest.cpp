@@ -28,7 +28,7 @@
 #include "Log.h"
 #include "DiskState.h"
 
-Log* g_Log;
+Log* g_Log = new Log();
 Options* g_Options;
 DiskState* g_DiskState;
 

@@ -42,7 +42,7 @@ namespace SystemInfo
 
 	SystemInfo::SystemInfo()
 	{
-		InitLibVersions();
+		InitLibsInfo();
 	}
 
 	const std::vector<Library>& SystemInfo::GetLibraries() const
@@ -50,7 +50,7 @@ namespace SystemInfo
 		return m_libraries;
 	}
 
-	void SystemInfo::InitLibVersions()
+	void SystemInfo::InitLibsInfo()
 	{
 		m_libraries.reserve(4);
 		m_libraries.push_back({ "LibXML2", LIBXML_DOTTED_VERSION });
@@ -86,6 +86,11 @@ namespace SystemInfo
 		return m_os;
 	}
 
+	Network SystemInfo::GetNetworkInfo() const
+	{
+		return GetNetwork();
+	}
+
 	std::vector<Tool> SystemInfo::GetTools() const
 	{
 		std::vector<Tool> tools{
@@ -96,19 +101,6 @@ namespace SystemInfo
 
 		return tools;
 	}
-	std::string SystemInfo::ParseUnpackerVersion(const std::string& line) const
-	{
-		// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
-		// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
-		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
-		std::smatch match;
-		if (std::regex_search(line, match, pattern))
-		{
-			return match[0].str();
-		}
-
-		return std::string("");
-	};
 
 	Tool SystemInfo::GetPython() const
 	{
@@ -116,57 +108,41 @@ namespace SystemInfo
 
 		tool.name = "Python";
 
-		auto result = Util::FindPython();
-		if (!result.has_value())
+		auto result = Util::FindShellOverriddenExecutor(".py", g_Options->GetShellOverride());
+		if (result.has_value())
 		{
-			warn("Failed to find Python.");
-			return tool;
-		}
-
-		std::string cmd = Util::FIND_CMD + result.value();
-#ifndef __APPLE__ 
-		cmd += Util::NULL_ERR_OUTPUT;
-#endif
-
-		char buffer[BUFFER_SIZE];
-
-		{
-			auto pipe = Util::MakePipe(cmd);
-			if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+			if (FileSystem::FileExists(result.value().c_str()))
 			{
-				tool.path = buffer;
+				tool.path = std::move(result.value());
 				Util::Trim(tool.path);
 			}
 			else
 			{
+				warn("Failed to find Python: '%s' doesn't exist.", result.value().c_str());
+				return tool;
+			}
+		}
+		else
+		{
+			result = FindPython();
+			if (!result.has_value())
+			{
 				warn("Failed to find Python.");
 				return tool;
 			}
+
+			tool.path = std::move(result.value());
+			Util::Trim(tool.path);
 		}
 
-		cmd = FileSystem::EscapePathForShell(result.value()) + " --version";
-#ifndef __APPLE__ 
-		cmd += Util::NULL_ERR_OUTPUT;
-#endif
+		result = GetPythonVersion(tool.path);
+		if (!result.has_value())
 		{
-			auto pipe = Util::MakePipe(cmd);
-			if (pipe && fgets(buffer, sizeof(buffer), pipe.get()))
-			{
-				// e.g. Python 3.12.3
-				std::string version{ buffer };
-				Util::Trim(version);
-				size_t pos = version.find(" ");
-				if (pos != std::string::npos)
-				{
-					tool.version = version.substr(pos + 1);
-				}
-			}
-			else
-			{
-				warn("Failed to get Python version.");
-				return tool;
-			}
+			warn("Failed to get Python version.");
+			return tool;
 		}
+
+		tool.version = std::move(result.value());
 
 		return tool;
 	}
@@ -246,9 +222,91 @@ namespace SystemInfo
 		return version;
 	}
 
-	Network SystemInfo::GetNetworkInfo() const
+	std::optional<std::string> SystemInfo::FindPython() const
 	{
-		return GetNetwork();
+		auto result = Util::FindPython();
+		if (!result.has_value())
+		{
+			return std::nullopt;
+		}
+
+		std::string cmd = Util::FIND_CMD + result.value();
+#ifndef __APPLE__ 
+		cmd += Util::NULL_ERR_OUTPUT;
+#endif
+
+		char buffer[BUFFER_SIZE];
+		auto pipe = Util::MakePipe(cmd);
+		if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+		{
+			std::string path{ buffer };
+			Util::Trim(path);
+			return path;
+		}
+
+		return std::nullopt;
+	}
+
+	std::optional<std::string> SystemInfo::GetPythonVersion(const std::string path) const
+	{
+		std::string cmd = FileSystem::EscapePathForShell(path) + " --version 2>&1";
+		{
+			auto pipe = Util::MakePipe(cmd);
+			char buffer[BUFFER_SIZE];
+			if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+			{
+				// e.g. Python 3.12.3
+				std::string version{ buffer };
+				Util::Trim(version);
+				size_t pos = version.find("Python");
+				if (pos != std::string::npos)
+				{
+					version = version.substr(pos + sizeof("Python"));
+					Util::Trim(version);
+					return version;
+				}
+			}
+		}
+
+		return std::nullopt;
+	}
+
+	std::string SystemInfo::ParseUnpackerVersion(const std::string& line) const
+	{
+		// e.g. 7-Zip (a) 19.00 (x64) : Copyright (c) 1999-2018 Igor Pavlov : 2019-02-21
+		// e.g. UNRAR 5.70 x64 freeware      Copyright (c) 1993-2019 Alexander Roshal
+		std::regex pattern(R"([0-9]*\.[0-9]*)"); // float number
+		std::smatch match;
+		if (std::regex_search(line, match, pattern))
+		{
+			return match[0].str();
+		}
+
+		return std::string("");
+	};
+
+	std::ostream& operator<<(std::ostream& os, const SystemInfo& sysinfo)
+	{
+		os << "OS: ";
+		os << sysinfo.GetOSInfo().GetName() << " ";
+		os << sysinfo.GetOSInfo().GetVersion() << "\n";
+		os << "CPU: ";
+		os << sysinfo.GetCPUInfo().GetModel() << "\n";
+		os << "Arch: ";
+		os << sysinfo.GetCPUInfo().GetArch() << "\n";
+
+		for (const auto& tool : sysinfo.GetTools())
+		{
+			os << tool.name << " " << tool.version << " ";
+			os << tool.path << "\n";
+		}
+
+		for (const auto& lib : sysinfo.GetLibraries())
+		{
+			os << lib.name << " " << lib.version << "\n";
+		}
+
+		return os;
 	}
 
 	std::string ToJsonStr(const SystemInfo& sysInfo)

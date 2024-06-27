@@ -50,15 +50,18 @@ namespace SystemInfo
 		const std::vector<Library>& GetLibraries() const;
 		const CPU& GetCPUInfo() const;
 		const OS& GetOSInfo() const;
+		friend std::ostream& operator<<(std::ostream& os, const SystemInfo& sysinfo);
 
 	private:
 		Tool GetPython() const;
 		Tool GetSevenZip() const;
 		Tool GetUnrar() const;
-		void InitLibVersions();
+		void InitLibsInfo();
 		std::string ParseUnpackerVersion(const std::string& line) const;
 		std::string GetUnpackerPath(const char* unpackerCmd) const;
 		std::string GetUnpackerVersion(const std::string& path, const char* marker) const;
+		std::optional<std::string> FindPython() const;
+		std::optional<std::string> GetPythonVersion(const std::string path) const;
 
 		CPU m_cpu;
 		OS m_os;

@@ -67,6 +67,11 @@
 #include "NServMain.h"
 #endif
 
+#ifdef DEBUG
+#include <sstream>
+#include <iostream>
+#endif
+
  // Prototypes
 void RunMain();
 
@@ -322,14 +327,18 @@ void NZBGet::Init()
 		info("nzbget %s remote-mode", Util::VersionRevision());
 	}
 
-	info("using %s", g_Options->GetConfigFilename());
-	info("nzbget runs on %s:%i", g_Options->GetControlIp(), g_Options->GetControlPort());
+	info("using %s", m_options->GetConfigFilename());
+	info("nzbget runs on %s:%i", m_options->GetControlIp(), m_options->GetControlPort());
 
-	debug("OS: %s %s",
-		g_SystemInfo->GetOSInfo().GetName().c_str(),
-		g_SystemInfo->GetOSInfo().GetVersion().c_str());
-	debug("CPU: %s", g_SystemInfo->GetCPUInfo().GetModel().c_str());
-	debug("Arch: %s", g_SystemInfo->GetCPUInfo().GetArch().c_str());
+#ifdef DEBUG
+	std::stringstream ss;
+	ss << *m_systemInfo;
+	std::string line;
+	while (std::getline(ss, line))
+	{
+		info(line.c_str());
+	}
+#endif
 
 	m_reloading = false;
 

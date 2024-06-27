@@ -60,7 +60,7 @@ namespace SystemInfo
 			if (buildNum == 0)
 			{
 				m_version = "";
-				warn("Get invalid OS version: %li", buildNum);
+				warn("Got invalid OS version: %s", buffer);
 			}
 			else if (buildNum >= m_win11BuildVersion)
 			{
@@ -211,7 +211,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get OS name. 'ProductName' wasn't found.");
+			warn("Failed to get OS name. Couldn't find 'ProductName'.");
 		}
 
 		std::string productVersion = "ProductVersion:";
@@ -224,7 +224,7 @@ namespace SystemInfo
 		}
 		else
 		{
-			warn("Failed to get OS version. 'ProductVersion' wasn't found.");
+			warn("Failed to get OS version. Couldn't find 'ProductVersion'.");
 		}
 	}
 #endif
@@ -243,8 +243,6 @@ namespace SystemInfo
 		{
 			warn("Failed to get OS name. Couldn't read 'kern.ostype'.");
 		}
-
-		len = BUFFER_SIZE;
 
 		if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
 		{

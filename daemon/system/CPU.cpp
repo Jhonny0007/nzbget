@@ -111,7 +111,6 @@ namespace SystemInfo
 		if (!pipe)
 		{
 			warn("Failed to get CPU model. Couldn't read 'lscpu'.");
-
 			return;
 		}
 
