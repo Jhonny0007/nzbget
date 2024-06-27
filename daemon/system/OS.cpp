@@ -244,6 +244,8 @@ namespace SystemInfo
 			warn("Failed to get OS name. Couldn't read 'kern.ostype'.");
 		}
 
+		len = BUFFER_SIZE;
+
 		if (sysctlbyname("kern.osrelease", &buffer, &len, nullptr, 0) == 0)
 		{
 			m_version = buffer;
