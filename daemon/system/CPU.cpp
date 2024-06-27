@@ -111,9 +111,13 @@ namespace SystemInfo
 #include <fstream>
 	void CPU::Init()
 	{
-		m_arch = GetCPUArch();
+		auto result = GetCPUArch();
+		if (result.has_value())
+		{
+			m_arch = std::move(result.value());
+		}
 
-		auto result = GetCPUModelFromCPUInfo();
+		result = GetCPUModelFromCPUInfo();
 		if (result.has_value())
 		{
 			m_model = std::move(result.value());
@@ -197,7 +201,11 @@ namespace SystemInfo
 			warn("Failed to get CPU model. Couldn't read 'hw.model'.");
 		}
 
-		m_arch = GetCPUArch();
+		auto result = GetCPUArch();
+		if (result.has_value())
+		{
+			m_arch = std::move(result.value());
+		}
 	}
 
 #endif
@@ -217,12 +225,16 @@ namespace SystemInfo
 			warn("Failed to get CPU model. Couldn't read 'machdep.cpu.brand_string'.");
 		}
 
-		m_arch = GetCPUArch();
+		auto result = GetCPUArch();
+		if (result.has_value())
+		{
+			m_arch = std::move(result.value());
+		}
 	}
 #endif
 
 #ifndef WIN32
-	std::string CPU::GetCPUArch() const
+	std::optional<std::string> CPU::GetCPUArch() const
 	{
 		std::string cmd = "uname -m";
 		auto pipe = Util::MakePipe(cmd);
@@ -230,19 +242,20 @@ namespace SystemInfo
 		{
 			warn("Failed to get CPU arch. Couldn't read 'uname -m'.");
 
-			return "";
+			return std::nullopt;
 		}
 
 		char buffer[BUFFER_SIZE];
 		if (fgets(buffer, BUFFER_SIZE, pipe.get()))
 		{
-			Util::Trim(buffer);
-			return buffer;
+			std::string arch{ buffer };
+			Util::Trim(arch);
+			return arch;
 		}
 
 		warn("Failed to get CPU arch.");
 
-		return "";
-	}
+		return std::nullopt;
+}
 #endif
 }
