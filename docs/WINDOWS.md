@@ -40,7 +40,6 @@ vcpkg install openssl:x64-windows-static
 vcpkg install libxml2:x64-windows-static
 vcpkg install zlib:x64-windows-static
 vcpkg install boost-json:x64-windows-static
-vcpkg install boost-optional:x64-windows-static
 vcpkg install boost-asio:x64-windows-static
 ```
   - For tests:
