@@ -27,7 +27,7 @@
 
 namespace SystemInfo
 {
-	static const int BUFFER_SIZE = 256;
+	static const int BUFFER_SIZE = 128;
 
 	OS::OS()
 	{
@@ -47,44 +47,57 @@ namespace SystemInfo
 #ifdef WIN32
 	void OS::Init()
 	{
+		m_name = "Windows";
+
 		int len = BUFFER_SIZE;
-		char buffer[BUFFER_SIZE];
-		if (Util::RegReadStr(
+		char buildBuffer[BUFFER_SIZE];
+		if (!Util::RegReadStr(
 			HKEY_LOCAL_MACHINE,
 			"SOFTWARE\\MICROSOFT\\Windows NT\\CurrentVersion",
 			"CurrentBuild",
-			buffer,
+			buildBuffer,
 			&len))
 		{
-			long buildNum = std::atol(buffer);
-			if (buildNum == 0)
-			{
-				m_version = "";
-				warn("Got invalid OS version: %s", buffer);
-			}
-			else if (buildNum >= m_win11BuildVersion)
-			{
-				m_version = "11";
-			}
-			else if (buildNum >= m_win10BuildVersion)
-			{
-				m_version = "10";
-			}
-			else if (buildNum >= m_win8BuildVersion)
-			{
-				m_version = "8";
-			}
-			else if (buildNum >= m_winXPBuildVersion)
-			{
-				m_version = "XP";
-			}
+			warn("Failed to get OS version. Couldn't read from Windows Registry");
+
+			return;
+		}
+
+		long buildNum = std::atol(buildBuffer);
+		if (buildNum == 0)
+		{
+			warn("Got invalid Windows version: %s", buildBuffer);
+
+			return;
+		}
+
+		if (buildNum >= m_win11BuildVersion) m_version = "11";
+		else if (buildNum >= m_win10BuildVersion) m_version = "10";
+		else if (buildNum >= m_win8BuildVersion) m_version = "8";
+		else if (buildNum >= m_winXPBuildVersion) m_version = "XP";
+		else
+		{
+			warn("Unsupported Windows version");
+			return;
+		}
+
+		len = BUFFER_SIZE;
+		char updateBuffer[BUFFER_SIZE];
+		if (Util::RegReadStr(
+			HKEY_LOCAL_MACHINE,
+			"SOFTWARE\\MICROSOFT\\Windows NT\\CurrentVersion",
+			"DisplayVersion",
+			updateBuffer,
+			&len))
+		{
+			m_version += std::string(" ") + updateBuffer;
 		}
 		else
 		{
-			warn("Failed to get OS version. Couldn't read Windows Registry");
+			warn("Failed to get OS update version. Couldn't read from Windows Registry");
 		}
 
-		m_name = "Windows";
+		m_version += std::string(" (") + buildBuffer + ")";
 	}
 #endif	
 
