@@ -44,6 +44,25 @@ namespace SystemInfo
 		return m_arch;
 	}
 
+	std::string CPU::GetCanonicalCPUArch(const std::string& arch) const
+	{
+		if (arch == "i386" || arch == "x86")
+			return "i686";
+
+		if (arch == "amd64" || arch == "AMD64")
+			return "x86_64";
+
+		if (arch.find("armv5") != std::string::npos ||
+			arch.find("armv6") != std::string::npos)
+			return "armel";
+
+		if (arch.find("armv7") != std::string::npos ||
+			arch.find("armv8") != std::string::npos)
+			return "armhf";
+
+		return arch;
+	}
+
 #ifdef WIN32
 	void CPU::Init()
 	{
@@ -100,7 +119,7 @@ namespace SystemInfo
 		{
 			std::string arch{ buffer };
 			Util::Trim(arch);
-			return arch;
+			return GetCanonicalCPUArch(arch);
 		}
 
 		return std::nullopt;
@@ -240,7 +259,7 @@ namespace SystemInfo
 			return std::nullopt;
 		}
 
-		return res.value();
+		return GetCanonicalCPUArch(res.value());
 	}
 #endif
 }

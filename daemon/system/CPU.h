@@ -36,6 +36,7 @@ namespace SystemInfo
 		void Init();
 		std::optional<std::string> GetCPUArch() const;
 		std::optional<std::string> GetCPUModel() const;
+		std::string GetCanonicalCPUArch(const std::string& arch) const;
 
 #ifndef WIN32
 		std::optional<std::string> GetCPUModelFromCPUInfo() const;
