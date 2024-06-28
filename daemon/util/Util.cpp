@@ -201,7 +201,7 @@ Util::FindShellOverriddenExecutor(const std::string& fileExt, const std::string&
 		if (shellcmd)
 		{
 			*shellcmd = '\0';
-			shellcmd++;
+			++shellcmd;
 
 			if (fileExt == shellover)
 			{
