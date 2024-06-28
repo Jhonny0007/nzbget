@@ -117,7 +117,7 @@ namespace SystemInfo
 			auto res = Util::Uname("-o");
 			if (res.has_value())
 			{
-				m_name = std::move(res.has_value());
+				m_name = std::move(res.value());
 			}
 			else
 			{
@@ -130,7 +130,7 @@ namespace SystemInfo
 			auto res = Util::Uname("-r");
 			if (res.has_value())
 			{
-				m_version = std::move(res.has_value());
+				m_version = std::move(res.value());
 			}
 			else
 			{
