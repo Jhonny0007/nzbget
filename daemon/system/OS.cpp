@@ -131,15 +131,16 @@ namespace SystemInfo
 			if (res.has_value())
 			{
 				m_version = std::move(res.value());
-				if (IsRunningInDocker())
-				{
-					m_version += " (Running in Docker)";
-				}
 			}
 			else
 			{
 				warn("Failed to get OS name. Couldn't read 'uname -o'");
 			}
+		}
+
+		if (IsRunningInDocker())
+		{
+			m_version += " (Running in Docker)";
 		}
 	}
 
@@ -186,6 +187,7 @@ namespace SystemInfo
 			{
 				m_version = line.substr(line.find("=") + 1);
 				Util::Trim(m_version);
+
 				continue;
 			}
 		}

@@ -178,11 +178,7 @@ namespace SystemInfo
 
 		auto result = FileSystem::GetFileRealPath(unpackerCmd);
 
-		if (!result.has_value())
-		{
-			return "";
-		}
-		if (FileSystem::FileExists(result.value().c_str()))
+		if (result.has_value() && FileSystem::FileExists(result.value().c_str()))
 		{
 			return result.value();
 		}
