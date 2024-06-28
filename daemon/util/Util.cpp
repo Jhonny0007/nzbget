@@ -225,6 +225,7 @@ std::optional<std::string> Util::FindPython()
 			return executable;
 		}
 	}
+
 	return std::nullopt;
 }
  

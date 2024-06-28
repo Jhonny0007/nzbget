@@ -54,7 +54,6 @@ public:
 	static bool FileExists(const char* filename);
 	static bool DirectoryExists(const char* dirFilename);
 	static bool CreateDirectory(const char* dirFilename);
-	static std::string ExtractFilePath(const std::string& path);
 	static std::string EscapePathForShell(const std::string& path);
 
 	/* Delete empty directory */

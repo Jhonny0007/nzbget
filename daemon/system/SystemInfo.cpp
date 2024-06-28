@@ -176,12 +176,26 @@ namespace SystemInfo
 			return "";
 		}
 
-		std::string path = FileSystem::ExtractFilePath(unpackerCmd);
+		auto result = FileSystem::GetFileRealPath(unpackerCmd);
 
-		auto result = FileSystem::GetFileRealPath(path);
-		if (result.has_value() && FileSystem::FileExists(result.value().c_str()))
+		if (!result.has_value())
+		{
+			return "";
+		}
+		if (FileSystem::FileExists(result.value().c_str()))
 		{
 			return result.value();
+		}
+
+		std::string cmd = Util::FIND_CMD + std::string(unpackerCmd);
+
+		char buffer[BUFFER_SIZE];
+		auto pipe = Util::MakePipe(cmd);
+		if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+		{
+			std::string path{ buffer };
+			Util::Trim(path);
+			return path;
 		}
 
 		return "";

@@ -4357,8 +4357,8 @@ var SystemInfo = (new function($)
 			$SysInfo_OS.text('N/A');
 		}
 		
-		$SysInfo_CPUModel.text(sysInfo['CPU'].Model || 'N/A');
-		$SysInfo_Arch.text(sysInfo['CPU'].Arch || 'N/A');
+		$SysInfo_CPUModel.text(sysInfo['CPU'].Model || 'Unknown');
+		$SysInfo_Arch.text(sysInfo['CPU'].Arch || 'Unknown');
 		$SysInfo_ConfPath.text(Options.option('ConfigFile'));
 		$SysInfo_ArticleCache.text(Util.formatSizeMB(+Options.option('ArticleCache')));
 
