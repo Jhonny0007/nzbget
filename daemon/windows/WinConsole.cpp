@@ -412,7 +412,12 @@ void WinConsole::ShowMenu()
 
 void WinConsole::ShowWebUI()
 {
-	const char* iP = Util::NormalizeLocalHostIP(g_Options->GetControlIp());
+	const char* iP = g_Options->GetControlIp();
+	if (!strcmp(g_Options->GetControlIp(), "localhost") ||
+		!strcmp(g_Options->GetControlIp(), "0.0.0.0"))
+	{
+		iP = "127.0.0.1";
+	}
 
 	BString<1024> url("http://%s:%i", iP, g_Options->GetControlPort());
 	ShellExecute(0, "open", url, nullptr, nullptr, SW_SHOWNORMAL);

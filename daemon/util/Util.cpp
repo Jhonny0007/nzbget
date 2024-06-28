@@ -692,11 +692,6 @@ uint32 Util::HashBJ96(const char* buffer, int bufSize, uint32 initValue)
 	return (uint32)hash((uint8*)buffer, (uint32)bufSize, (uint32)initValue);
 }
 
-const char* Util::NormalizeLocalHostIP(const char* ip)
-{
-	return !strcmp(ip, "0.0.0.0") ? "127.0.0.1" : ip;
-}
-
 std::unique_ptr<FILE, std::function<void(FILE*)>> Util::MakePipe(const std::string& cmd)
 {
 	FILE* pipe = popen(cmd.c_str(), "r");
