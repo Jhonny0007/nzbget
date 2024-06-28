@@ -131,6 +131,10 @@ namespace SystemInfo
 			if (res.has_value())
 			{
 				m_version = std::move(res.value());
+				if (IsRunningInDocker())
+				{
+					m_version += " (Running in Docker)";
+				}
 			}
 			else
 			{
@@ -162,11 +166,6 @@ namespace SystemInfo
 
 				Util::Trim(m_name);
 				TrimQuotes(m_name);
-
-				if (IsRunningInDocker())
-				{
-					m_name += " (Running in Docker)";
-				}
 
 				continue;
 			}
