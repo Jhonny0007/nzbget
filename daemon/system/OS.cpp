@@ -174,7 +174,7 @@ namespace SystemInfo
 			}
 		}
 
-		if (m_name.empty())
+		if (m_version.empty())
 		{
 			std::string cmd = std::string("uname -r");
 			auto pipe = Util::MakePipe(cmd);
