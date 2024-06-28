@@ -21,6 +21,7 @@
 #define OS_H
 
 #include <string>
+#include <optional>
 
 namespace SystemInfo
 {
@@ -39,6 +40,7 @@ namespace SystemInfo
 #ifdef __linux__
 		bool IsRunningInDocker() const;
 		void TrimQuotes(std::string& str) const;
+		void InitOSInfoFromOSRelease();
 #endif
 
 #ifdef WIN32

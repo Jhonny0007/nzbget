@@ -110,63 +110,14 @@ namespace SystemInfo
 
 	void OS::Init()
 	{
-		std::ifstream osInfo("/etc/os-release");
-		if (osInfo.is_open())
-		{
-			std::string line;
-			while (std::getline(osInfo, line))
-			{
-				if (!m_name.empty() && !m_version.empty())
-				{
-					return;
-				}
-
-				// e.g NAME="Debian GNU/Linux"
-				if (m_name.empty() && line.find("NAME=") == 0)
-				{
-					m_name = line.substr(line.find("=") + 1);
-
-					Util::Trim(m_name);
-					TrimQuotes(m_name);
-
-					if (IsRunningInDocker())
-					{
-						m_name += " (Running in Docker)";
-					}
-
-					continue;
-				}
-
-				// e.g VERSION_ID="12"
-				if (m_version.empty() && line.find("VERSION_ID=") == 0)
-				{
-					m_version = line.substr(line.find("=") + 1);
-
-					Util::Trim(m_version);
-					TrimQuotes(m_version);
-
-					continue;
-				}
-
-				// e.g. BUILD_ID=rolling
-				if (m_version.empty() && line.find("BUILD_ID=") == 0)
-				{
-					m_version = line.substr(line.find("=") + 1);
-					Util::Trim(m_version);
-					continue;
-				}
-			}
-		}
+		InitOSInfoFromOSRelease();
 
 		if (m_name.empty())
 		{
-			std::string cmd = std::string("uname -o");
-			auto pipe = Util::MakePipe(cmd);
-			char buffer[BUFFER_SIZE];
-			if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+			auto res = Util::Uname("-o");
+			if (res.has_value())
 			{
-				m_name = buffer;
-				Util::Trim(m_name);
+				m_name = std::move(res.has_value());
 			}
 			else
 			{
@@ -176,18 +127,67 @@ namespace SystemInfo
 
 		if (m_version.empty())
 		{
-			std::string cmd = std::string("uname -r");
-			auto pipe = Util::MakePipe(cmd);
-			char buffer[BUFFER_SIZE];
-			if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+			auto res = Util::Uname("-r");
+			if (res.has_value())
 			{
-				m_version = buffer;
-				Util::Trim(m_version);
-				return;
+				m_version = std::move(res.has_value());
 			}
 			else
 			{
 				warn("Failed to get OS name. Couldn't read 'uname -o'");
+			}
+		}
+	}
+
+	void OS::InitOSInfoFromOSRelease()
+	{
+		std::ifstream osInfo("/etc/os-release");
+		if (!osInfo.is_open())
+		{
+			return;
+		}
+
+		std::string line;
+		while (std::getline(osInfo, line))
+		{
+			if (!m_name.empty() && !m_version.empty())
+			{
+				return;
+			}
+
+			// e.g NAME="Debian GNU/Linux"
+			if (m_name.empty() && line.find("NAME=") == 0)
+			{
+				m_name = line.substr(line.find("=") + 1);
+
+				Util::Trim(m_name);
+				TrimQuotes(m_name);
+
+				if (IsRunningInDocker())
+				{
+					m_name += " (Running in Docker)";
+				}
+
+				continue;
+			}
+
+			// e.g VERSION_ID="12"
+			if (m_version.empty() && line.find("VERSION_ID=") == 0)
+			{
+				m_version = line.substr(line.find("=") + 1);
+
+				Util::Trim(m_version);
+				TrimQuotes(m_version);
+
+				continue;
+			}
+
+			// e.g. BUILD_ID=rolling
+			if (m_version.empty() && line.find("BUILD_ID=") == 0)
+			{
+				m_version = line.substr(line.find("=") + 1);
+				Util::Trim(m_version);
+				continue;
 			}
 		}
 	}
@@ -271,4 +271,4 @@ namespace SystemInfo
 	}
 #endif
 
-	}
+}

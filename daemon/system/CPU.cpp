@@ -232,26 +232,15 @@ namespace SystemInfo
 #ifndef WIN32
 	std::optional<std::string> CPU::GetCPUArch() const
 	{
-		std::string cmd = "uname -m";
-		auto pipe = Util::MakePipe(cmd);
-		if (!pipe)
+		auto res = Util::Uname("-m");
+		if (!res.has_value())
 		{
-			warn("Failed to get CPU arch. Couldn't read 'uname -m'");
+			warn("Failed to get CPU arch from 'uname-m'");
 
 			return std::nullopt;
 		}
 
-		char buffer[BUFFER_SIZE];
-		if (fgets(buffer, BUFFER_SIZE, pipe.get()))
-		{
-			std::string arch{ buffer };
-			Util::Trim(arch);
-			return arch;
-		}
-
-		warn("Failed to get CPU arch");
-
-		return std::nullopt;
+		return res.value();
 	}
 #endif
 }
