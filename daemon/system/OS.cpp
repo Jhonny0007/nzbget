@@ -156,27 +156,40 @@ namespace SystemInfo
 					continue;
 				}
 			}
-
-			return;
 		}
 
-		std::string cmd = std::string("uname -o");
-		auto pipe = Util::MakePipe(cmd);
-		if (!pipe)
+		if (m_name.empty())
 		{
-			warn("Failed to get OS name. Couldn't read 'uname -o'");
-			return;
+			std::string cmd = std::string("uname -o");
+			auto pipe = Util::MakePipe(cmd);
+			char buffer[BUFFER_SIZE];
+			if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+			{
+				m_name = buffer;
+				Util::Trim(m_name);
+			}
+			else
+			{
+				warn("Failed to get OS name. Couldn't read 'uname -o'");
+			}
 		}
 
-		char buffer[BUFFER_SIZE];
-		if (fgets(buffer, BUFFER_SIZE, pipe.get()))
+		if (m_name.empty())
 		{
-			m_name = buffer;
-			Util::Trim(m_name);
-			return;
+			std::string cmd = std::string("uname -r");
+			auto pipe = Util::MakePipe(cmd);
+			char buffer[BUFFER_SIZE];
+			if (pipe && fgets(buffer, BUFFER_SIZE, pipe.get()))
+			{
+				m_version = buffer;
+				Util::Trim(m_version);
+				return;
+			}
+			else
+			{
+				warn("Failed to get OS name. Couldn't read 'uname -o'");
+			}
 		}
-
-		warn("Failed to get OS info");
 	}
 #endif
 
@@ -258,4 +271,4 @@ namespace SystemInfo
 	}
 #endif
 
-}
+	}
