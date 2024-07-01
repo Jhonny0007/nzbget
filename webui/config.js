@@ -4434,41 +4434,73 @@ var SystemInfo = (new function($)
 	{
 		newsServers.forEach(function(newsServer)
 			{
-			var server = Options.getServerById(newsServer.ID);
-			var tr = $('<tr>');
-			var tdName = $('<td>');
-			var tdActive = $('<td>');
-			var tdTests = $('<td>');
-			var testConnectionBtn = $('<button type="button" title="Test connection" class="btn btn-default"></>');
-			var testConnectionIcon = $('<i class="material-icon">cell_tower</i>');
-			testConnectionBtn.append(testConnectionIcon);
-			testConnectionBtn.attr({ 'data-multiid': server.id });
-			testConnectionBtn.on('click', function () 
+				var server = Options.getServerById(newsServer.ID);
+				var tr = $('<tr>');
+				var tdName = $('<td>');
+				var tdActive = $('<td>');
+				var tdTests = $('<td>');
+				var testConnectionBtn = makeTestConnectionBtn(server.id);
+				var testServerSpeedBtn = makeTestServerSpeedBtn(server.id);
+
+				tdName.text(server.host + ':' + server.port + '(' + server.connections + ')');
+				tdName.attr({ title: server.name });
+				if (newsServer.Active) 
 				{
-					Config.testConnection(this, "Server", server.id);
+					tdActive.text('Yes');
+					tdActive.css('color', '#468847');
 				}
-			);
+				else 
+				{
+					tdActive.text('No');
+					tdActive.css('color', '#da4f49');
+				}
 
-			tdName.text(server.host + ':' + server.port + '(' + server.connections + ')');
-			tdName.attr({ title: server.name });
-			if (newsServer.Active) 
-			{
-				tdActive.text('Yes');
-				tdActive.css('color', '#468847');
-			}
-			else 
-			{
-				tdActive.text('No');
-				tdActive.css('color', '#da4f49');
-			}
-
-			tdTests.append(testConnectionBtn);
-			tr.append(tdName);
-			tr.append(tdActive);
-			tr.append(tdTests);
-			$SysInfo_NewsServersTable.append(tr);
+				tdTests.append(testConnectionBtn);
+				tdTests.append(testServerSpeedBtn);
+				tr.append(tdName);
+				tr.append(tdActive);
+				tr.append(tdTests);
+				$SysInfo_NewsServersTable.append(tr);
 			}
 		);
+	}
+
+	function makeTestConnectionBtn(serverid)
+	{
+		var testConnectionBtn = $('<button type="button" title="Test connection" class="btn btn-default btn-group"></>');
+		var testConnectionIcon = $('<i class="material-icon">cell_tower</i>');
+
+		testConnectionBtn.append(testConnectionIcon);
+		testConnectionBtn.attr({ 'data-multiid': serverid });
+		testConnectionBtn.on('click', function () 
+			{
+				Config.testConnection(this, "Server", serverid);
+			}
+		);
+
+		return testConnectionBtn;
+	}
+
+	function makeTestServerSpeedBtn(serverid)
+	{
+		var container = $('<div class="btn-group" style="display: inline; position: absolute;">');
+		var list = $('<ul class="dropdown-menu"></ul>');
+		var icons = $('<i class="material-icon" style="padding-right: 3px;">network_check</i><span class="caret"></>');
+		var testBtn = $('<button class="btn dropdown-toggle" data-toggle="dropdown"></button>');
+
+		var _100MB = $('<li><a href="#">100MB</a></li>').on('click', function() { console.log('100MB', serverid); });
+		var _1GB = $('<li><a href="#">1GB</a></li>').on('click', function() { console.log('1GB', serverid); });
+		var _10GB = $('<li><a href="#">10GB</a></li>').on('click', function() { console.log('10GB', serverid); });
+
+		list.append(_100MB);
+		list.append(_1GB);
+		list.append(_10GB);
+
+		testBtn.append(icons);
+		container.append(testBtn);
+		container.append(list);
+
+		return container;
 	}
 
 }(jQuery))
