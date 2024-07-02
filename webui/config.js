@@ -4488,9 +4488,21 @@ var SystemInfo = (new function($)
 		var icons = $('<i class="material-icon" style="padding-right: 3px;">network_check</i><span class="caret"></>');
 		var testBtn = $('<button class="btn dropdown-toggle" data-toggle="dropdown"></button>');
 
-		var _100MB = $('<li><a href="#">100MB</a></li>').on('click', function() { console.log('100MB', serverid); });
-		var _1GB = $('<li><a href="#">1GB</a></li>').on('click', function() { console.log('1GB', serverid); });
-		var _10GB = $('<li><a href="#">10GB</a></li>').on('click', function() { console.log('10GB', serverid); });
+		var _100MB = $('<li><a href="#">100MB</a></li>').on('click', function() 
+			{
+				addTestDownload('100MB');
+			}
+		);
+		var _1GB = $('<li><a href="#">1GB</a></li>').on('click', function() 
+			{
+				addTestDownload('1GB');
+			}
+		);
+		var _10GB = $('<li><a href="#">10GB</a></li>').on('click', function() 
+			{ 
+				addTestDownload('10GB');
+			}
+		);
 
 		list.append(_100MB);
 		list.append(_1GB);
@@ -4501,6 +4513,30 @@ var SystemInfo = (new function($)
 		container.append(list);
 
 		return container;
+	}
+
+	function addTestDownload(name)
+	{
+		RPC.call('append', [
+			name, 
+			'http://127.0.0.1:8000/' + name + '.nzb', 
+			'', 
+			900, // max priority
+			false,
+			false, 
+			'', 
+			0, 
+			'SCORE', 
+			[]
+		], 
+		function(e) 
+		{ 
+			console.log('completed: ', e) 
+		}, 
+		function(e) 
+		{ 
+			console.log('failure: ', e) 
+		});
 	}
 
 }(jQuery))
