@@ -50,13 +50,14 @@ namespace HttpClient
 	class HttpClient final
 	{
 	public:
-		std::future<Response> GET(const std::string& host);
-		const std::string GetLocalIP() const;
-
-		HttpClient();
+		HttpClient() noexcept(false);
 		HttpClient(const HttpClient&) = delete;
 		HttpClient operator=(const HttpClient&) = delete;
 		~HttpClient() = default;
+
+		std::future<Response> GET(const std::string& host) noexcept;
+		const std::string GetLocalIP() const;
+
 	private:
 		void Connect(Socket& socket, const Endpoints& endpoints, const std::string& host);
 		void Write(Socket& socket, const std::string& method, const std::string& host);

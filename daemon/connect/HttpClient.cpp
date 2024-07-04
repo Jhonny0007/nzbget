@@ -32,7 +32,7 @@ namespace HttpClient
 	namespace ssl = boost::asio::ssl;
 #endif
 
-	HttpClient::HttpClient()
+	HttpClient::HttpClient() noexcept(false)
 		: m_context{}
 		, m_resolver{ m_context }
 	{
@@ -46,7 +46,7 @@ namespace HttpClient
 		return m_localIP;
 	}
 
-	std::future<Response> HttpClient::GET(const std::string& host)
+	std::future<Response> HttpClient::GET(const std::string& host) noexcept
 	{
 		return std::async(std::launch::async, [&]
 			{
