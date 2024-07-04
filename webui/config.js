@@ -4402,9 +4402,13 @@ var SystemInfo = (new function($)
 	{
 		$SysInfo_AppVersion.text(version);
 		var updateIcon = $('<i class="material-icon">update</i>');
-		var updateBtn = $('<button type="button" title="Check for Updates" class="btn btn-default" style="margin: 0 10px;"></>');
+		updateIcon.css('margin-right', '3px');
+		var updateBtn = $('<button type="button" class="btn btn-default"></>');
+		updateBtn.css('margin-left', '5px');
+		updateBtn.css('padding-left', '3px');
 		updateBtn.on('click', function() { Config.checkUpdates(); });
 		updateBtn.append(updateIcon);
+		updateBtn.append('Updates');
 		$SysInfo_AppVersion.append(updateBtn);
 	}
 
@@ -4452,10 +4456,13 @@ var SystemInfo = (new function($)
 			var tdName = $('<td>');
 			var tdActive = $('<td>');
 			var tdTests = $('<td>');
-			var testConnectionBtn = $('<button type="button" title="Test connection" class="btn btn-default"></>');
+			var testConnectionBtn = $('<button type="button" title="Connection" class="btn btn-default"></>');
 			var testConnectionIcon = $('<i class="material-icon">cell_tower</i>');
+			testConnectionIcon.css('margin-right', '3px');
 			testConnectionBtn.append(testConnectionIcon);
+			testConnectionBtn.append("Connection");
 			testConnectionBtn.attr({ 'data-multiid': server.id });
+			testConnectionBtn.css('padding-left', '3px');
 			testConnectionBtn.on('click', function () 
 				{
 					Config.testConnection(this, "Server", server.id);
