@@ -4301,6 +4301,8 @@ var SystemInfo = (new function($)
 	var $SysInfo_ToolsTable;
 	var $SysInfo_LibrariesTable;
 	var $SysInfo_NewsServersTable;
+	var $SysInfo_ErrorAlert;
+	var $SysInfo_ErrorAlertText;
 
 	var _this = this;
 
@@ -4319,6 +4321,8 @@ var SystemInfo = (new function($)
 		$SysInfo_ToolsTable = $('#SysInfo_ToolsTable');
 		$SysInfo_LibrariesTable = $('#SysInfo_LibrariesTable');
 		$SysInfo_NewsServersTable = $('#SysInfo_NewsServersTable');
+		$SysInfo_ErrorAlert = $('#SystemInfoErrorAlert');
+		$SysInfo_ErrorAlertText = $('#SystemInfoAlert-text');
 		Status.addStatusSub(this);
 	}
 
@@ -4327,12 +4331,10 @@ var SystemInfo = (new function($)
 		RPC.call('sysinfo', [], 
 			function (sysInfo)
 			{
+				hideError();
 				render(sysInfo);
 			},
-			function (err)
-			{
-				console.error(err);
-			}
+			errorHandler
 		);
 	}
 
@@ -4340,6 +4342,17 @@ var SystemInfo = (new function($)
 	{
 		$SysInfo_Uptime.text(Util.formatTimeHMS(status['UpTimeSec']));
 		renderDiskSpace(+status['FreeDiskSpaceMB'], +status['TotalDiskSpaceMB'])
+	}
+
+	function errorHandler(err)
+	{
+		$SysInfo_ErrorAlertText.text(err);
+		$SysInfo_ErrorAlert.show();
+	}
+
+	function hideError()
+	{
+		$SysInfo_ErrorAlertText.hide();
 	}
 
 	function render(sysInfo)
