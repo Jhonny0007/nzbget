@@ -176,7 +176,9 @@ namespace SystemInfo
 			return "";
 		}
 
-		auto result = FileSystem::GetFileRealPath(unpackerCmd);
+		std::string path = FileSystem::ExtractFilePathFromCmd(unpackerCmd);
+
+		auto result = FileSystem::GetFileRealPath(path);
 
 		if (result.has_value() && FileSystem::FileExists(result.value().c_str()))
 		{

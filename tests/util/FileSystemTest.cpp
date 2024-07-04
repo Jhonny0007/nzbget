@@ -39,6 +39,13 @@ BOOST_AUTO_TEST_CASE(FileSystemTest)
 }
 #endif
 
+BOOST_AUTO_TEST_CASE(ExtractFilePathCmdTest)
+{
+	BOOST_CHECK(FileSystem::ExtractFilePathFromCmd("C:\\Program Files\\NZBGet\\unrar.exe") == "C:\\Program Files\\NZBGet\\unrar.exe");
+	BOOST_CHECK(FileSystem::ExtractFilePathFromCmd("C:\\Program Files\\NZBGet\\unrar.exe -ai") == "C:\\Program Files\\NZBGet\\unrar.exe");
+	BOOST_CHECK(FileSystem::ExtractFilePathFromCmd("") == "");
+}
+
 BOOST_AUTO_TEST_CASE(EscapePathForShellTest)
 {
 	BOOST_CHECK(FileSystem::EscapePathForShell("C:\\Program Files\\NZBGet\\unrar.exe") == "\"C:\\Program Files\\NZBGet\\unrar.exe\"");

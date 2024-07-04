@@ -615,6 +615,28 @@ bool FileSystem::RemoveDirectory(const char* dirFilename)
 #endif
 }
 
+
+std::string FileSystem::ExtractFilePathFromCmd(const std::string& path)
+{
+	if (path.empty())
+	{
+		return std::string(path);
+	}
+
+	size_t lastSeparatorPos = path.find_last_of(PATH_SEPARATOR);
+	if (lastSeparatorPos != std::string::npos)
+	{
+		size_t possibleKeysPos = path.find(" ", lastSeparatorPos);
+
+		if (possibleKeysPos != std::string::npos)
+		{
+			return path.substr(0, possibleKeysPos);
+		}
+	}
+
+	return path;
+}
+
 std::string FileSystem::EscapePathForShell(const std::string& path)
 {
 	if (path.empty())
